@@ -101,6 +101,17 @@ dans `CLASS_PATHS` (`scripts/game_config.gd`).
 
 ## Équilibrage
 
+Script rapide (matrice, plusieurs processus, alertes chiffrées) :
+
+```
+godot --headless --path . -s res://tests/balance_matrix.gd
+godot --headless --path . -s res://tests/balance_matrix.gd -- personnage=Archer carte=Prairie parties=60 rapport=rapport.md
+```
+Les seuils (fourchette de victoires, durée, avantage du premier joueur, nombre de parties) sont dans
+`tests/balance_config.json`. « ALERTE » = hors fourchette avec certitude statistique (intervalle de confiance
+à 95 %), « attention » = hors fourchette mais échantillon trop petit (augmenter `parties=`). Code de sortie 1
+s'il y a une alerte. Le premier script ci-dessous reste disponible (sortie détaillée par duel) :
+
 ```
 godot --headless --path . -s res://tests/simulate_balance.gd
 ```

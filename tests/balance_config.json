@@ -1,0 +1,12 @@
+{
+	"parties_par_cote": 40,
+	"graine_depart": 1,
+	"victoires_min": 40,
+	"victoires_max": 60,
+	"tours_min": 6.0,
+	"tours_max": 12.0,
+	"sans_fin_max": 0,
+	"premier_joueur_max": 58,
+	"tours_limite": 40,
+	"confiance": 1.96
+}
