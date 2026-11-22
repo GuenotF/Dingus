@@ -92,7 +92,7 @@ godot --headless --path . -s res://tests/test_core.gd
 Dans le panneau FileSystem de Godot, duplique un fichier de `data/spells/` et modifie-le
 dans l'inspecteur : coût, portée, ligne de vue, zone, recharge, et surtout la liste
 **Effets** (dégâts, vol de vie, soin, poussée, attraction, bond, bonus/malus de PA ou PM).
-Son **icône** (champ `icon`, groupe Visuel) : un SVG blanc sur fond transparent dans `assets/ui/spells/`
+Son **icône** (champ `icon`, groupe Visuel) : une image PNG (96 px, en couleur) dans `assets/ui/spells/`
 (sans icône, la case affiche les deux premières lettres du nom).
 Ajoute-le ensuite à la liste `spells` d'une classe dans `data/classes/`.
 

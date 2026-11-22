@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/core/effect_data.gd" id="1_eff"]
 [ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="2_spl"]
-[ext_resource type="Texture2D" path="res://assets/ui/spells/chevalier_lame.svg" id="3_ico"]
+[ext_resource type="Texture2D" path="res://assets/ui/spells/chevalier_lame.png" id="3_ico"]
 
 [sub_resource type="Resource" id="e0"]
 script = ExtResource("1_eff")

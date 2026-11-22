@@ -236,8 +236,9 @@ class SpellSlot extends Button:
 		# Icône (ou initiales si le sort n'en a pas)
 		var tint := Color("f1e3c2") if usable() else Color("6d695f")
 		if spell.icon:
-			var icon_size := Vector2(36, 36)
-			draw_texture_rect(spell.icon, Rect2((size - icon_size) * 0.5, icon_size), false, tint)
+			var icon_size := Vector2(40, 40)
+			var icon_tint := Color.WHITE if usable() else Color(0.38, 0.38, 0.4)
+			draw_texture_rect(spell.icon, Rect2((size - icon_size) * 0.5, icon_size), false, icon_tint)
 		else:
 			var initials := spell.spell_name.substr(0, 2)
 			HudWidgets.draw_text_centered(self, size * 0.5, initials, 20, tint)

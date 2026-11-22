@@ -578,15 +578,14 @@ class PlayerPanel extends PanelContainer:
 		sb.border_color = Color("5a5040")
 		sb.set_border_width_all(1)
 		sb.set_corner_radius_all(8)
-		sb.set_content_margin_all(10)
+		sb.set_content_margin_all(3)
 		p.add_theme_stylebox_override("panel", sb)
 		if spell.icon:
 			var t := TextureRect.new()
 			t.texture = spell.icon
 			t.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			t.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-			t.custom_minimum_size = Vector2(24, 24)
-			t.modulate = Color("f1e3c2")
+			t.custom_minimum_size = Vector2(38, 38)
 			t.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			p.add_child(t)
 		else:

@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/core/effect_data.gd" id="1_eff"]
 [ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="2_spl"]
-[ext_resource type="Texture2D" path="res://assets/ui/spells/chevalier_pacte.svg" id="3_ico"]
+[ext_resource type="Texture2D" path="res://assets/ui/spells/chevalier_pacte.png" id="3_ico"]
 [ext_resource type="Resource" path="res://data/effects/death_burst.tres" id="5_imp"]
 
 [sub_resource type="Resource" id="e0"]
