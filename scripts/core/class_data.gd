@@ -6,6 +6,8 @@ extends Resource
 @export var color: Color = Color.WHITE
 ## Une phrase de présentation, affichée dans le menu sous le nom.
 @export var description: String = ""
+## Portrait rond (assets/ui/portraits/), affiché dans l'ordre du tour. Sans portrait : l'initiale de la classe.
+@export var portrait: Texture2D
 @export var max_hp: int = 100
 @export var max_pa: int = 6
 @export var max_pm: int = 3

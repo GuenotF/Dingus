@@ -11,6 +11,7 @@ du code seulement si un sort a besoin d'un nouvel effet.
 - [ ] **4 sorts**, chacun avec : coût en PA, portée, ligne de vue, zone, effets, limites (lancers/tour, recharge),
       animation du lanceur, et si besoin projectile (`projectile`) et effet d'impact (`impact`).
 - [ ] **Stats** : PV, PA, PM.
+- [ ] **Portrait** : PNG rond 88 px dans `assets/ui/portraits/<classe>.png` (tête et épaules recadrées sur la frame 0 de l'animation `idle`, orientation bas-gauche), champ `portrait` de la classe ; sans lui, la bulle de l'ordre du tour affiche l'initiale.
 - [ ] **Voix** (optionnel) : ressource `CharacterVoice` dans `data/voices/`, champ `voice` de la classe (voir README, Sons).
 - [ ] **Description** : une phrase de présentation (champ `description` de la classe, affichée dans le menu).
 - [ ] **Tests** : `tests/test_core.gd` vérifie automatiquement la checklist (4 sorts, stats, skin, animations, effets).

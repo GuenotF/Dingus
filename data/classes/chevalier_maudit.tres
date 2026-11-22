@@ -8,6 +8,8 @@
 [ext_resource type="Resource" path="res://data/spells/chevalier_pacte.tres" id="6_d"]
 [ext_resource type="Resource" path="res://data/sprites/chevalier.tres" id="7_spr"]
 
+[ext_resource type="Texture2D" path="res://assets/ui/portraits/chevalier_maudit.png" id="99_portrait"]
+
 [resource]
 script = ExtResource("1_cls")
 class_label = "Chevalier maudit"
@@ -17,3 +19,4 @@ max_hp = 120
 max_pm = 3
 spells = Array[ExtResource("2_spl")]([ExtResource("3_a"), ExtResource("4_b"), ExtResource("5_c"), ExtResource("6_d")])
 sprites = ExtResource("7_spr")
+portrait = ExtResource("99_portrait")

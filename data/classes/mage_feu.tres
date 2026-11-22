@@ -8,6 +8,8 @@
 [ext_resource type="Resource" path="res://data/spells/feu_nova.tres" id="6_l1iv6"]
 [ext_resource type="Resource" path="res://data/sprites/wizard.tres" id="7_adqwd"]
 
+[ext_resource type="Texture2D" path="res://assets/ui/portraits/mage_feu.png" id="99_portrait"]
+
 [resource]
 script = ExtResource("1_481od")
 class_label = "Mage de feu"
@@ -18,3 +20,4 @@ max_pm = 4
 preferred_range = 4
 spells = Array[ExtResource("2_13lxt")]([ExtResource("3_jhcxu"), ExtResource("4_psj4u"), ExtResource("5_aqkw4"), ExtResource("6_l1iv6")])
 sprites = ExtResource("7_adqwd")
+portrait = ExtResource("99_portrait")

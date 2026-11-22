@@ -292,9 +292,12 @@ class FighterChip extends Control:
 		var team: Color = HudWidgets.TEAM_COLORS[fighter.team % HudWidgets.TEAM_COLORS.size()]
 		var class_color := fighter.class_data.color if fighter.class_data else Color.WHITE
 		draw_circle(c, 22, team)
-		draw_circle(c, 19.5, Color("2a2620"))
-		var letter := fighter.class_data.class_label.substr(0, 1) if fighter.class_data else "?"
-		HudWidgets.draw_text_centered(self, c, letter, 20, class_color)
+		draw_circle(c, 19.5, Color("4b4639") if fighter.class_data and fighter.class_data.portrait else Color("2a2620"))
+		if fighter.class_data and fighter.class_data.portrait:
+			draw_texture_rect(fighter.class_data.portrait, Rect2(c - Vector2(19.5, 19.5), Vector2(39, 39)), false)
+		else:
+			var letter := fighter.class_data.class_label.substr(0, 1) if fighter.class_data else "?"
+			HudWidgets.draw_text_centered(self, c, letter, 20, class_color)
 		# Barre de PV
 		var bar := Rect2(8, 56, size.x - 16, 5)
 		draw_rect(bar, Color("2a2e37"))

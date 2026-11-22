@@ -8,6 +8,8 @@
 [ext_resource type="Resource" path="res://data/spells/archer_roulade.tres" id="6_b7n5a"]
 [ext_resource type="Resource" path="res://data/sprites/archer.tres" id="7_ph6oo"]
 
+[ext_resource type="Texture2D" path="res://assets/ui/portraits/archer.png" id="99_portrait"]
+
 [resource]
 script = ExtResource("1_10evu")
 class_label = "Archer"
@@ -17,3 +19,4 @@ max_hp = 125
 preferred_range = 5
 spells = Array[ExtResource("2_kfolu")]([ExtResource("3_aojr1"), ExtResource("4_mexef"), ExtResource("5_lhpsp"), ExtResource("6_b7n5a")])
 sprites = ExtResource("7_ph6oo")
+portrait = ExtResource("99_portrait")
