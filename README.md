@@ -218,4 +218,3 @@ L'Archer, le Mage de feu et le Chevalier maudit n'ont pas encore de voix.
 
 L'interface utilise la police *Vinque Antique* (Typodermic), à placer dans `assets/fonts/vinque_antique_bd.otf`.
 S'il est absent, Godot utilise sa police par défaut.
-La description des sorts reste dans la police par défaut.
