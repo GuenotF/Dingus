@@ -493,6 +493,8 @@ class PlayerPanel extends PanelContainer:
 	func _change_class(step: int) -> void:
 		class_index = posmod(class_index + step, GameConfig.CLASS_PATHS.size())
 		_refresh()
+		var data: ClassData = menu._classes[class_index]
+		Sound.play_voice(data.voice, "select", "menu%d" % player)
 
 	func _refresh() -> void:
 		var data: ClassData = menu._classes[class_index]

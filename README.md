@@ -18,6 +18,7 @@ Prototype de jeu tactique 1v1 au tour par tour, en vue isométrique (style Dofus
 | Clic droit / Échap | Annuler le sort choisi |
 | Espace / bouton | Prêt (placement) / Fin du tour |
 | F11 | Plein écran / fenêtre |
+| M | Couper / remettre le son |
 
 Le jeu s'ouvre en fenêtre maximisée et tout s'agrandit avec la fenêtre. Sous chaque personnage,
 un cercle à la couleur de son équipe (rouge : joueur 1, bleu : joueur 2) ; un cercle jaune en plus
@@ -173,3 +174,20 @@ le **Mage de feu** et l'**Archer** le pack *2D HD Character pack 1* (`assets/cha
    (Guerrier : `melee`, `jump`, `kick`, `cast`). Une animation absente est simplement ignorée.
 
 Les images sont versionnées normalement dans Git (pas de LFS nécessaire).
+
+## Sons
+
+Les voix passent par l'autoload `Sound` (`scripts/audio/sound.gd`, bus audio « Voix »).
+Un personnage parle si sa classe a une **voix** (champ `voice`, une ressource `CharacterVoice`
+dans `data/voices/`) : plusieurs variantes par moment (attaque, attaque lourde, cri, dégâts,
+gros dégâts, mort, victoire, premier tour, choix dans le menu), tirées au hasard. Le moment d'un sort
+dépend de son animation (`melee` → attaque, `jump` / `kick` → attaque lourde, sinon cri).
+
+Pour donner une voix à un personnage : convertir les sons en `.ogg` dans `assets/audio/voices/<perso>/`,
+créer une ressource `CharacterVoice` (clic droit dans FileSystem → Nouvelle ressource), y glisser les sons,
+puis la mettre dans le champ `voice` de la classe.
+
+Actuellement : le **Guerrier** parle (*Warrior Voice Pack* de John Carroll,
+[johncarroll.itch.io](https://johncarroll.itch.io/) ; 52 répliques converties en OGG).
+L'Archer et le Mage de feu n'ont pas encore de voix.
+

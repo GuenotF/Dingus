@@ -15,3 +15,5 @@ extends Resource
 ## Graphismes animés (optionnel). Sans eux, le pion temporaire est dessiné.
 ## Type Resource pour que core/ ne dépende pas du code d'affichage (CharacterSprites).
 @export var sprites: Resource
+## Voix (optionnel, CharacterVoice) : répliques à l'attaque, aux dégâts, à la mort...
+@export var voice: Resource

@@ -11,6 +11,7 @@ du code seulement si un sort a besoin d'un nouvel effet.
 - [ ] **4 sorts**, chacun avec : coût en PA, portée, ligne de vue, zone, effets, limites (lancers/tour, recharge),
       animation du lanceur, et si besoin projectile (`projectile`) et effet d'impact (`impact`).
 - [ ] **Stats** : PV, PA, PM.
+- [ ] **Voix** (optionnel) : ressource `CharacterVoice` dans `data/voices/`, champ `voice` de la classe (voir README, Sons).
 - [ ] **Description** : une phrase de présentation (champ `description` de la classe, affichée dans le menu).
 - [ ] **Tests** : `tests/test_core.gd` vérifie automatiquement la checklist (4 sorts, stats, skin, animations, effets).
 - [ ] **Équilibrage** : `tests/simulate_balance.gd` contre chaque autre personnage, sur chaque carte.

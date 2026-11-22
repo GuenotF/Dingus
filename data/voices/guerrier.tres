@@ -1,0 +1,67 @@
+[gd_resource type="Resource" script_class="CharacterVoice" format=3]
+
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/lightattack1.ogg" id="1_8ugqq"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/lightattack2.ogg" id="2_wd733"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/lightattack3.ogg" id="3_t0ola"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/lightattack4.ogg" id="4_n73sh"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/attack1.ogg" id="5_ecas6"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/attack2.ogg" id="6_6m5v2"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/attack3.ogg" id="7_foimh"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/attack4.ogg" id="8_hofd8"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/crit1.ogg" id="9_01c7v"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/crit2.ogg" id="10_tcskh"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/crit3.ogg" id="11_76rey"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/death1.ogg" id="12_hb2fa"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/death2.ogg" id="13_bbvcu"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/death3.ogg" id="14_t5xhy"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/death4.ogg" id="15_w2aet"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/hello1.ogg" id="16_f5q4i"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/hello2.ogg" id="17_hq1li"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/hello3.ogg" id="18_cqp5e"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/here1.ogg" id="19_ehquh"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/here2.ogg" id="20_dsbnk"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/here3.ogg" id="21_dae2q"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/here4.ogg" id="22_lneyx"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/heavyattack1.ogg" id="23_k4uvf"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/heavyattack2.ogg" id="24_ye8wh"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/heavyattack3.ogg" id="25_docl1"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/heavyattack4.ogg" id="26_m45s1"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/hup1.ogg" id="27_1c44q"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/hup2.ogg" id="28_oc3de"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/hup3.ogg" id="29_lx4nd"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/hut1.ogg" id="30_gcqlp"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/hut2.ogg" id="31_f56mb"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/hut3.ogg" id="32_e0dil"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/hut4.ogg" id="33_m2338"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/hit1.ogg" id="34_63nv8"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/hit2.ogg" id="35_kcs1n"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/hit3.ogg" id="36_gl4xx"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/hit4.ogg" id="37_bodmk"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/hit5.ogg" id="38_2p5j2"]
+[ext_resource type="Script" path="res://scripts/audio/character_voice.gd" id="39_r0iu2"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/yesconfirm1.ogg" id="40_v80mv"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/yesconfirm2.ogg" id="41_ma5d2"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/angry1.ogg" id="42_q8ruc"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/angry2.ogg" id="43_blj6t"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/angry3.ogg" id="44_sc2d6"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/angry4.ogg" id="45_2dqoq"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/excited1.ogg" id="46_03ik1"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/excited2.ogg" id="47_os1oo"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/laugh1.ogg" id="48_8mlc4"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/laugh2.ogg" id="49_bxl1f"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/laugh4.ogg" id="50_onk7t"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/joyous1.ogg" id="51_i0c8u"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/joyous2.ogg" id="52_aa4lu"]
+[ext_resource type="AudioStream" path="res://assets/audio/voices/guerrier/joyous3.ogg" id="53_8cu8a"]
+
+[resource]
+script = ExtResource("39_r0iu2")
+attack = Array[AudioStream]([ExtResource("1_8ugqq"), ExtResource("2_wd733"), ExtResource("3_t0ola"), ExtResource("4_n73sh"), ExtResource("5_ecas6"), ExtResource("6_6m5v2"), ExtResource("7_foimh"), ExtResource("8_hofd8")])
+heavy_attack = Array[AudioStream]([ExtResource("23_k4uvf"), ExtResource("24_ye8wh"), ExtResource("25_docl1"), ExtResource("26_m45s1"), ExtResource("27_1c44q"), ExtResource("28_oc3de"), ExtResource("29_lx4nd"), ExtResource("30_gcqlp"), ExtResource("31_f56mb"), ExtResource("32_e0dil"), ExtResource("33_m2338")])
+shout = Array[AudioStream]([ExtResource("42_q8ruc"), ExtResource("43_blj6t"), ExtResource("44_sc2d6"), ExtResource("45_2dqoq"), ExtResource("46_03ik1"), ExtResource("47_os1oo")])
+hurt = Array[AudioStream]([ExtResource("34_63nv8"), ExtResource("35_kcs1n"), ExtResource("36_gl4xx"), ExtResource("37_bodmk"), ExtResource("38_2p5j2")])
+big_hurt = Array[AudioStream]([ExtResource("9_01c7v"), ExtResource("10_tcskh"), ExtResource("11_76rey")])
+death = Array[AudioStream]([ExtResource("12_hb2fa"), ExtResource("13_bbvcu"), ExtResource("14_t5xhy"), ExtResource("15_w2aet")])
+victory = Array[AudioStream]([ExtResource("48_8mlc4"), ExtResource("49_bxl1f"), ExtResource("50_onk7t"), ExtResource("51_i0c8u"), ExtResource("52_aa4lu"), ExtResource("53_8cu8a")])
+greet = Array[AudioStream]([ExtResource("16_f5q4i"), ExtResource("17_hq1li"), ExtResource("18_cqp5e"), ExtResource("19_ehquh"), ExtResource("20_dsbnk"), ExtResource("21_dae2q"), ExtResource("22_lneyx")])
+select = Array[AudioStream]([ExtResource("40_v80mv"), ExtResource("41_ma5d2")])

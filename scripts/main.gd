@@ -326,7 +326,9 @@ func _on_fighter_placed(fighter: Fighter) -> void:
 	fighter_views[fighter.id].snap()
 
 
-func _on_turn_started(fighter: Fighter, _turn_number: int) -> void:
+func _on_turn_started(fighter: Fighter, turn_number: int) -> void:
+	if turn_number == 1:
+		Sound.play_voice(_voice(fighter), "greet", fighter.id) # chacun se présente à son premier tour
 	selected_spell = null
 	for id in fighter_views:
 		fighter_views[id].is_active = (id == fighter.id)
@@ -347,6 +349,7 @@ func _on_fighter_moved(fighter: Fighter, path: Array[Vector2i]) -> void:
 func _on_spell_cast(caster: Fighter, spell: SpellData, target: Vector2i, cells: Array[Vector2i]) -> void:
 	var caster_view: FighterView = fighter_views[caster.id]
 	caster_view.play_cast(spell.animation, target)
+	Sound.play_voice(_voice(caster), CharacterVoice.moment_for_animation(spell.animation), caster.id)
 	_set_busy(true)
 	if spell.projectile is EffectAnimation or spell.impact is EffectAnimation:
 		_deferring = true
@@ -365,6 +368,11 @@ func _on_spell_cast(caster: Fighter, spell: SpellData, target: Vector2i, cells: 
 		board.flash(cells)
 		await get_tree().create_timer(0.5).timeout
 	_set_busy(false)
+
+
+## Voix du combattant (CharacterVoice de sa classe), ou null.
+func _voice(fighter: Fighter) -> Resource:
+	return fighter.class_data.voice if fighter.class_data else null
 
 
 ## Met une conséquence de sort en attente si un projectile est en vol. Renvoie true si mise en attente.
@@ -389,6 +397,10 @@ func _on_fighter_damaged(fighter: Fighter, amount: int) -> void:
 	var caster := state.active_fighter()
 	view.play_hit(Iso.cell_to_world(caster.cell) if caster != fighter else view.position + Vector2(0, -1))
 	FloatingText.spawn(self, view.text_anchor(), "-%d" % amount, Color("ff6b5b"))
+	var voice := _voice(fighter) as CharacterVoice
+	if voice and fighter.is_alive():
+		var big := amount >= fighter.max_hp * voice.big_hurt_ratio
+		Sound.play_voice(voice, "big_hurt" if big else "hurt", fighter.id)
 
 
 func _on_fighter_healed(fighter: Fighter, amount: int) -> void:
@@ -414,6 +426,7 @@ func _on_fighter_died(fighter: Fighter) -> void:
 	if _defer(_on_fighter_died.bind(fighter)):
 		return
 	fighter_views[fighter.id].play_death()
+	Sound.play_voice(_voice(fighter), "death", fighter.id)
 
 
 func _on_combat_ended(winner_team: int) -> void:
@@ -426,3 +439,7 @@ func _on_combat_ended(winner_team: int) -> void:
 	await get_tree().create_timer(1.0).timeout
 	_refresh_highlights()
 	hud.show_victory(winner_name)
+	for f in state.fighters:
+		if f.team == winner_team and f.is_alive():
+			Sound.play_voice(_voice(f), "victory", f.id)
+			break
