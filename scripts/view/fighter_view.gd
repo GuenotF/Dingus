@@ -16,10 +16,13 @@ var is_active := false:
 	set(value):
 		is_active = value
 		queue_redraw()
+		_ground_marker.queue_redraw()
 ## Direction de la grille vers laquelle le personnage regarde.
 var facing := Vector2i(1, 0)
 
 var _body := Node2D.new() # partie animée (recul, clignotement)
+## Cercles au sol, dessinés au niveau du sol (sous le décor et les personnages) pour rester visibles.
+var _ground_marker := Node2D.new()
 var _sprite: AnimatedSprite2D
 var _sprites: CharacterSprites
 var _dead := false
@@ -28,6 +31,10 @@ var _dead := false
 func setup(p_fighter: Fighter) -> void:
 	fighter = p_fighter
 	position = Iso.cell_to_world(fighter.cell)
+	_ground_marker.z_as_relative = false
+	_ground_marker.z_index = 1 # sol = 0, effets au sol = 1, personnages = 2
+	_ground_marker.draw.connect(_draw_ground_marker)
+	add_child(_ground_marker)
 	_body.draw.connect(_draw_body)
 	add_child(_body)
 	if fighter.class_data and fighter.class_data.sprites is CharacterSprites:
@@ -180,17 +187,22 @@ func play_death() -> void:
 
 # --- Dessin ------------------------------------------------------------------
 
-func _draw() -> void:
-	# Ombre et anneau du joueur actif : ne bougent pas avec le corps.
-	# Les sprites ont déjà leur ombre.
+func _draw_ground_marker() -> void:
+	# Cercles au sol : ne bougent pas avec le corps. Les sprites ont déjà leur ombre.
 	if fighter == null:
 		return
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.5))
+	var m := _ground_marker
+	m.draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.5))
 	if _sprite == null:
-		draw_circle(Vector2.ZERO, 16.0, Color(0, 0, 0, 0.35))
+		m.draw_circle(Vector2.ZERO, 16.0, Color(0, 0, 0, 0.35))
+	# Cercle d'équipe, toujours visible : on repère la case de chaque personnage d'un coup d'œil.
+	var team_color := FALLBACK_COLORS[fighter.team % FALLBACK_COLORS.size()]
+	m.draw_circle(Vector2.ZERO, 21.0, Color(team_color, 0.22))
+	m.draw_arc(Vector2.ZERO, 21.0, 0.0, TAU, 40, Color(team_color.lightened(0.15), 0.95), 2.5, true)
+	# Cercle jaune autour : c'est à ce personnage de jouer.
 	if is_active:
-		draw_arc(Vector2.ZERO, 22.0, 0.0, TAU, 32, Color(1, 0.9, 0.3), 3.0, true)
-	draw_set_transform(Vector2.ZERO)
+		m.draw_arc(Vector2.ZERO, 26.0, 0.0, TAU, 40, Color(1, 0.9, 0.3), 3.0, true)
+	m.draw_set_transform(Vector2.ZERO)
 
 
 func _draw_body() -> void:

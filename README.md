@@ -17,6 +17,11 @@ Prototype de jeu tactique 1v1 au tour par tour, en vue isométrique (style Dofus
 | 1 à 4 | Choisir un sort |
 | Clic droit / Échap | Annuler le sort choisi |
 | Espace / bouton | Prêt (placement) / Fin du tour |
+| F11 | Plein écran / fenêtre |
+
+Le jeu s'ouvre en fenêtre maximisée et tout s'agrandit avec la fenêtre. Sous chaque personnage,
+un cercle à la couleur de son équipe (rouge : joueur 1, bleu : joueur 2) ; un cercle jaune en plus
+indique le personnage qui joue.
 
 Le menu permet de choisir la classe de chaque joueur et s'il est contrôlé par un humain
 ou par l'IA (2 joueurs sur le même écran, contre l'IA, ou IA contre IA pour regarder).
