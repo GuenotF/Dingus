@@ -14,7 +14,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 [application]
 
-config/name="Tactique Iso"
+config/name="Dingus"
 config/description="Prototype de jeu tactique 1v1 tour par tour en vue isométrique."
 run/main_scene="res://scenes/menu.tscn"
 config/features=PackedStringArray("4.7")

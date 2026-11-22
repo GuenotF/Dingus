@@ -12,6 +12,7 @@
 script = ExtResource("1_481od")
 class_label = "Mage de feu"
 color = Color(0.9098039, 0.45490196, 0.23137255, 1)
+description = "Frappe fort, touche derrière les obstacles"
 max_hp = 135
 max_pm = 4
 preferred_range = 4

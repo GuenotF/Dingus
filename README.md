@@ -29,8 +29,10 @@ PA insuffisants), les lancers restants (points) et la recharge (chiffre sur fond
 détaille le sort au survol. En haut à droite : le tour et l'ordre de jeu. Quand un sort vise un
 personnage, sa barre de PV montre la part que le sort peut retirer et les dégâts prévus (« K.O. » si létal).
 
-Le menu permet de choisir la classe de chaque joueur et s'il est contrôlé par un humain
-ou par l'IA (2 joueurs sur le même écran, contre l'IA, ou IA contre IA pour regarder).
+Le menu oppose les deux joueurs face à face : chaque panneau montre le personnage choisi, animé sur sa case
+(flèches ‹ › pour en changer), ses PV / PA / PM et ses sorts (survol = détail), et une pilule **Humain / IA**.
+Au centre, l'aperçu de la carte (la vraie scène, flèches ‹ › pour changer) et « Lancer le combat » (ou Entrée).
+2 joueurs sur le même écran, contre l'IA, ou IA contre IA pour regarder.
 
 ## Classes
 

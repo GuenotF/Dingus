@@ -12,6 +12,7 @@
 script = ExtResource("1_10evu")
 class_label = "Archer"
 color = Color(0.8509804, 0.6431373, 0.25490198, 1)
+description = "Tireur à longue portée"
 max_hp = 125
 preferred_range = 5
 spells = Array[ExtResource("2_kfolu")]([ExtResource("3_aojr1"), ExtResource("4_mexef"), ExtResource("5_lhpsp"), ExtResource("6_b7n5a")])

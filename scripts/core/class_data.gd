@@ -4,6 +4,8 @@ extends Resource
 
 @export var class_label: String = "Classe"
 @export var color: Color = Color.WHITE
+## Une phrase de présentation, affichée dans le menu sous le nom.
+@export var description: String = ""
 @export var max_hp: int = 100
 @export var max_pa: int = 6
 @export var max_pm: int = 3
