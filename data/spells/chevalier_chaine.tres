@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="SpellData" format=3]
+
+[ext_resource type="Script" path="res://scripts/core/effect_data.gd" id="1_eff"]
+[ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="2_spl"]
+[ext_resource type="Texture2D" path="res://assets/ui/spells/chevalier_chaine.svg" id="3_ico"]
+[ext_resource type="Resource" path="res://data/effects/death_spell.tres" id="4_prj"]
+
+[sub_resource type="Resource" id="e0"]
+script = ExtResource("1_eff")
+min_value = 4
+max_value = 6
+
+[sub_resource type="Resource" id="e2"]
+script = ExtResource("1_eff")
+kind = 5
+min_value = -2
+max_value = -2
+duration = 1
+
+[sub_resource type="Resource" id="e1"]
+script = ExtResource("1_eff")
+kind = 3
+min_value = 5
+max_value = 5
+
+[resource]
+script = ExtResource("2_spl")
+spell_name = "Chaîne infernale"
+animation = "cast"
+range_min = 2
+range_max = 6
+line_only = true
+effects = Array[ExtResource("1_eff")]([SubResource("e0"), SubResource("e1"), SubResource("e2")])
+icon = ExtResource("3_ico")
+projectile = ExtResource("4_prj")
+cast_delay = 0.35
+casts_per_turn = 1
+cooldown = 2

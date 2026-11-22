@@ -38,10 +38,10 @@ static func next_action(state: CombatState) -> Dictionary:
 
 
 ## Meilleur sort lançable si `me` se tenait sur `origin` : { score, spell, cell }.
-static func best_cast_from(state: CombatState, me: Fighter, origin: Vector2i) -> Dictionary:
+static func best_cast_from(state: CombatState, me: Fighter, origin: Vector2i, skip_sacrifice: bool = false) -> Dictionary:
 	var best := {"score": 0.0, "spell": null, "cell": origin}
 	for spell in me.spells:
-		if not state.can_use_spell(spell):
+		if not state.can_use_spell(spell) or (skip_sacrifice and _is_self_sacrifice(spell)):
 			continue
 		var cells := state.cells_in_range_from(spell, me, origin)
 		for cell in cells:
@@ -61,10 +61,22 @@ static func score_cast(state: CombatState, me: Fighter, origin: Vector2i, spell:
 		if v != null and (spell.affects_caster or v != me):
 			victims.append(v)
 
+	if _is_self_sacrifice(spell):
+		return _score_sacrifice(state, me, origin, spell)
+
 	var score := 0.0
 	for effect in spell.effects:
 		var avg := effect.average()
 		match effect.kind:
+			EffectData.Kind.DRAIN:
+				for v in victims:
+					if v.team != me.team:
+						score += minf(avg, v.hp) + (40.0 if avg >= v.hp else 0.0)
+						# Le vol de vie compte, surtout quand le lanceur est blessé.
+						var gain := minf(minf(avg, v.hp) * CombatState.DRAIN_RATIO, float(me.max_hp - me.hp))
+						score += gain * (1.5 if me.hp < me.max_hp * 0.5 else 0.6)
+					else:
+						score -= avg * 1.5
 			EffectData.Kind.DAMAGE:
 				for v in victims:
 					if v.team != me.team:
@@ -111,12 +123,49 @@ static func score_cast(state: CombatState, me: Fighter, origin: Vector2i, spell:
 	return score - spell.pa_cost * 0.1
 
 
+## Sort sur soi qui coûte des PV pour gagner des PA (ex. Pacte de sang).
+static func _is_self_sacrifice(spell: SpellData) -> bool:
+	if spell.range_max != 0 or not spell.affects_caster:
+		return false
+	var hurts := false
+	var gains_pa := false
+	for e in spell.effects:
+		if e.kind == EffectData.Kind.DAMAGE:
+			hurts = true
+		elif e.kind == EffectData.Kind.MOD_PA and e.average() > 0:
+			gains_pa = true
+	return hurts and gains_pa
+
+
+## Le sacrifice vaut le coup quand on peut frapper tout de suite depuis cette case, que les PA en plus
+## serviront et qu'il reste assez de PV : on l'ouvre avant de frapper. Jamais « pour rien ».
+static func _score_sacrifice(state: CombatState, me: Fighter, origin: Vector2i, spell: SpellData) -> float:
+	var damage := 0.0
+	var pa_gain := 0.0
+	for e in spell.effects:
+		if e.kind == EffectData.Kind.DAMAGE:
+			damage += e.average()
+		elif e.kind == EffectData.Kind.MOD_PA:
+			pa_gain += e.average()
+	if me.hp <= damage * 3.0:
+		return -100.0
+	var engaged: bool = best_cast_from(state, me, origin, true).score >= MIN_CAST_SCORE * 5.0
+	var pa_left := me.pa - spell.pa_cost + pa_gain
+	if not engaged or pa_left < 3.0 or pa_gain - spell.pa_cost < 1.0:
+		return -5.0
+	return 30.0 - damage * 0.2
+
+
 ## Préférence de placement : rester à la bonne distance de l'ennemi le plus proche.
 static func position_score(state: CombatState, me: Fighter, cell: Vector2i) -> float:
 	var d := _nearest_enemy_distance(state, me, cell)
 	if d >= 999:
 		return 0.0
 	var pref := me.preferred_range()
+	if pref <= 1:
+		# Au corps à corps, ce qui compte est le chemin à parcourir : un rocher entre les deux
+		# ne doit pas donner l'impression d'être déjà au contact (sinon l'IA reste plantée).
+		d = maxi(d, _nearest_enemy_walk(state, me, cell))
 	var score := -absf(d - pref) * 1.5
 	if pref > 1:
 		if d <= 1:
@@ -132,6 +181,16 @@ static func position_score(state: CombatState, me: Fighter, cell: Vector2i) -> f
 				exits += 1
 		score -= (4 - exits) * 1.5
 	return score
+
+
+## Nombre de pas pour rejoindre l'ennemi le plus proche (0 si aucun chemin : on garde la distance à vol d'oiseau).
+static func _nearest_enemy_walk(state: CombatState, me: Fighter, from: Vector2i) -> int:
+	var best := 0
+	for e in state.enemies_of(me):
+		var path := state.grid.find_path(from, e.cell)
+		if not path.is_empty() and (best == 0 or path.size() < best):
+			best = path.size()
+	return best
 
 
 static func _nearest_enemy_distance(state: CombatState, me: Fighter, from: Vector2i) -> int:

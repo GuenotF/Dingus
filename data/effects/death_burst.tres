@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="EffectAnimation" format=3]
+
+[ext_resource type="Script" path="res://scripts/view/effect_animation.gd" id="1_a"]
+[ext_resource type="Texture2D" path="res://assets/effects/death/death_aoe.png" id="2_b"]
+
+[resource]
+script = ExtResource("1_a")
+texture = ExtResource("2_b")
+fps = 34.0
+origin = Vector2(128, 130)
+scale = Vector2(0.34, 0.24)
+on_ground = true

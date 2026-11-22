@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="SpellData" format=3]
+
+[ext_resource type="Script" path="res://scripts/core/effect_data.gd" id="1_eff"]
+[ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="2_spl"]
+[ext_resource type="Texture2D" path="res://assets/ui/spells/chevalier_pacte.svg" id="3_ico"]
+[ext_resource type="Resource" path="res://data/effects/death_burst.tres" id="5_imp"]
+
+[sub_resource type="Resource" id="e0"]
+script = ExtResource("1_eff")
+min_value = 12
+max_value = 12
+
+[sub_resource type="Resource" id="e1"]
+script = ExtResource("1_eff")
+kind = 6
+min_value = 3
+max_value = 3
+
+[resource]
+script = ExtResource("2_spl")
+spell_name = "Pacte de sang"
+pa_cost = 1
+animation = "pact"
+range_min = 0
+range_max = 0
+needs_line_of_sight = false
+effects = Array[ExtResource("1_eff")]([SubResource("e0"), SubResource("e1")])
+icon = ExtResource("3_ico")
+impact = ExtResource("5_imp")
+casts_per_turn = 1
+cooldown = 3

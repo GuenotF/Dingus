@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ClassData" format=3]
+
+[ext_resource type="Script" path="res://scripts/core/class_data.gd" id="1_cls"]
+[ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="2_spl"]
+[ext_resource type="Resource" path="res://data/spells/chevalier_lame.tres" id="3_a"]
+[ext_resource type="Resource" path="res://data/spells/chevalier_chaine.tres" id="4_b"]
+[ext_resource type="Resource" path="res://data/spells/chevalier_malediction.tres" id="5_c"]
+[ext_resource type="Resource" path="res://data/spells/chevalier_pacte.tres" id="6_d"]
+[ext_resource type="Resource" path="res://data/sprites/chevalier.tres" id="7_spr"]
+
+[resource]
+script = ExtResource("1_cls")
+class_label = "Chevalier maudit"
+color = Color(0.62, 0.36, 0.86, 1)
+description = "Corps à corps : attire, ponctionne et maudit"
+max_hp = 120
+max_pm = 3
+spells = Array[ExtResource("2_spl")]([ExtResource("3_a"), ExtResource("4_b"), ExtResource("5_c"), ExtResource("6_d")])
+sprites = ExtResource("7_spr")

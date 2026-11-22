@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SpellData" format=3]
+
+[ext_resource type="Script" path="res://scripts/core/effect_data.gd" id="1_eff"]
+[ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="2_spl"]
+[ext_resource type="Texture2D" path="res://assets/ui/spells/chevalier_lame.svg" id="3_ico"]
+
+[sub_resource type="Resource" id="e0"]
+script = ExtResource("1_eff")
+kind = 7
+min_value = 14
+max_value = 17
+
+[resource]
+script = ExtResource("2_spl")
+spell_name = "Lame sombre"
+animation = "melee"
+effects = Array[ExtResource("1_eff")]([SubResource("e0")])
+icon = ExtResource("3_ico")

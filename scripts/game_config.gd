@@ -5,6 +5,7 @@ const CLASS_PATHS: Array[String] = [
 	"res://data/classes/guerrier.tres",
 	"res://data/classes/mage_feu.tres",
 	"res://data/classes/archer.tres",
+	"res://data/classes/chevalier_maudit.tres",
 ]
 
 ## Carte de combat (scène dessinée dans l'éditeur, voir scripts/map/battle_map.gd).

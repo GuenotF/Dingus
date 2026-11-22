@@ -11,6 +11,7 @@ enum Kind {
 	DASH, ## Le lanceur bondit sur la case ciblée (qui doit être libre).
 	MOD_PM, ## Ajoute min..max PM (négatif = retrait) pendant `duration` tours.
 	MOD_PA, ## Ajoute min..max PA (négatif = retrait) pendant `duration` tours.
+	DRAIN, ## Comme DAMAGE, et le lanceur récupère la moitié des PV réellement retirés (vol de vie).
 }
 
 @export var kind: Kind = Kind.DAMAGE
@@ -55,4 +56,6 @@ func describe() -> String:
 			return "%+d PM (%d t.)" % [min_value, duration]
 		Kind.MOD_PA:
 			return "%+d PA (%d t.)" % [min_value, duration]
+		Kind.DRAIN:
+			return "%s dégâts, vol de vie %d %%" % [amount, roundi(CombatState.DRAIN_RATIO * 100.0)]
 	return ""

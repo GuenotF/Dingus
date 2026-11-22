@@ -31,6 +31,8 @@ func _init() -> void:
 	_test_spell_not_affecting_caster()
 	_test_village_map()
 	_test_cast_preview()
+	_test_drain()
+	_test_ai_sacrifice()
 	print("Tests terminés : %s" % ("OK" if _failures == 0 else "%d échec(s)" % _failures))
 	quit(1 if _failures > 0 else 0)
 
@@ -496,3 +498,45 @@ func _test_cast_preview() -> void:
 	_check(preview[0].damage_min == 5 + bump and preview[0].damage_max == 7 + bump, "aperçu : dégâts + collision")
 	_check(state.fighters[1].hp == 100 and state.fighters[1].cell == Vector2i(2, 1), "aperçu sans effet sur le combat")
 	_check(state.preview_cast(spell, Vector2i(5, 5)).is_empty(), "aperçu vide hors portée")
+
+
+func _test_drain() -> void:
+	var fx: Array[EffectData] = [EffectData.make(K.DRAIN, 20)]
+	var spell := _effect_spell(1, 1, 1, fx)
+	var state := _duel([spell], Vector2i(1, 1), Vector2i(2, 1))
+	var me := state.active_fighter()
+	var foe := state.fighters[1]
+	me.hp = 50
+	var preview := state.preview_cast(spell, foe.cell)
+	var gain := int(20 * CombatState.DRAIN_RATIO)
+	var mine: Array = preview.filter(func(p: Dictionary) -> bool: return p.fighter == me)
+	_check(mine.size() == 1 and mine[0].heal_min == gain and mine[0].heal_max == gain, "vol de vie : aperçu du soin du lanceur")
+	_check(state.try_cast(spell, foe.cell), "vol de vie : lancer")
+	_check(foe.hp == 80 and me.hp == 50 + gain, "vol de vie : dégâts à la cible, soin au lanceur")
+	# Plafonné aux PV max du lanceur, et rien sur une cible qui n'a plus de PV à perdre.
+	me.hp = me.max_hp - 3
+	state.try_cast(spell, foe.cell)
+	_check(me.hp == me.max_hp, "vol de vie : plafonné aux PV max")
+	foe.hp = 4
+	me.hp = 50
+	state.try_cast(spell, foe.cell)
+	_check(not foe.is_alive() and me.hp == 50 + int(4 * CombatState.DRAIN_RATIO), "vol de vie : limité aux PV réellement retirés")
+
+
+func _test_ai_sacrifice() -> void:
+	# Un sort qui coûte des PV pour gagner des PA n'est lancé que si l'on peut frapper ensuite.
+	var pact := SpellData.new()
+	pact.pa_cost = 1
+	pact.range_min = 0
+	pact.range_max = 0
+	var pact_fx: Array[EffectData] = [EffectData.make(K.DAMAGE, 12), EffectData.make(K.MOD_PA, 3)]
+	pact.effects = pact_fx
+	var hit := _spell(3, 1, 1, false, 15)
+	hit.casts_per_turn = 2
+	var far := _duel([pact, hit], Vector2i(0, 0), Vector2i(9, 9))
+	_check(AiBrain.score_cast(far, far.active_fighter(), Vector2i(0, 0), pact, Vector2i(0, 0)) < AiBrain.MIN_CAST_SCORE, "IA : pas de sacrifice loin de l'ennemi")
+	var near := _duel([pact, hit], Vector2i(0, 0), Vector2i(1, 0))
+	_check(AiBrain.score_cast(near, near.active_fighter(), Vector2i(0, 0), pact, Vector2i(0, 0)) > 15.0, "IA : sacrifice avant de frapper au contact")
+	var weak := near.active_fighter()
+	weak.hp = 30
+	_check(AiBrain.score_cast(near, weak, Vector2i(0, 0), pact, Vector2i(0, 0)) < 0.0, "IA : pas de sacrifice quand les PV sont bas")

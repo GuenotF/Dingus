@@ -8,6 +8,8 @@ enum Phase { SETUP, PLACEMENT, FIGHT, OVER }
 
 ## Dégâts subis par case de poussée non parcourue (collision).
 const PUSH_DAMAGE_PER_CELL := 8
+## Part des dégâts d'un effet DRAIN que le lanceur récupère en PV.
+const DRAIN_RATIO := 0.5
 
 signal fighter_placed(fighter: Fighter)
 signal turn_started(fighter: Fighter, turn_number: int)
@@ -234,6 +236,8 @@ func preview_cast(spell: SpellData, target: Vector2i) -> Array[Dictionary]:
 	var caster := active_fighter()
 	if caster == null or not can_cast_at(spell, target):
 		return result
+	var drain_min := 0
+	var drain_max := 0
 	for cell in spell.affected_cells(target):
 		var v := fighter_at(cell)
 		if v == null or (v == caster and not spell.affects_caster):
@@ -244,6 +248,12 @@ func preview_cast(spell: SpellData, target: Vector2i) -> Array[Dictionary]:
 				EffectData.Kind.DAMAGE:
 					p.damage_min += effect.min_value
 					p.damage_max += effect.max_value
+				EffectData.Kind.DRAIN:
+					p.damage_min += effect.min_value
+					p.damage_max += effect.max_value
+					if v != caster:
+						drain_min += int(minf(effect.min_value, v.hp) * DRAIN_RATIO)
+						drain_max += int(minf(effect.max_value, v.hp) * DRAIN_RATIO)
 				EffectData.Kind.HEAL:
 					p.heal_min += effect.min_value
 					p.heal_max += effect.max_value
@@ -254,6 +264,19 @@ func preview_cast(spell: SpellData, target: Vector2i) -> Array[Dictionary]:
 						p.damage_max += push.blocked * PUSH_DAMAGE_PER_CELL
 		if p.damage_max > 0 or p.heal_max > 0:
 			result.append(p)
+	# Vol de vie : le soin du lanceur (sans dépasser ses PV maximum).
+	var missing := caster.max_hp - caster.hp
+	if drain_max > 0 and missing > 0:
+		var gain_min := mini(drain_min, missing)
+		var gain_max := mini(drain_max, missing)
+		var found := false
+		for p in result:
+			if p.fighter == caster:
+				p.heal_min += gain_min
+				p.heal_max += gain_max
+				found = true
+		if not found:
+			result.append({"fighter": caster, "damage_min": 0, "damage_max": 0, "heal_min": gain_min, "heal_max": gain_max})
 	return result
 
 
@@ -290,6 +313,12 @@ func _apply_effect(effect: EffectData, caster: Fighter, victim: Fighter, spell: 
 	match effect.kind:
 		EffectData.Kind.DAMAGE:
 			_damage(victim, rng.randi_range(effect.min_value, effect.max_value))
+		EffectData.Kind.DRAIN:
+			var dealt := _damage(victim, rng.randi_range(effect.min_value, effect.max_value))
+			if victim != caster and caster.is_alive():
+				var gained := caster.heal(int(dealt * DRAIN_RATIO))
+				if gained > 0:
+					fighter_healed.emit(caster, gained)
 		EffectData.Kind.HEAL:
 			var healed := victim.heal(rng.randi_range(effect.min_value, effect.max_value))
 			fighter_healed.emit(victim, healed)
@@ -328,11 +357,13 @@ func _apply_dash(caster: Fighter, target: Vector2i) -> void:
 	fighter_displaced.emit(caster, from, target)
 
 
-func _damage(victim: Fighter, amount: int) -> void:
+## Retire des PV et renvoie les PV réellement perdus.
+func _damage(victim: Fighter, amount: int) -> int:
 	var dealt := victim.take_damage(amount)
 	fighter_damaged.emit(victim, dealt)
 	if not victim.is_alive():
 		fighter_died.emit(victim)
+	return dealt
 
 
 ## Direction cardinale de `from` vers `to` (axe dominant).

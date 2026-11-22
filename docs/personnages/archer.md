@@ -51,3 +51,5 @@ facilement ses distances (85 %). C'est un avantage de carte assumé pour l'insta
 veut des cartes neutres (moins d'eau, ou des obstacles qui coupent la ligne de vue au bord du lac).
 Les écarts sont très sensibles aux seuils de mise à mort (±1 dégât ou ±5 PV peut faire basculer
 de 20 à 80 %), d'où des réglages fins.
+
+**Mise à jour** (IA de corps à corps révisée avec le Chevalier maudit) : Archer / Guerrier = 46 / 53 ur la Prairie, 85 / 15 ur le lac, 49 / 50 ur la Place du village.

@@ -44,6 +44,7 @@ Au centre, l'aperçu de la carte (la vraie scène, flèches ‹ › pour changer
 | Guerrier | 150 | 6 | 3 | Coup d'épée, Charge (bond), Repousser (poussée 2), Cri (+1 PM) |
 | Mage de feu | 135 | 6 | 4 | Flammèche, Boule de feu, Pluie de feu (zone sans ligne de vue), Nova de flammes (autour de soi, repousse) |
 | Archer | 125 | 6 | 3 | Flèche (portée 8), Flèche entravante (−2 PM), Flèche de recul (repousse 2), Roulade (bond) |
+| Chevalier maudit | 120 | 6 | 3 | Lame sombre (vol de vie), Chaîne infernale (attire de 5, −2 PM), Malédiction (−2 PA), Pacte de sang (−12 PV, +3 PA) |
 
 Créer un nouveau personnage : voir [docs/creation_personnage.md](docs/creation_personnage.md)
 (checklist, étapes, critères d'équilibrage, modèle de fiche).
@@ -90,7 +91,7 @@ godot --headless --path . -s res://tests/test_core.gd
 
 Dans le panneau FileSystem de Godot, duplique un fichier de `data/spells/` et modifie-le
 dans l'inspecteur : coût, portée, ligne de vue, zone, recharge, et surtout la liste
-**Effets** (dégâts, soin, poussée, attraction, bond, bonus/malus de PA ou PM).
+**Effets** (dégâts, vol de vie, soin, poussée, attraction, bond, bonus/malus de PA ou PM).
 Son **icône** (champ `icon`, groupe Visuel) : un SVG blanc sur fond transparent dans `assets/ui/spells/`
 (sans icône, la case affiche les deux premières lettres du nom).
 Ajoute-le ensuite à la liste `spells` d'une classe dans `data/classes/`.
@@ -111,9 +112,12 @@ Résultats actuels (victoires du premier nommé) :
 
 | Duel | Prairie | Le lac | Place du village |
 |---|---|---|---|
-| Guerrier / Mage de feu | 56 / 43 % | 48 / 51 % | 63 / 36 % |
-| Archer / Guerrier | 48 / 51 % | 85 / 15 % | 47 / 52 % |
+| Guerrier / Mage de feu | 67 / 32 % | 45 / 55 % | 61 / 38 % |
+| Archer / Guerrier | 46 / 53 % | 85 / 15 % | 49 / 50 % |
 | Archer / Mage de feu | 41 / 58 % | 50 / 50 % | 53 / 46 % |
+| Chevalier maudit / Guerrier | 63 / 36 % | 45 / 54 % | 52 / 47 % |
+| Chevalier maudit / Mage de feu | 49 / 50 % | 0 / 100 % | 47 / 52 % |
+| Chevalier maudit / Archer | 73 / 26 % | 26 / 73 % | 75 / 24 % |
 
 Détail et historique des réglages : `docs/personnages/`.
 
@@ -159,7 +163,7 @@ La carte utilise le tileset isométrique (`assets/tiles/`). Les combattants util
 si leur classe en a un (champ `sprites` de la classe), sinon un pion temporaire.
 
 Actuellement : le **Guerrier** utilise le pack *2D HD Character Knight* (`assets/characters/knight/`),
-le **Mage de feu** et l'**Archer** le pack *2D HD Character pack 1* (`assets/characters/wizard/`, `assets/characters/archer/`).
+le **Mage de feu**, l'**Archer** et le **Chevalier maudit** le pack *2D HD Character pack 1* (`assets/characters/wizard/`, `assets/characters/archer/`, `assets/characters/chevalier/`).
 
 ### Ajouter un personnage animé
 
@@ -200,5 +204,5 @@ puis la mettre dans le champ `voice` de la classe.
 
 Actuellement : le **Guerrier** parle (*Warrior Voice Pack* de John Carroll,
 [johncarroll.itch.io](https://johncarroll.itch.io/) ; 52 répliques converties en OGG).
-L'Archer et le Mage de feu n'ont pas encore de voix.
+L'Archer, le Mage de feu et le Chevalier maudit n'ont pas encore de voix.
 
