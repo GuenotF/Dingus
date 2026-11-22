@@ -15,6 +15,8 @@ var muted := false
 var fullscreen := false
 ## Particules d'ambiance du fond : 0 aucune, 1 réduites, 2 complètes.
 var particles_level := 2
+## Animations du décor (vent sur arbres, herbes et fleurs).
+var scenery_animation := true
 
 const PARTICLES_LABELS: Array[String] = ["Aucune", "Réduites", "Complètes"]
 
@@ -47,6 +49,11 @@ func set_fullscreen(value: bool) -> void:
 
 func set_particles_level(value: int) -> void:
 	particles_level = clampi(value, 0, PARTICLES_LABELS.size() - 1)
+	_commit()
+
+
+func set_scenery_animation(value: bool) -> void:
+	scenery_animation = value
 	_commit()
 
 
@@ -85,6 +92,7 @@ func _save() -> void:
 	cfg.set_value("audio", "muted", muted)
 	cfg.set_value("display", "fullscreen", fullscreen)
 	cfg.set_value("display", "particles", particles_level)
+	cfg.set_value("display", "scenery_animation", scenery_animation)
 	cfg.save(FILE)
 
 
@@ -96,4 +104,5 @@ func _load() -> void:
 	voice_volume = clampf(float(cfg.get_value("audio", "voice", 1.0)), 0.0, 1.0)
 	muted = bool(cfg.get_value("audio", "muted", false))
 	fullscreen = bool(cfg.get_value("display", "fullscreen", false))
+	scenery_animation = bool(cfg.get_value("display", "scenery_animation", true))
 	particles_level = clampi(int(cfg.get_value("display", "particles", 2)), 0, PARTICLES_LABELS.size() - 1)

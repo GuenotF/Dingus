@@ -14,6 +14,7 @@ var _voice_value: Label
 var _mute: Button
 var _fullscreen: Button
 var _particles: Button
+var _scenery: Button
 
 
 func _ready() -> void:
@@ -69,6 +70,11 @@ func _ready() -> void:
 		Settings.set_particles_level((Settings.particles_level + 1) % Settings.PARTICLES_LABELS.size()))
 	box.add_child(particles_row[1])
 
+	var scenery_row := _toggle_row("Animations du décor")
+	_scenery = scenery_row[0]
+	_scenery.toggled.connect(func(on: bool) -> void: Settings.set_scenery_animation(on))
+	box.add_child(scenery_row[1])
+
 	var back := W.menu_button("Retour", true)
 	back.pressed.connect(close)
 	box.add_child(back)
@@ -108,6 +114,8 @@ func _sync() -> void:
 	_fullscreen.set_pressed_no_signal(Settings.fullscreen)
 	_fullscreen.text = "Oui" if Settings.fullscreen else "Non"
 	_particles.text = Settings.PARTICLES_LABELS[Settings.particles_level]
+	_scenery.set_pressed_no_signal(Settings.scenery_animation)
+	_scenery.text = "Oui" if Settings.scenery_animation else "Non"
 
 
 ## [slider, label de valeur, ligne complète]

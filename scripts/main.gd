@@ -67,6 +67,7 @@ func _build_scene() -> void:
 	# Carte : les tuiles sont alignées sur la grille du jeu (centre de la case (0, 0) en (0, 0)).
 	add_child(map)
 	map.position = -map.ground().map_to_local(Vector2i.ZERO) * map.scale
+	TileWind.apply(map) # vent sur arbres, herbes et fleurs
 	map.placement().hide() # les zones sont affichées par le plateau pendant le placement
 
 	board = BoardView.new()
