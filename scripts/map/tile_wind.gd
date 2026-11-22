@@ -10,6 +10,14 @@ const WATER_SHADER := preload("res://assets/shaders/eau.gdshader")
 ## TileSets dont les tuiles d'eau (donnée « water ») scintillent. Le désert a ses propres ondulations.
 const WATER_TILESETS := ["res://assets/tiles/terrain_tileset.tres"]
 
+## Réglages du village, partagés avec la carte du barrage (même atlas).
+const VILLAGE_WIND := [
+		# Feuillus, puis sapins (plus raides), puis buissons et hautes herbes.
+		{"coords": [Vector2i(2, 4), Vector2i(5, 4), Vector2i(7, 4), Vector2i(0, 5)], "amplitude": 4.5, "snap": 0.0},
+		{"coords": [Vector2i(3, 4), Vector2i(4, 4), Vector2i(6, 4), Vector2i(1, 5)], "amplitude": 2.5, "snap": 0.0},
+		{"coords": [Vector2i(0, 6), Vector2i(1, 6), Vector2i(2, 6), Vector2i(3, 6), Vector2i(4, 6), Vector2i(5, 6)], "amplitude": 5.0, "snap": 0.0},
+	]
+
 ## Par TileSet : liste de { "coords": cases de l'atlas, "amplitude": px, "snap": px (0 = lisse) }.
 const CONFIG := {
 	"res://assets/tiles/desert/desert_tileset.tres": [
@@ -17,12 +25,8 @@ const CONFIG := {
 		{"coords": [Vector2i(6, 2), Vector2i(7, 2), Vector2i(0, 3), Vector2i(1, 3)], "amplitude": 5.0, "snap": 0.0},
 		{"coords": [Vector2i(4, 1), Vector2i(5, 1), Vector2i(6, 1), Vector2i(7, 1)], "amplitude": 4.0, "snap": 0.0},
 	],
-	"res://assets/tiles/village/village_tileset.tres": [
-		# Feuillus, puis sapins (plus raides), puis buissons et hautes herbes.
-		{"coords": [Vector2i(2, 4), Vector2i(5, 4), Vector2i(7, 4), Vector2i(0, 5)], "amplitude": 4.5, "snap": 0.0},
-		{"coords": [Vector2i(3, 4), Vector2i(4, 4), Vector2i(6, 4), Vector2i(1, 5)], "amplitude": 2.5, "snap": 0.0},
-		{"coords": [Vector2i(0, 6), Vector2i(1, 6), Vector2i(2, 6), Vector2i(3, 6), Vector2i(4, 6), Vector2i(5, 6)], "amplitude": 5.0, "snap": 0.0},
-	],
+	"res://assets/tiles/village/village_tileset.tres": VILLAGE_WIND,
+	"res://assets/tiles/village/barricade_tileset.tres": VILLAGE_WIND,
 	"res://assets/tiles/terrain_tileset.tres": [
 		# Fleurs et buisson de la prairie (pixel art : mouvement au pixel près).
 		{"coords": [Vector2i(0, 4), Vector2i(1, 4), Vector2i(2, 4), Vector2i(3, 4)], "amplitude": 1.6, "snap": 1.0},

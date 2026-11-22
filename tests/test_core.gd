@@ -37,6 +37,7 @@ func _init() -> void:
 	_test_destructibles_spells()
 	_test_desert_destructibles()
 	_test_ai_destructibles()
+	_test_barricade_map()
 	print("Tests terminés : %s" % ("OK" if _failures == 0 else "%d échec(s)" % _failures))
 	quit(1 if _failures > 0 else 0)
 
@@ -638,6 +639,29 @@ func _test_desert_destructibles() -> void:
 	_check(not destructibles.has(Vector2i(7, 7)), "désert : le sphinx est indestructible")
 	_check(not destructibles.has(Vector2i(7, 5)) and not destructibles.has(Vector2i(7, 9)), "désert : les obélisques sont indestructibles")
 	_check(grid.get_obstacles().size() == 25, "désert : toujours 25 obstacles")
+	map.free()
+
+
+func _test_barricade_map() -> void:
+	var map: BattleMap = load("res://maps/barricade.tscn").instantiate()
+	var grid := map.build_grid()
+	var zones := map.placement_zones()
+	_check(zones.size() == 2 and zones[0].size() == 9 and zones[1].size() == 9, "barrage : 9 cases de placement par équipe")
+	var destructibles := map.destructibles()
+	_check(destructibles.size() > 10, "barrage : des destructibles (%d)" % destructibles.size())
+	for y in 3:
+		_check(grid.is_obstacle(Vector2i(7, y)) and not grid.is_destructible(Vector2i(7, y)), "barrage : mur de pierre (7,%d) indestructible" % y)
+	_check(not grid.is_obstacle(Vector2i(7, 7)), "barrage : l'ouverture centrale est libre")
+	_check(grid.is_destructible(Vector2i(7, 4)), "barrage : la palissade (7,4) est destructible")
+	# Une ligne de tir à travers la palissade est coupée, puis rétablie une fois la palissade détruite.
+	var from := Vector2i(6, 4)
+	var to := Vector2i(8, 4)
+	_check(not grid.has_line_of_sight(from, to), "barrage : la palissade bloque la vue")
+	grid.damage_destructible(Vector2i(7, 4), 999)
+	_check(grid.has_line_of_sight(from, to), "barrage : la vue est ouverte une fois la palissade détruite")
+	# Les deux camps peuvent se rejoindre (par l'ouverture).
+	var path := grid.find_path(Vector2i(1, 7), Vector2i(13, 7))
+	_check(not path.is_empty(), "barrage : un chemin relie les deux camps")
 	map.free()
 
 
