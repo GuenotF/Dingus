@@ -10,3 +10,6 @@ extends Resource
 ## Distance à l'ennemi que l'IA cherche à garder (1 = corps à corps).
 @export_range(1, 10) var preferred_range: int = 1
 @export var spells: Array[SpellData] = []
+## Graphismes animés (optionnel). Sans eux, le pion temporaire est dessiné.
+## Type Resource pour que core/ ne dépende pas du code d'affichage (CharacterSprites).
+@export var sprites: Resource

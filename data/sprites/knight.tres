@@ -1,0 +1,64 @@
+[gd_resource type="Resource" script_class="CharacterSprites" load_steps=19 format=3]
+
+[ext_resource type="Script" path="res://scripts/view/character_animation.gd" id="1_g1m66"]
+[ext_resource type="Texture2D" path="res://assets/characters/knight/idle.png" id="2_657wq"]
+[ext_resource type="Texture2D" path="res://assets/characters/knight/walk.png" id="3_gu6yt"]
+[ext_resource type="Texture2D" path="res://assets/characters/knight/take_damage.png" id="4_jv5sw"]
+[ext_resource type="Texture2D" path="res://assets/characters/knight/die.png" id="5_g8jhm"]
+[ext_resource type="Texture2D" path="res://assets/characters/knight/melee.png" id="6_m503u"]
+[ext_resource type="Texture2D" path="res://assets/characters/knight/kick.png" id="7_rd6sa"]
+[ext_resource type="Texture2D" path="res://assets/characters/knight/front_flip.png" id="8_stbfs"]
+[ext_resource type="Texture2D" path="res://assets/characters/knight/cast_spell.png" id="9_u7rb1"]
+[ext_resource type="Script" path="res://scripts/view/character_sprites.gd" id="10_4ey2i"]
+
+[sub_resource type="Resource" id="Resource_wqhbv"]
+script = ExtResource("1_g1m66")
+texture = ExtResource("2_657wq")
+fps = 12.0
+loop = true
+
+[sub_resource type="Resource" id="Resource_vx3fw"]
+script = ExtResource("1_g1m66")
+name = "walk"
+texture = ExtResource("3_gu6yt")
+fps = 20.0
+loop = true
+
+[sub_resource type="Resource" id="Resource_dkssb"]
+script = ExtResource("1_g1m66")
+name = "hit"
+texture = ExtResource("4_jv5sw")
+fps = 24.0
+
+[sub_resource type="Resource" id="Resource_m681c"]
+script = ExtResource("1_g1m66")
+name = "die"
+texture = ExtResource("5_g8jhm")
+
+[sub_resource type="Resource" id="Resource_kkx1n"]
+script = ExtResource("1_g1m66")
+name = "melee"
+texture = ExtResource("6_m503u")
+fps = 30.0
+
+[sub_resource type="Resource" id="Resource_nqvoq"]
+script = ExtResource("1_g1m66")
+name = "kick"
+texture = ExtResource("7_rd6sa")
+fps = 30.0
+
+[sub_resource type="Resource" id="Resource_gqsl0"]
+script = ExtResource("1_g1m66")
+name = "jump"
+texture = ExtResource("8_stbfs")
+fps = 32.0
+
+[sub_resource type="Resource" id="Resource_34tf2"]
+script = ExtResource("1_g1m66")
+name = "cast"
+texture = ExtResource("9_u7rb1")
+fps = 24.0
+
+[resource]
+script = ExtResource("10_4ey2i")
+animations = Array[ExtResource("1_g1m66")]([SubResource("Resource_wqhbv"), SubResource("Resource_vx3fw"), SubResource("Resource_dkssb"), SubResource("Resource_m681c"), SubResource("Resource_kkx1n"), SubResource("Resource_nqvoq"), SubResource("Resource_gqsl0"), SubResource("Resource_34tf2")])

@@ -16,6 +16,7 @@ max_value = 2
 [resource]
 script = ExtResource("2_ap341")
 spell_name = "Repousser"
+animation = "kick"
 target_rule = 2
 effects = Array[ExtResource("1_jm5op")]([SubResource("Resource_2wkwi"), SubResource("Resource_1qrl8")])
 casts_per_turn = 1

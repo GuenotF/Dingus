@@ -13,6 +13,7 @@ max_value = 0
 script = ExtResource("2_6x3r5")
 spell_name = "Charge"
 pa_cost = 2
+animation = "jump"
 range_min = 2
 range_max = 3
 line_only = true

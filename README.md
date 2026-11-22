@@ -85,6 +85,22 @@ classe. Réglage actuel : environ 43 / 37.
 
 ## Graphismes
 
-Les formes sont dessinées en code (temporaire). Les dimensions de tuile sont définies
-dans `scripts/view/iso.gd` (64×32). Les vrais graphismes remplaceront `BoardView`,
-`ObstacleView` et `FighterView` sans toucher à `core/`.
+Le sol et les blocs sont encore dessinés en code. Les combattants utilisent un **sprite animé**
+si leur classe en a un (champ `sprites` de la classe), sinon un pion temporaire.
+
+Actuellement : le **Guerrier** utilise le pack *2D HD Character Knight* (`assets/characters/knight/`).
+
+### Ajouter un personnage animé
+
+1. Copie les planches dans `assets/characters/<nom>/`. Format attendu : une ligne par direction
+   (8 lignes), une colonne par image, toutes les images de même taille.
+2. Duplique `data/sprites/knight.tres` et règle-le dans l'inspecteur :
+   - `frame_size`, `frames_per_row` ;
+   - la **ligne** de la planche pour chacune des 4 directions de la grille ;
+   - `feet_position` (position des pieds dans une image) et `height` (pour placer le nom) ;
+   - la liste `animations` : `idle`, `walk`, `hit`, `die`, plus les noms utilisés par les sorts.
+3. Dans la classe (`data/classes/*.tres`), mets ce fichier dans `sprites`.
+4. Dans chaque sort, le champ `animation` choisit l'animation du lanceur
+   (Guerrier : `melee`, `jump`, `kick`, `cast`). Une animation absente est simplement ignorée.
+
+Les images sont versionnées normalement dans Git (pas de LFS nécessaire).

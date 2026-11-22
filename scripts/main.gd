@@ -316,7 +316,8 @@ func _on_fighter_moved(fighter: Fighter, path: Array[Vector2i]) -> void:
 	_set_busy(false)
 
 
-func _on_spell_cast(_caster: Fighter, _spell: SpellData, _target: Vector2i, cells: Array[Vector2i]) -> void:
+func _on_spell_cast(caster: Fighter, spell: SpellData, target: Vector2i, cells: Array[Vector2i]) -> void:
+	fighter_views[caster.id].play_cast(spell.animation, target)
 	board.flash(cells)
 	_set_busy(true)
 	await get_tree().create_timer(0.5).timeout
@@ -327,13 +328,13 @@ func _on_fighter_damaged(fighter: Fighter, amount: int) -> void:
 	var view: FighterView = fighter_views[fighter.id]
 	var caster := state.active_fighter()
 	view.play_hit(Iso.cell_to_world(caster.cell) if caster != fighter else view.position + Vector2(0, -1))
-	FloatingText.spawn(self, view.position, "-%d" % amount, Color("ff6b5b"))
+	FloatingText.spawn(self, view.text_anchor(), "-%d" % amount, Color("ff6b5b"))
 
 
 func _on_fighter_healed(fighter: Fighter, amount: int) -> void:
 	var view: FighterView = fighter_views[fighter.id]
 	view.play_heal()
-	FloatingText.spawn(self, view.position, "+%d" % amount, Color("6be07a"))
+	FloatingText.spawn(self, view.text_anchor(), "+%d" % amount, Color("6be07a"))
 
 
 func _on_fighter_displaced(fighter: Fighter, _from: Vector2i, to: Vector2i) -> void:

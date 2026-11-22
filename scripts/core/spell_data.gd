@@ -12,6 +12,8 @@ enum TargetRule {
 
 @export var spell_name: String = "Sort"
 @export_range(0, 12) var pa_cost: int = 3
+## Animation jouée par le lanceur (si sa classe a des sprites) : melee, kick, jump, cast...
+@export var animation: String = "cast"
 @export_group("Portée")
 @export_range(0, 20) var range_min: int = 1
 @export_range(0, 20) var range_max: int = 1

@@ -11,4 +11,5 @@ max_value = 22
 [resource]
 script = ExtResource("2_jiojc")
 spell_name = "Coup d'épée"
+animation = "melee"
 effects = Array[ExtResource("1_jvyc3")]([SubResource("Resource_s7mkm")])
