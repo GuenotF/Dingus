@@ -17,6 +17,7 @@ var fighter_views: Dictionary = {} # Fighter.id -> FighterView
 var selected_spell: SpellData = null
 var busy := false # vrai pendant une animation : on ignore les entrées
 var placing_index := 0 # combattant en cours de placement
+var obstacle_view: ObstacleView
 ## Pendant qu'un projectile vole, les conséquences du sort (dégâts, poussées, mort...)
 ## sont mises en attente et jouées à l'impact.
 var _deferring := false
@@ -35,6 +36,8 @@ func _ready() -> void:
 	state.fighter_displaced.connect(_on_fighter_displaced)
 	state.status_changed.connect(_on_status_changed)
 	state.fighter_died.connect(_on_fighter_died)
+	state.obstacle_damaged.connect(_on_obstacle_damaged)
+	state.obstacle_destroyed.connect(_on_obstacle_destroyed)
 	state.combat_ended.connect(_on_combat_ended)
 	state.begin_placement()
 	_begin_placement_of(0)
@@ -87,6 +90,11 @@ func _build_scene() -> void:
 	decor.scale = map.scale
 	decor.position = map.position
 	decor.texture_filter = map.texture_filter # pixel art net ou rendu lissé, selon la carte
+
+	# Obstacles destructibles : remplacés par des sprites animables (secousse, effondrement, barre de PV).
+	obstacle_view = ObstacleView.new()
+	add_child(obstacle_view)
+	obstacle_view.setup(state.grid, decor, map.ground_detail(), entities, self)
 
 	for f in state.fighters:
 		var view := FighterView.new()
@@ -278,6 +286,11 @@ func _refresh_highlights(forced_hover: Vector2i = Vector2i(-1, -1)) -> void:
 	var hover := forced_hover if forced_hover != Vector2i(-1, -1) else _mouse_cell()
 	for fighter in state.fighters:
 		fighter_views[fighter.id].set_hovered(fighter.cell == hover)
+	var obstacle_preview: Dictionary = {}
+	if selected_spell and not busy and not state.is_over:
+		for p in state.preview_obstacles(selected_spell, hover):
+			obstacle_preview[p.cell] = p.damage_max
+	obstacle_view.set_hover(hover, obstacle_preview)
 
 	if state.phase == CombatState.Phase.PLACEMENT:
 		var placer := _placing_fighter()
@@ -434,6 +447,18 @@ func _on_fighter_displaced(fighter: Fighter, _from: Vector2i, to: Vector2i) -> v
 
 func _on_status_changed(fighter: Fighter) -> void:
 	fighter_views[fighter.id].refresh()
+
+
+func _on_obstacle_damaged(cell: Vector2i, amount: int, hp_left: int) -> void:
+	if _defer(_on_obstacle_damaged.bind(cell, amount, hp_left)):
+		return
+	obstacle_view.hit(cell, amount, hp_left)
+
+
+func _on_obstacle_destroyed(cell: Vector2i) -> void:
+	if _defer(_on_obstacle_destroyed.bind(cell)):
+		return
+	obstacle_view.destroy(cell)
 
 
 func _on_fighter_died(fighter: Fighter) -> void:
