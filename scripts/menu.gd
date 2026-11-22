@@ -7,6 +7,8 @@ const ICON_HUMAN := preload("res://assets/ui/icon_human.svg")
 const ICON_AI := preload("res://assets/ui/icon_ai.svg")
 const ICON_EDIT := preload("res://assets/ui/icon_edit.svg")
 const ICON_SETTINGS := preload("res://assets/ui/icon_settings.svg")
+const ICON_CHEVRON_LEFT := preload("res://assets/ui/icon_chevron_left.svg")
+const ICON_CHEVRON_RIGHT := preload("res://assets/ui/icon_chevron_right.svg")
 const ICON_QUIT := preload("res://assets/ui/icon_quit.svg")
 const NAME_MAX_LENGTH := 16
 const TEAM_NAME_COLORS: Array[Color] = [Color("f2a19d"), Color("9cc6f2")]
@@ -264,7 +266,14 @@ static func _small_caps(text: String) -> Label:
 
 static func _arrow_button(right: bool, label: String) -> Button:
 	var b := Button.new()
-	b.text = "›" if right else "‹"
+	# Chevron dessiné (SVG) : parfaitement centré, contrairement à un caractère de police.
+	b.icon = ICON_CHEVRON_RIGHT if right else ICON_CHEVRON_LEFT
+	b.expand_icon = true
+	b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	b.add_theme_constant_override("icon_max_width", 18)
+	b.add_theme_color_override("icon_normal_color", Color("f1e3c2"))
+	b.add_theme_color_override("icon_hover_color", Color.WHITE)
+	b.add_theme_color_override("icon_pressed_color", Color.WHITE)
 	b.tooltip_text = label
 	b.focus_mode = Control.FOCUS_NONE
 	b.custom_minimum_size = Vector2(40, 44)
