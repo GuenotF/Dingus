@@ -1,10 +1,14 @@
 class_name TileWind
 extends RefCounted
 ## Pose le shader de vent (assets/shaders/vent.gdshader) sur les tuiles de décor qui s'y prêtent
-## (arbres, herbes, fleurs), via la propriété `material` des tuiles du TileSet.
+## (arbres, herbes, fleurs) et le shader d'eau sur les tuiles d'eau, via la propriété `material` des tuiles du TileSet.
 ## Purement visuel. Réglage joueur : Settings.scenery_animation (coupe l'effet).
 
 const SHADER := preload("res://assets/shaders/vent.gdshader")
+const WATER_SHADER := preload("res://assets/shaders/eau.gdshader")
+
+## TileSets dont les tuiles d'eau (donnée « water ») scintillent. Le désert a ses propres ondulations.
+const WATER_TILESETS := ["res://assets/tiles/terrain_tileset.tres"]
 
 ## Par TileSet : liste de { "coords": cases de l'atlas, "amplitude": px, "snap": px (0 = lisse) }.
 const CONFIG := {
@@ -41,11 +45,15 @@ static func apply(map: BattleMap) -> void:
 
 static func _prepare(tile_set: TileSet) -> void:
 	var path := tile_set.resource_path
-	if not CONFIG.has(path) or _prepared.has(path):
+	if _prepared.has(path) or not (CONFIG.has(path) or WATER_TILESETS.has(path)):
 		return
 	_prepared[path] = true
 	var source := tile_set.get_source(tile_set.get_source_id(0)) as TileSetAtlasSource
 	if source == null or source.texture == null:
+		return
+	if WATER_TILESETS.has(path):
+		_prepare_water(source)
+	if not CONFIG.has(path):
 		return
 	var tex_size := Vector2(source.texture.get_size())
 	var cell := Vector2(source.texture_region_size)
@@ -62,6 +70,18 @@ static func _prepare(tile_set: TileSet) -> void:
 			material.set_shader_parameter("snap", group["snap"])
 			source.get_tile_data(coords, 0).material = material
 			_materials.append(material)
+
+
+## Un seul matériau partagé par toutes les tuiles d'eau de l'atlas.
+static func _prepare_water(source: TileSetAtlasSource) -> void:
+	var material := ShaderMaterial.new()
+	material.shader = WATER_SHADER
+	for i in source.get_tiles_count():
+		var coords := source.get_tile_id(i)
+		var data := source.get_tile_data(coords, 0)
+		if data.get_custom_data("water"):
+			data.material = material
+	_materials.append(material)
 
 
 static func _refresh() -> void:
