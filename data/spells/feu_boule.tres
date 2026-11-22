@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/core/effect_data.gd" id="1_qabvr"]
 [ext_resource type="Resource" path="res://data/effects/fire_burst.tres" id="2_2tl1i"]
+[ext_resource type="Texture2D" path="res://assets/ui/spells/feu_boule.svg" id="2_gqbx0"]
 [ext_resource type="Resource" path="res://data/effects/fire_ball.tres" id="3_gqbx0"]
 [ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="4_yfwpc"]
 
@@ -18,6 +19,7 @@ animation = "special2"
 range_min = 3
 range_max = 7
 effects = Array[ExtResource("1_qabvr")]([SubResource("Resource_siisa")])
+icon = ExtResource("2_gqbx0")
 projectile = ExtResource("3_gqbx0")
 impact = ExtResource("2_2tl1i")
 cast_delay = 0.35

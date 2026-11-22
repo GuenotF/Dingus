@@ -30,6 +30,7 @@ func _init() -> void:
 	_test_lake_map()
 	_test_spell_not_affecting_caster()
 	_test_village_map()
+	_test_cast_preview()
 	print("Tests terminés : %s" % ("OK" if _failures == 0 else "%d échec(s)" % _failures))
 	quit(1 if _failures > 0 else 0)
 
@@ -482,3 +483,16 @@ func _test_village_map() -> void:
 			_check(grid.is_walkable(cell), "village : case de départ praticable %s" % cell)
 	_check(not grid.find_path(zones[0][0], zones[1][0]).is_empty(), "village : les deux camps peuvent se rejoindre")
 	map.free()
+
+
+func _test_cast_preview() -> void:
+	var fx: Array[EffectData] = [EffectData.make(K.DAMAGE, 5, 7), EffectData.make(K.PUSH, 2)]
+	var spell := _effect_spell(1, 1, 3, fx)
+	var walls: Array[Vector2i] = [Vector2i(4, 1)]
+	var state := _duel([spell], Vector2i(1, 1), Vector2i(2, 1), walls)
+	var preview := state.preview_cast(spell, Vector2i(2, 1))
+	_check(preview.size() == 1 and preview[0].fighter == state.fighters[1], "aperçu : une cible")
+	var bump := CombatState.PUSH_DAMAGE_PER_CELL
+	_check(preview[0].damage_min == 5 + bump and preview[0].damage_max == 7 + bump, "aperçu : dégâts + collision")
+	_check(state.fighters[1].hp == 100 and state.fighters[1].cell == Vector2i(2, 1), "aperçu sans effet sur le combat")
+	_check(state.preview_cast(spell, Vector2i(5, 5)).is_empty(), "aperçu vide hors portée")

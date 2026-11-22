@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="SpellData" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="SpellData" format=3]
 
 [ext_resource type="Script" path="res://scripts/core/effect_data.gd" id="1_jvyc3"]
 [ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="2_jiojc"]
+[ext_resource type="Texture2D" path="res://assets/ui/spells/guerrier_coup_epee.svg" id="2_s7mkm"]
 
 [sub_resource type="Resource" id="Resource_s7mkm"]
 script = ExtResource("1_jvyc3")
@@ -13,3 +14,4 @@ script = ExtResource("2_jiojc")
 spell_name = "Coup d'épée"
 animation = "melee"
 effects = Array[ExtResource("1_jvyc3")]([SubResource("Resource_s7mkm")])
+icon = ExtResource("2_s7mkm")

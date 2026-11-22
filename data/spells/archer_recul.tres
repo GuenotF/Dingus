@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/core/effect_data.gd" id="1_85urg"]
 [ext_resource type="Resource" path="res://data/effects/arrow.tres" id="2_jn1qu"]
+[ext_resource type="Texture2D" path="res://assets/ui/spells/archer_recul.svg" id="2_t6kop"]
 [ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="3_t6kop"]
 
 [sub_resource type="Resource" id="Resource_jxudg"]
@@ -23,6 +24,7 @@ range_max = 3
 line_only = true
 target_rule = 2
 effects = Array[ExtResource("1_85urg")]([SubResource("Resource_jxudg"), SubResource("Resource_kch4d")])
+icon = ExtResource("2_t6kop")
 projectile = ExtResource("2_jn1qu")
 cast_delay = 0.4
 casts_per_turn = 1

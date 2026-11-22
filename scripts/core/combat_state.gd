@@ -226,6 +226,37 @@ func can_cast_at(spell: SpellData, target: Vector2i) -> bool:
 
 
 ## Lance un sort du combattant actif. Renvoie false si l'action est refusée.
+## Aperçu d'un lancer, sans rien modifier : pour chaque combattant touché,
+## { "fighter": Fighter, "damage_min", "damage_max", "heal_min", "heal_max" }.
+## Les dégâts de collision d'une poussée bloquée sont comptés.
+func preview_cast(spell: SpellData, target: Vector2i) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	var caster := active_fighter()
+	if caster == null or not can_cast_at(spell, target):
+		return result
+	for cell in spell.affected_cells(target):
+		var v := fighter_at(cell)
+		if v == null or (v == caster and not spell.affects_caster):
+			continue
+		var p := {"fighter": v, "damage_min": 0, "damage_max": 0, "heal_min": 0, "heal_max": 0}
+		for effect in spell.effects:
+			match effect.kind:
+				EffectData.Kind.DAMAGE:
+					p.damage_min += effect.min_value
+					p.damage_max += effect.max_value
+				EffectData.Kind.HEAL:
+					p.heal_min += effect.min_value
+					p.heal_max += effect.max_value
+				EffectData.Kind.PUSH:
+					if v != caster:
+						var push := preview_push(v, push_direction(caster.cell, v.cell), effect.min_value)
+						p.damage_min += push.blocked * PUSH_DAMAGE_PER_CELL
+						p.damage_max += push.blocked * PUSH_DAMAGE_PER_CELL
+		if p.damage_max > 0 or p.heal_max > 0:
+			result.append(p)
+	return result
+
+
 func try_cast(spell: SpellData, target: Vector2i) -> bool:
 	if not can_cast_at(spell, target):
 		return false

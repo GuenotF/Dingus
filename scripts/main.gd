@@ -257,8 +257,7 @@ func _wait_idle() -> void:
 func _refresh_ui(forced_hover: Vector2i = Vector2i(-1, -1)) -> void:
 	var f := state.active_fighter()
 	if f and state.phase == CombatState.Phase.FIGHT:
-		hud.show_fighter(f, state.turn_number, is_ai(f))
-		hud.show_spells(state, selected_spell, is_ai(f))
+		hud.show_combat(state, selected_spell, is_ai(f))
 	_refresh_highlights(forced_hover)
 
 
@@ -276,6 +275,8 @@ func _refresh_highlights(forced_hover: Vector2i = Vector2i(-1, -1)) -> void:
 		board.set_layers(layers, hover)
 		return
 
+	if busy or state.is_over or not selected_spell:
+		_show_previews([])
 	if busy or state.is_over:
 		board.set_layers(layers, Vector2i(-1, -1))
 		return
@@ -295,12 +296,22 @@ func _refresh_highlights(forced_hover: Vector2i = Vector2i(-1, -1)) -> void:
 		var castable := state.can_cast_at(selected_spell, hover)
 		if castable:
 			layers.append(BoardView.layer(selected_spell.affected_cells(hover), BoardView.COLOR_AREA, 6.0))
+		_show_previews(state.preview_cast(selected_spell, hover) if castable else [])
 		board.set_layers(layers, hover, BoardView.COLOR_HOVER if castable else Color(1, 0.3, 0.3, 0.8))
 	else:
 		layers.append(BoardView.layer(state.reachable_for_active().keys(), BoardView.COLOR_REACHABLE))
 		if not is_ai(state.active_fighter()):
 			layers.append(BoardView.layer(state.path_for_active(hover), BoardView.COLOR_PATH, 6.0))
 		board.set_layers(layers, hover)
+
+
+## Aperçu des dégâts / soins sur la barre de PV des personnages touchés par le sort visé.
+func _show_previews(previews: Array) -> void:
+	var by_id: Dictionary = {}
+	for p in previews:
+		by_id[p.fighter.id] = p
+	for id in fighter_views:
+		fighter_views[id].set_preview(by_id.get(id, {}))
 
 
 func _set_busy(value: bool) -> void:

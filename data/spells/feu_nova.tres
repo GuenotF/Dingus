@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="SpellData" format=3]
 
 [ext_resource type="Script" path="res://scripts/core/effect_data.gd" id="1_i3452"]
+[ext_resource type="Texture2D" path="res://assets/ui/spells/feu_nova.svg" id="2_vv1uv"]
 [ext_resource type="Resource" path="res://data/effects/fire_zone.tres" id="2_wun8c"]
 [ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="3_vv1uv"]
 
@@ -26,6 +27,7 @@ needs_line_of_sight = false
 area = 1
 affects_caster = false
 effects = Array[ExtResource("1_i3452")]([SubResource("Resource_oii1h"), SubResource("Resource_7uu8w")])
+icon = ExtResource("2_vv1uv")
 impact = ExtResource("2_wun8c")
 casts_per_turn = 1
 cooldown = 2

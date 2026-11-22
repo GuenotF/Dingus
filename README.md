@@ -23,6 +23,12 @@ Le jeu s'ouvre en fenêtre maximisée et tout s'agrandit avec la fenêtre. Sous 
 un cercle à la couleur de son équipe (rouge : joueur 1, bleu : joueur 2) ; un cercle jaune en plus
 indique le personnage qui joue.
 
+**Interface de combat** : en bas, l'orbe de PV, les PA (étoile bleue) et PM (pas verts) du personnage
+qui joue, ses sorts et « Fin du tour ». Chaque case de sort montre son coût (pastille bleue, rouge si
+PA insuffisants), les lancers restants (points) et la recharge (chiffre sur fond sombre) ; une infobulle
+détaille le sort au survol. En haut à droite : le tour et l'ordre de jeu. Quand un sort vise un
+personnage, sa barre de PV montre la part que le sort peut retirer et les dégâts prévus (« K.O. » si létal).
+
 Le menu permet de choisir la classe de chaque joueur et s'il est contrôlé par un humain
 ou par l'IA (2 joueurs sur le même écran, contre l'IA, ou IA contre IA pour regarder).
 
@@ -80,6 +86,8 @@ godot --headless --path . -s res://tests/test_core.gd
 Dans le panneau FileSystem de Godot, duplique un fichier de `data/spells/` et modifie-le
 dans l'inspecteur : coût, portée, ligne de vue, zone, recharge, et surtout la liste
 **Effets** (dégâts, soin, poussée, attraction, bond, bonus/malus de PA ou PM).
+Son **icône** (champ `icon`, groupe Visuel) : un SVG blanc sur fond transparent dans `assets/ui/spells/`
+(sans icône, la case affiche les deux premières lettres du nom).
 Ajoute-le ensuite à la liste `spells` d'une classe dans `data/classes/`.
 
 Pour une nouvelle classe : duplique un fichier de `data/classes/` et ajoute son chemin

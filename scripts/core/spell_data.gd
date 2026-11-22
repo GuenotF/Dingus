@@ -28,6 +28,8 @@ enum TargetRule {
 @export_group("Effets")
 @export var effects: Array[EffectData] = []
 @export_group("Visuel")
+## Icône de la barre de sorts (SVG ou image, dessinée en clair sur fond sombre).
+@export var icon: Texture2D
 ## Projectile lancé vers la cible (EffectAnimation, optionnel).
 @export var projectile: Resource
 ## Effet joué sur la case ciblée au moment de l'impact (EffectAnimation, optionnel).

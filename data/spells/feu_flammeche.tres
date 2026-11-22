@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/core/effect_data.gd" id="1_oihp2"]
 [ext_resource type="Resource" path="res://data/effects/fire_bolt.tres" id="2_fsuth"]
+[ext_resource type="Texture2D" path="res://assets/ui/spells/feu_flammeche.svg" id="2_rnkk7"]
 [ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="3_rnkk7"]
 
 [sub_resource type="Resource" id="Resource_4srsn"]
@@ -15,6 +16,7 @@ pa_cost = 2
 animation = "attack2"
 range_max = 5
 effects = Array[ExtResource("1_oihp2")]([SubResource("Resource_4srsn")])
+icon = ExtResource("2_rnkk7")
 projectile = ExtResource("2_fsuth")
 cast_delay = 0.25
 casts_per_turn = 3

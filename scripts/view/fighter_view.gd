@@ -26,6 +26,8 @@ var _ground_marker := Node2D.new()
 var _sprite: AnimatedSprite2D
 var _sprites: CharacterSprites
 var _dead := false
+## Aperçu du sort visé sur ce personnage (voir CombatState.preview_cast), vide sinon.
+var _preview: Dictionary = {}
 
 
 func setup(p_fighter: Fighter) -> void:
@@ -61,6 +63,14 @@ func refresh() -> void:
 	_body.queue_redraw()
 	if _sprite:
 		_body.get_node("Labels").queue_redraw()
+
+
+## Affiche (ou efface, avec {}) l'aperçu des dégâts / soins du sort visé.
+func set_preview(preview: Dictionary) -> void:
+	if preview == _preview:
+		return
+	_preview = preview
+	refresh()
 
 
 func has_sprite() -> bool:
@@ -231,7 +241,20 @@ func _draw_labels(canvas: CanvasItem) -> void:
 	var ratio := float(fighter.hp) / float(fighter.max_hp)
 	canvas.draw_rect(Rect2(bar_pos - Vector2(1, 1), BAR_SIZE + Vector2(2, 2)), Color(0, 0, 0, 0.7))
 	var bar_color := Color("5bd16a") if ratio > 0.5 else (Color("e8c547") if ratio > 0.25 else Color("e0574f"))
-	canvas.draw_rect(Rect2(bar_pos, Vector2(BAR_SIZE.x * ratio, BAR_SIZE.y)), bar_color)
+	var dmg_min: int = _preview.get("damage_min", 0)
+	var dmg_max: int = _preview.get("damage_max", 0)
+	var heal_max: int = _preview.get("heal_max", 0)
+	if dmg_max > 0:
+		# Part claire = ce que le sort peut retirer ; le reste = PV restants au pire.
+		var after := clampf(float(fighter.hp - dmg_max) / float(fighter.max_hp), 0.0, 1.0)
+		canvas.draw_rect(Rect2(bar_pos, Vector2(BAR_SIZE.x * ratio, BAR_SIZE.y)), Color("f2c9c4"))
+		canvas.draw_rect(Rect2(bar_pos, Vector2(BAR_SIZE.x * after, BAR_SIZE.y)), bar_color)
+	elif heal_max > 0:
+		var healed := clampf(float(fighter.hp + heal_max) / float(fighter.max_hp), 0.0, 1.0)
+		canvas.draw_rect(Rect2(bar_pos, Vector2(BAR_SIZE.x * healed, BAR_SIZE.y)), Color("b9f0c3"))
+		canvas.draw_rect(Rect2(bar_pos, Vector2(BAR_SIZE.x * ratio, BAR_SIZE.y)), bar_color)
+	else:
+		canvas.draw_rect(Rect2(bar_pos, Vector2(BAR_SIZE.x * ratio, BAR_SIZE.y)), bar_color)
 	if _sprite:
 		canvas.draw_rect(Rect2(bar_pos + Vector2(0, BAR_SIZE.y + 1), Vector2(BAR_SIZE.x, 2)), team_color)
 
@@ -252,3 +275,24 @@ func _draw_labels(canvas: CanvasItem) -> void:
 		canvas.draw_rect(rect, Color(0, 0, 0, 0.7))
 		canvas.draw_string(font, Vector2(-tsize.x * 0.5, y), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, col)
 		y -= 18.0
+
+	# Aperçu du sort visé : dégâts possibles (ou K.O.), soin
+	var preview_text := ""
+	var preview_color := Color("f08a6a")
+	if dmg_max > 0:
+		if dmg_min >= fighter.hp:
+			preview_text = "K.O."
+			preview_color = Color("ff5a4f")
+		else:
+			preview_text = ("−%d" % dmg_min if dmg_min == dmg_max else "−%d à −%d" % [dmg_min, dmg_max])
+			if dmg_max >= fighter.hp:
+				preview_text += "  (K.O. possible)"
+	elif heal_max > 0:
+		var heal_min: int = _preview.get("heal_min", 0)
+		preview_text = "+%d" % heal_min if heal_min == heal_max else "+%d à +%d" % [heal_min, heal_max]
+		preview_color = Color("7be08a")
+	if preview_text != "":
+		var psize := font.get_string_size(preview_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16)
+		var ppos := Vector2(-psize.x * 0.5, y - 2)
+		canvas.draw_string_outline(font, ppos, preview_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, 4, Color(0, 0, 0, 0.85))
+		canvas.draw_string(font, ppos, preview_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, preview_color)
