@@ -300,6 +300,6 @@ class FighterChip extends Control:
 		draw_rect(bar, Color("2a2e37"))
 		var ratio := clampf(float(fighter.hp) / float(fighter.max_hp), 0.0, 1.0)
 		draw_rect(Rect2(bar.position, Vector2(bar.size.x * ratio, bar.size.y)), HudWidgets.TEAM_COLORS[0].lerp(HudWidgets.HP, 0.3))
-		HudWidgets.draw_text_centered(self, Vector2(size.x * 0.5, 72), str(fighter.hp) if alive else "K.O.", 11, HudWidgets.TEXT_DIM)
+		HudWidgets.draw_text_centered(self, Vector2(size.x * 0.5, 72), "%d/%d" % [fighter.hp, fighter.max_hp] if alive else "K.O.", 11, HudWidgets.TEXT_DIM)
 		if not alive:
 			draw_rect(Rect2(Vector2.ZERO, size), Color(0, 0, 0, 0.45))

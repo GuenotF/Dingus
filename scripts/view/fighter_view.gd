@@ -268,15 +268,21 @@ func _draw_labels(canvas: CanvasItem) -> void:
 	if _sprite:
 		canvas.draw_rect(Rect2(bar_pos + Vector2(0, BAR_SIZE.y + 1), Vector2(BAR_SIZE.x, 2)), team_color)
 
-	# Nom + PV
-	var label := "%s  %d" % [fighter.display_name, fighter.hp] if _hovered else fighter.display_name
+	# Pastille de PV (au survol seulement) : entre le nom et la barre de vie
+	var shift := 0.0
+	if _hovered:
+		_draw_hp_pill(canvas, font, top - 30.0, bar_color)
+		shift = 20.0
+
+	# Nom
+	var label := fighter.display_name
 	var size := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13)
-	var name_pos := Vector2(-size.x * 0.5, top - 17)
+	var name_pos := Vector2(-size.x * 0.5, top - 17 - shift)
 	canvas.draw_string_outline(font, name_pos, label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, 3, Color(0, 0, 0, 0.8))
 	canvas.draw_string(font, name_pos, label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color.WHITE)
 
 	# Statuts (bonus en vert, malus en orange) au-dessus du nom
-	var y := top - 35
+	var y := top - 35 - shift
 	for s in fighter.statuses:
 		var text := s.label()
 		var tsize := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12)
@@ -306,3 +312,32 @@ func _draw_labels(canvas: CanvasItem) -> void:
 		var ppos := Vector2(-psize.x * 0.5, y - 2)
 		canvas.draw_string_outline(font, ppos, preview_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, 4, Color(0, 0, 0, 0.85))
 		canvas.draw_string(font, ppos, preview_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, preview_color)
+
+
+## Pastille « ♥ PV / PV max » : fond sombre arrondi, liseré de la couleur de la barre.
+## `top` est le haut de la pastille (hauteur 16), centrée sur le personnage.
+func _draw_hp_pill(canvas: CanvasItem, font: Font, top: float, accent: Color) -> void:
+	var current := str(fighter.hp)
+	var maximum := " / %d" % fighter.max_hp
+	var fs := 12
+	var w_cur := font.get_string_size(current, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+	var w_max := font.get_string_size(maximum, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+	var heart := 10.0
+	var width := heart + 5.0 + w_cur + w_max + 14.0
+	var rect := Rect2(Vector2(-width * 0.5, top), Vector2(width, 16))
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.07, 0.08, 0.1, 0.88)
+	sb.border_color = accent.darkened(0.15)
+	sb.set_border_width_all(1)
+	sb.set_corner_radius_all(8)
+	canvas.draw_style_box(sb, rect)
+	# Petit cœur
+	var hc := Vector2(rect.position.x + 7.0 + heart * 0.5, top + 8.0)
+	canvas.draw_circle(hc + Vector2(-2.2, -1.5), 2.8, accent)
+	canvas.draw_circle(hc + Vector2(2.2, -1.5), 2.8, accent)
+	canvas.draw_colored_polygon(PackedVector2Array([hc + Vector2(-4.9, -0.5), hc + Vector2(4.9, -0.5), hc + Vector2(0, 4.6)]), accent)
+	# Chiffres : PV actuels en clair, PV max en gris
+	var x := rect.position.x + 7.0 + heart + 5.0
+	var baseline := top + 12.0
+	canvas.draw_string(font, Vector2(x, baseline), current, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, accent.lightened(0.55))
+	canvas.draw_string(font, Vector2(x + w_cur, baseline), maximum, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color("a99f8a"))
