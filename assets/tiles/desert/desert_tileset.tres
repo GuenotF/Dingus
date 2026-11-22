@@ -1,0 +1,99 @@
+[gd_resource type="TileSet" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/tiles/desert/desert_tiles.png" id="1_8q5xl"]
+[ext_resource type="Texture2D" path="res://assets/tiles/desert/placement_markers.png" id="2_dmbw4"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_jnpup"]
+resource_name = "Désert"
+texture = ExtResource("1_8q5xl")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/texture_origin = Vector2i(0, 40)
+1:0/0 = 0
+1:0/0/texture_origin = Vector2i(0, 40)
+1:0/0/custom_data_2 = true
+2:0/0 = 0
+2:0/0/texture_origin = Vector2i(0, 40)
+3:0/0 = 0
+3:0/0/texture_origin = Vector2i(0, 40)
+4:0/0 = 0
+4:0/0/texture_origin = Vector2i(0, 40)
+5:0/0 = 0
+5:0/0/texture_origin = Vector2i(0, 40)
+6:0/0 = 0
+6:0/0/texture_origin = Vector2i(0, 40)
+7:0/0 = 0
+7:0/0/texture_origin = Vector2i(0, 40)
+0:1/0 = 0
+0:1/0/texture_origin = Vector2i(0, 40)
+1:1/0 = 0
+1:1/0/texture_origin = Vector2i(0, 40)
+2:1/0 = 0
+2:1/0/texture_origin = Vector2i(0, 40)
+3:1/0 = 0
+3:1/0/texture_origin = Vector2i(0, 40)
+4:1/0 = 0
+4:1/0/texture_origin = Vector2i(0, 40)
+5:1/0 = 0
+5:1/0/texture_origin = Vector2i(0, 40)
+6:1/0 = 0
+6:1/0/texture_origin = Vector2i(0, 40)
+7:1/0 = 0
+7:1/0/texture_origin = Vector2i(0, 40)
+0:2/0 = 0
+0:2/0/texture_origin = Vector2i(0, 40)
+0:2/0/custom_data_0 = true
+1:2/0 = 0
+1:2/0/texture_origin = Vector2i(0, 40)
+1:2/0/custom_data_0 = true
+2:2/0 = 0
+2:2/0/texture_origin = Vector2i(0, 40)
+2:2/0/custom_data_0 = true
+3:2/0 = 0
+3:2/0/texture_origin = Vector2i(0, 40)
+3:2/0/custom_data_0 = true
+4:2/0 = 0
+4:2/0/texture_origin = Vector2i(0, 40)
+4:2/0/custom_data_0 = true
+5:2/0 = 0
+5:2/0/texture_origin = Vector2i(0, 40)
+5:2/0/custom_data_0 = true
+6:2/0 = 0
+6:2/0/texture_origin = Vector2i(0, 40)
+6:2/0/custom_data_0 = true
+7:2/0 = 0
+7:2/0/texture_origin = Vector2i(0, 40)
+7:2/0/custom_data_0 = true
+0:3/0 = 0
+0:3/0/texture_origin = Vector2i(0, 40)
+0:3/0/custom_data_0 = true
+1:3/0 = 0
+1:3/0/texture_origin = Vector2i(0, 40)
+1:3/0/custom_data_0 = true
+2:3/0 = 0
+2:3/0/texture_origin = Vector2i(0, 40)
+2:3/0/custom_data_0 = true
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_6gvew"]
+resource_name = "Placement"
+texture = ExtResource("2_dmbw4")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/texture_origin = Vector2i(0, 40)
+0:0/0/custom_data_1 = 1
+1:0/0 = 0
+1:0/0/texture_origin = Vector2i(0, 40)
+1:0/0/custom_data_1 = 2
+
+[resource]
+tile_shape = 1
+tile_layout = 5
+tile_size = Vector2i(64, 32)
+custom_data_layer_0/name = "obstacle"
+custom_data_layer_0/type = 1
+custom_data_layer_1/name = "placement_team"
+custom_data_layer_1/type = 2
+custom_data_layer_2/name = "water"
+custom_data_layer_2/type = 1
+sources/0 = SubResource("TileSetAtlasSource_jnpup")
+sources/1 = SubResource("TileSetAtlasSource_6gvew")

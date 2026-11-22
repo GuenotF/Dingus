@@ -131,6 +131,10 @@ Cartes actuelles :
 - **Le lac** (`lac.tscn`) : une rivière coupe le terrain, deux ponts, deux pierres dans l'eau.
 - **Place du village** (`village.tscn`) : place pavée autour d'un puits, étals, charrette, tonneaux,
   clôtures. Tuiles du pack *Fantasy tileset - 2D Isometric* (`assets/tiles/village/`), en rendu lissé.
+- **Ruines du désert** (`desert.tscn`) : allée pavée de 3 cases du nord-ouest au sud-est, sphinx central,
+  colonnes et obélisques, rochers, oasis à l'est (eau animée par `WaterRipples`). Tuiles du pack
+  *2D Desert Fantasy tileset* (`assets/tiles/desert/`), générées par `tools/build_desert_map.gd`
+  (modifier les listes du script puis le relancer : `godot --headless --path . -s res://tools/build_desert_map.gd`).
 
 1. **Ouvrir** une carte de `maps/`, ou la **dupliquer** (clic droit → Dupliquer) pour en créer une nouvelle.
    Sur le nœud racine, renseigner `map_name` et `description` (affichés dans le menu).
@@ -161,6 +165,9 @@ La rangée d'eau la plus claire (glace) se traverse.
 
 La carte utilise le tileset isométrique (`assets/tiles/`). Les combattants utilisent un **sprite animé**
 si leur classe en a un (champ `sprites` de la classe), sinon un pion temporaire.
+
+L'eau de l'oasis est animée par le nœud `WaterRipples` (`scripts/map/water_ripples.gd`, purement visuel) :
+à ajouter comme enfant d'une carte avec une planche d'images en `sheet`.
 
 Actuellement : le **Guerrier** utilise le pack *2D HD Character Knight* (`assets/characters/knight/`),
 le **Mage de feu**, l'**Archer** et le **Chevalier maudit** le pack *2D HD Character pack 1* (`assets/characters/wizard/`, `assets/characters/archer/`, `assets/characters/chevalier/`).
