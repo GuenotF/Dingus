@@ -59,6 +59,11 @@ func is_ai(fighter: Fighter) -> bool:
 func _build_scene() -> void:
 	RenderingServer.set_default_clear_color(Color("1d2128"))
 
+	# Fond : dégradé teinté par la carte, socle sous le plateau, particules d'ambiance.
+	var background := BackgroundView.new()
+	add_child(background)
+	background.setup(state.grid, map)
+
 	# Carte : les tuiles sont alignées sur la grille du jeu (centre de la case (0, 0) en (0, 0)).
 	add_child(map)
 	map.position = -map.ground().map_to_local(Vector2i.ZERO) * map.scale

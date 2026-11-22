@@ -26,6 +26,11 @@ const PLACEMENT_TEAM := "placement_team"
 ## Courte description affichée dans le menu.
 @export_multiline var description: String = ""
 
+## Ambiance du fond d'écran (voir BackgroundView) : teinte de base du dégradé...
+@export var background_color: Color = Color("232830")
+## ... et particules qui dérivent derrière la carte.
+@export_enum("aucune", "sable", "pollen", "lucioles") var ambiance: String = "aucune"
+
 
 func ground() -> TileMapLayer:
 	return get_node("Sol")
