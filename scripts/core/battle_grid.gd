@@ -74,14 +74,11 @@ static func distance(a: Vector2i, b: Vector2i) -> int:
 	return absi(a.x - b.x) + absi(a.y - b.y)
 
 
-## Ligne de vue entre deux cases. Les obstacles et les cases de `blockers` coupent la vue ;
-## les extrémités ne comptent pas. Symétrique : on accepte si le tracé est libre dans un sens
-## ou dans l'autre (Bresenham peut différer selon le sens sur les diagonales parfaites).
+## Ligne de vue stricte (façon Dofus) : on trace le segment entre les centres des deux cases.
+## Toute case que le segment touche, même en passant exactement par un coin, doit être libre.
+## Les obstacles et les cases de `blockers` coupent la vue ; les extrémités ne comptent pas.
+## Symétrique par construction.
 func has_line_of_sight(from: Vector2i, to: Vector2i, blockers: Array[Vector2i] = []) -> bool:
-	return _ray_is_clear(from, to, blockers) or _ray_is_clear(to, from, blockers)
-
-
-func _ray_is_clear(from: Vector2i, to: Vector2i, blockers: Array[Vector2i]) -> bool:
 	for cell in line_cells(from, to):
 		if cell == from or cell == to:
 			continue
@@ -90,26 +87,34 @@ func _ray_is_clear(from: Vector2i, to: Vector2i, blockers: Array[Vector2i]) -> b
 	return true
 
 
-## Cases traversées par une ligne de Bresenham, extrémités comprises.
+## Toutes les cases touchées par le segment entre les centres (« supercover »),
+## extrémités comprises. Quand le segment passe exactement par un coin,
+## les deux cases qui partagent ce coin sont incluses.
 static func line_cells(from: Vector2i, to: Vector2i) -> Array[Vector2i]:
-	var cells: Array[Vector2i] = []
-	var dx := absi(to.x - from.x)
-	var dy := -absi(to.y - from.y)
-	var sx := 1 if from.x < to.x else -1
-	var sy := 1 if from.y < to.y else -1
-	var err := dx + dy
+	var cells: Array[Vector2i] = [from]
+	var nx := absi(to.x - from.x)
+	var ny := absi(to.y - from.y)
+	var sx := signi(to.x - from.x)
+	var sy := signi(to.y - from.y)
 	var current := from
-	while true:
-		cells.append(current)
-		if current == to:
-			break
-		var e2 := 2 * err
-		if e2 >= dy:
-			err += dy
+	var ix := 0
+	var iy := 0
+	while ix < nx or iy < ny:
+		var decision := (1 + 2 * ix) * ny - (1 + 2 * iy) * nx
+		if decision == 0:
+			# Passage exact par un coin : les deux voisines sont touchées.
+			cells.append(current + Vector2i(sx, 0))
+			cells.append(current + Vector2i(0, sy))
+			current += Vector2i(sx, sy)
+			ix += 1
+			iy += 1
+		elif decision < 0:
 			current.x += sx
-		if e2 <= dx:
-			err += dx
+			ix += 1
+		else:
 			current.y += sy
+			iy += 1
+		cells.append(current)
 	return cells
 
 
