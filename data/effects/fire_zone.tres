@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EffectAnimation" format=3]
+
+[ext_resource type="Script" path="res://scripts/view/effect_animation.gd" id="1_kvsga"]
+[ext_resource type="Texture2D" path="res://assets/effects/fire/fire_aoe.png" id="2_owi07"]
+
+[resource]
+script = ExtResource("1_kvsga")
+texture = ExtResource("2_owi07")
+origin = Vector2(128, 130)
+scale = Vector2(0.82, 0.58)
+on_ground = true

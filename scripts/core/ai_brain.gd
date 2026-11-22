@@ -58,7 +58,7 @@ static func score_cast(state: CombatState, me: Fighter, origin: Vector2i, spell:
 	var victims: Array[Fighter] = []
 	for cell in spell.affected_cells(target):
 		var v := state.fighter_at_from(cell, me, origin)
-		if v != null:
+		if v != null and (spell.affects_caster or v != me):
 			victims.append(v)
 
 	var score := 0.0
@@ -117,6 +117,10 @@ static func position_score(state: CombatState, me: Fighter, cell: Vector2i) -> f
 	if pref > 1:
 		if d <= 1:
 			score -= 6.0 # un personnage à distance fuit le corps à corps
+		# Ne pas finir à portée de déplacement d'un ennemi (il arriverait au contact au tour suivant).
+		for e in state.enemies_of(me):
+			if BattleGrid.distance(cell, e.cell) <= e.max_pm + 1:
+				score -= 4.0
 		# Ne pas se laisser coincer : on pénalise les cases avec peu d'issues.
 		var exits := 0
 		for dir in BattleGrid.DIRECTIONS:

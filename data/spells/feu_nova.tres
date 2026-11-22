@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="SpellData" format=3]
+
+[ext_resource type="Script" path="res://scripts/core/effect_data.gd" id="1_i3452"]
+[ext_resource type="Resource" path="res://data/effects/fire_zone.tres" id="2_wun8c"]
+[ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="3_vv1uv"]
+
+[sub_resource type="Resource" id="Resource_oii1h"]
+script = ExtResource("1_i3452")
+min_value = 12
+max_value = 15
+
+[sub_resource type="Resource" id="Resource_7uu8w"]
+script = ExtResource("1_i3452")
+kind = 2
+min_value = 2
+max_value = 2
+
+[resource]
+script = ExtResource("3_vv1uv")
+spell_name = "Nova de flammes"
+pa_cost = 4
+animation = "special1"
+range_min = 0
+range_max = 0
+needs_line_of_sight = false
+area = 1
+affects_caster = false
+effects = Array[ExtResource("1_i3452")]([SubResource("Resource_oii1h"), SubResource("Resource_7uu8w")])
+impact = ExtResource("2_wun8c")
+casts_per_turn = 1
+cooldown = 2

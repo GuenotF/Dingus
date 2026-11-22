@@ -17,6 +17,10 @@ var fighter_views: Dictionary = {} # Fighter.id -> FighterView
 var selected_spell: SpellData = null
 var busy := false # vrai pendant une animation : on ignore les entrées
 var placing_index := 0 # combattant en cours de placement
+## Pendant qu'un projectile vole, les conséquences du sort (dégâts, poussées, mort...)
+## sont mises en attente et jouées à l'impact.
+var _deferring := false
+var _deferred: Array[Callable] = []
 
 
 func _ready() -> void:
@@ -68,6 +72,7 @@ func _build_scene() -> void:
 	# Décor et personnages dans le même conteneur trié par Y : la profondeur est automatique.
 	entities = Node2D.new()
 	entities.y_sort_enabled = true
+	entities.z_index = 2 # au-dessus des effets au sol (EffectView.Z_GROUND)
 	add_child(entities)
 
 	var decor := map.decor()
@@ -329,14 +334,46 @@ func _on_fighter_moved(fighter: Fighter, path: Array[Vector2i]) -> void:
 
 
 func _on_spell_cast(caster: Fighter, spell: SpellData, target: Vector2i, cells: Array[Vector2i]) -> void:
-	fighter_views[caster.id].play_cast(spell.animation, target)
-	board.flash(cells)
+	var caster_view: FighterView = fighter_views[caster.id]
+	caster_view.play_cast(spell.animation, target)
 	_set_busy(true)
-	await get_tree().create_timer(0.5).timeout
+	if spell.projectile is EffectAnimation or spell.impact is EffectAnimation:
+		_deferring = true
+		await get_tree().create_timer(spell.cast_delay).timeout
+		if spell.projectile is EffectAnimation:
+			var from := caster_view.position + Vector2(0, -40)
+			var to := Iso.cell_to_world(target) + Vector2(0, -28)
+			var fx := EffectView.projectile(self, spell.projectile, from, to)
+			await fx.arrived
+		if spell.impact is EffectAnimation:
+			EffectView.impact(self, spell.impact, Iso.cell_to_world(target))
+		board.flash(cells)
+		_flush_deferred()
+		await get_tree().create_timer(0.45).timeout
+	else:
+		board.flash(cells)
+		await get_tree().create_timer(0.5).timeout
 	_set_busy(false)
 
 
+## Met une conséquence de sort en attente si un projectile est en vol. Renvoie true si mise en attente.
+func _defer(action: Callable) -> bool:
+	if _deferring:
+		_deferred.append(action)
+	return _deferring
+
+
+func _flush_deferred() -> void:
+	_deferring = false
+	var actions := _deferred.duplicate()
+	_deferred.clear()
+	for action in actions:
+		action.call()
+
+
 func _on_fighter_damaged(fighter: Fighter, amount: int) -> void:
+	if _defer(_on_fighter_damaged.bind(fighter, amount)):
+		return
 	var view: FighterView = fighter_views[fighter.id]
 	var caster := state.active_fighter()
 	view.play_hit(Iso.cell_to_world(caster.cell) if caster != fighter else view.position + Vector2(0, -1))
@@ -344,12 +381,16 @@ func _on_fighter_damaged(fighter: Fighter, amount: int) -> void:
 
 
 func _on_fighter_healed(fighter: Fighter, amount: int) -> void:
+	if _defer(_on_fighter_healed.bind(fighter, amount)):
+		return
 	var view: FighterView = fighter_views[fighter.id]
 	view.play_heal()
 	FloatingText.spawn(self, view.text_anchor(), "+%d" % amount, Color("6be07a"))
 
 
 func _on_fighter_displaced(fighter: Fighter, _from: Vector2i, to: Vector2i) -> void:
+	if _defer(_on_fighter_displaced.bind(fighter, _from, to)):
+		return
 	# Le lanceur qui se déplace lui-même = bond ; sinon poussée / attraction.
 	fighter_views[fighter.id].play_slide(to, fighter == state.active_fighter())
 
@@ -359,10 +400,14 @@ func _on_status_changed(fighter: Fighter) -> void:
 
 
 func _on_fighter_died(fighter: Fighter) -> void:
+	if _defer(_on_fighter_died.bind(fighter)):
+		return
 	fighter_views[fighter.id].play_death()
 
 
 func _on_combat_ended(winner_team: int) -> void:
+	if _defer(_on_combat_ended.bind(winner_team)):
+		return
 	var winner_name := ""
 	for f in state.fighters:
 		if f.team == winner_team:

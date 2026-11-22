@@ -23,8 +23,17 @@ enum TargetRule {
 @export_group("Zone")
 @export var area: AreaShape = AreaShape.SINGLE
 @export_range(1, 5) var area_size: int = 1
+## false : le lanceur n'est jamais touché par sa propre zone (ex. Nova autour de soi).
+@export var affects_caster: bool = true
 @export_group("Effets")
 @export var effects: Array[EffectData] = []
+@export_group("Visuel")
+## Projectile lancé vers la cible (EffectAnimation, optionnel).
+@export var projectile: Resource
+## Effet joué sur la case ciblée au moment de l'impact (EffectAnimation, optionnel).
+@export var impact: Resource
+## Délai (s) entre le début de l'animation du lanceur et le départ du projectile / l'impact.
+@export var cast_delay: float = 0.3
 @export_group("Limites")
 @export_range(1, 10) var casts_per_turn: int = 2
 ## Nombre de tours avant de pouvoir relancer (0 = pas de recharge).
@@ -52,7 +61,7 @@ func describe() -> String:
 	for e in effects:
 		parts.append(e.describe())
 	if area == AreaShape.CROSS:
-		parts.append("zone en croix")
+		parts.append("zone en croix" if affects_caster or range_max > 0 else "autour de soi")
 	if line_only:
 		parts.append("en ligne")
 	if not needs_line_of_sight and range_max > 0:

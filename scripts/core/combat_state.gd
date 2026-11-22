@@ -241,7 +241,7 @@ func try_cast(spell: SpellData, target: Vector2i) -> bool:
 	var victims: Array[Fighter] = []
 	for cell in cells:
 		var v := fighter_at(cell)
-		if v != null:
+		if v != null and (spell.affects_caster or v != caster):
 			victims.append(v)
 
 	for effect in spell.effects:

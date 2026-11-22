@@ -3,7 +3,7 @@ extends Node
 
 const CLASS_PATHS: Array[String] = [
 	"res://data/classes/guerrier.tres",
-	"res://data/classes/druide.tres",
+	"res://data/classes/mage_feu.tres",
 ]
 
 ## Carte de combat (scène dessinée dans l'éditeur, voir scripts/map/battle_map.gd).

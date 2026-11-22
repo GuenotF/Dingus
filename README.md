@@ -25,8 +25,11 @@ ou par l'IA (2 joueurs sur le même écran, contre l'IA, ou IA contre IA pour re
 
 | Classe | PV | PA | PM | Sorts |
 |---|---|---|---|---|
-| Guerrier | 105 | 6 | 3 | Coup d'épée, Charge (bond), Repousser (poussée 2), Cri (+1 PM) |
-| Druide | 105 | 6 | 4 | Épine, Ronces (zone, −2 PM), Attirer (attraction 2), Soin |
+| Guerrier | 150 | 6 | 3 | Coup d'épée, Charge (bond), Repousser (poussée 2), Cri (+1 PM) |
+| Mage de feu | 135 | 6 | 4 | Flammèche, Boule de feu, Pluie de feu (zone sans ligne de vue), Nova de flammes (autour de soi, repousse) |
+
+Créer un nouveau personnage : voir [docs/creation_personnage.md](docs/creation_personnage.md)
+(checklist, étapes, critères d'équilibrage, modèle de fiche).
 
 Une poussée bloquée par un obstacle, un pion ou le bord inflige 8 dégâts par case
 non parcourue. Les bonus et malus s'affichent au-dessus du pion avec leur durée.
@@ -81,9 +84,9 @@ dans `CLASS_PATHS` (`scripts/game_config.gd`).
 ```
 godot --headless --path . -s res://tests/simulate_balance.gd
 ```
-Simule 80 combats IA contre IA sur **chaque carte** (placements aléatoires) et affiche les victoires
-de chaque classe (Guerrier / Druide). Actuellement : Prairie ≈ 35 / 45, Le lac ≈ 24 / 56
-(la rivière avantage le personnage à distance).
+Simule 80 combats IA contre IA pour **chaque paire de personnages** sur **chaque carte** et affiche
+victoires, durée moyenne et avantage du premier joueur. Actuellement, Guerrier / Mage de feu :
+Prairie 52 / 47 %, Le lac 53 / 46 %, environ 6 tours.
 
 ## Dessiner une carte
 

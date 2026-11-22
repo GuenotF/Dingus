@@ -28,6 +28,7 @@ func _init() -> void:
 	_test_demo_map()
 	_test_water_rules()
 	_test_lake_map()
+	_test_spell_not_affecting_caster()
 	print("Tests terminés : %s" % ("OK" if _failures == 0 else "%d échec(s)" % _failures))
 	quit(1 if _failures > 0 else 0)
 
@@ -291,19 +292,32 @@ func _test_placement() -> void:
 
 
 func _test_class_data_files() -> void:
-	for path in ["res://data/classes/guerrier.tres", "res://data/classes/druide.tres"]:
+	# Chaque personnage de data/classes doit être complet (checklist de création de personnage).
+	for file in DirAccess.get_files_at("res://data/classes"):
+		var path := "res://data/classes/" + file.trim_suffix(".remap")
+		if not path.ends_with(".tres"):
+			continue
 		var c: ClassData = load(path)
-		_check(c != null and c.spells.size() == 4, "%s : 4 sorts" % path)
-		if c:
-			for s in c.spells:
-				_check(s != null and not s.effects.is_empty(), "%s : sort avec effets" % path)
+		_check(c != null and c.spells.size() == 4, "%s : 4 sorts" % file)
+		if c == null:
+			continue
+		_check(c.max_hp > 0 and c.max_pa > 0 and c.max_pm > 0, "%s : stats PV/PA/PM" % file)
+		var sprites := c.sprites as CharacterSprites
+		_check(sprites != null, "%s : a un skin (sprites)" % file)
+		for base in ["idle", "walk", "hit", "die"]:
+			_check(sprites != null and sprites.has_animation(base), "%s : animation %s" % [file, base])
+		for s in c.spells:
+			_check(s != null and not s.effects.is_empty(), "%s : %s a des effets" % [file, s.spell_name])
+			_check(sprites != null and sprites.has_animation(s.animation), "%s : animation « %s » du sort %s" % [file, s.animation, s.spell_name])
+			_check(s.projectile == null or s.projectile is EffectAnimation, "%s : projectile valide (%s)" % [file, s.spell_name])
+			_check(s.impact == null or s.impact is EffectAnimation, "%s : impact valide (%s)" % [file, s.spell_name])
 
 
 func _class_duel(a_cell: Vector2i, b_cell: Vector2i, rng_seed: int) -> CombatState:
 	var grid := BattleGrid.new(MapLayouts.TEST_SIZE.x, MapLayouts.TEST_SIZE.y, MapLayouts.TEST_OBSTACLES)
 	var state := CombatState.new(grid, rng_seed)
 	state.add_fighter(Fighter.new(0, "G", 0, a_cell, load("res://data/classes/guerrier.tres")))
-	state.add_fighter(Fighter.new(1, "D", 1, b_cell, load("res://data/classes/druide.tres")))
+	state.add_fighter(Fighter.new(1, "M", 1, b_cell, load("res://data/classes/mage_feu.tres")))
 	state.start()
 	return state
 
@@ -429,3 +443,21 @@ func _test_lake_map() -> void:
 	map.free()
 	var all_maps := DirAccess.get_files_at("res://maps")
 	_check(all_maps.has("demo.tscn") and all_maps.has("lac.tscn"), "les deux cartes sont dans maps/")
+
+
+
+func _test_spell_not_affecting_caster() -> void:
+	# Nova de flammes : zone en croix autour du lanceur, sans le toucher, et repousse de 1.
+	var nova: SpellData = load("res://data/spells/feu_nova.tres")
+	var state := CombatState.new(BattleGrid.new(7, 7), 9)
+	var mage := Fighter.new(0, "M", 0, Vector2i(3, 3))
+	var foe := Fighter.new(1, "G", 1, Vector2i(4, 3))
+	mage.spells = [nova]
+	state.add_fighter(mage)
+	state.add_fighter(foe)
+	state.start()
+	_check(state.cells_in_range(nova).keys() == [Vector2i(3, 3)], "nova : se lance sur sa propre case")
+	_check(state.try_cast(nova, mage.cell), "nova lancée")
+	_check(mage.hp == 100, "nova : le lanceur n'est pas touché")
+	var push: int = nova.effects[1].min_value
+	_check(foe.hp <= 100 - nova.effects[0].min_value and foe.cell == Vector2i(4 + push, 3), "nova : l'ennemi adjacent est touché et repoussé")

@@ -16,6 +16,10 @@ Jeu tactique 1v1 au tour par tour en vue isométrique (style Dofus), Godot 4.7, 
   le jeu utilise ses propres copies dans `assets/`.
 - Images en Git classique (pas de Git LFS).
 
+## Créer un personnage
+Suivre `docs/creation_personnage.md` : fiche validée avec l'utilisateur d'abord, puis assets, données,
+code si besoin, captures, équilibrage (critères chiffrés), commit.
+
 ## Architecture (voir README)
 - `scripts/core/` : logique pure (grille, combat, sorts, IA). **Ne dépend jamais de `view/`** :
   elle tournera telle quelle sur un serveur en multijoueur.

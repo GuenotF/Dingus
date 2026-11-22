@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="SpellData" format=3]
+
+[ext_resource type="Script" path="res://scripts/core/effect_data.gd" id="1_qabvr"]
+[ext_resource type="Resource" path="res://data/effects/fire_burst.tres" id="2_2tl1i"]
+[ext_resource type="Resource" path="res://data/effects/fire_ball.tres" id="3_gqbx0"]
+[ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="4_yfwpc"]
+
+[sub_resource type="Resource" id="Resource_siisa"]
+script = ExtResource("1_qabvr")
+min_value = 18
+max_value = 22
+
+[resource]
+script = ExtResource("4_yfwpc")
+spell_name = "Boule de feu"
+pa_cost = 4
+animation = "special2"
+range_min = 3
+range_max = 7
+effects = Array[ExtResource("1_qabvr")]([SubResource("Resource_siisa")])
+projectile = ExtResource("3_gqbx0")
+impact = ExtResource("2_2tl1i")
+cast_delay = 0.35
+casts_per_turn = 1

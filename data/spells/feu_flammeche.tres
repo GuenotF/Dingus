@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SpellData" format=3]
+
+[ext_resource type="Script" path="res://scripts/core/effect_data.gd" id="1_oihp2"]
+[ext_resource type="Resource" path="res://data/effects/fire_bolt.tres" id="2_fsuth"]
+[ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="3_rnkk7"]
+
+[sub_resource type="Resource" id="Resource_4srsn"]
+script = ExtResource("1_oihp2")
+min_value = 8
+
+[resource]
+script = ExtResource("3_rnkk7")
+spell_name = "Flammèche"
+pa_cost = 2
+animation = "attack2"
+range_max = 5
+effects = Array[ExtResource("1_oihp2")]([SubResource("Resource_4srsn")])
+projectile = ExtResource("2_fsuth")
+cast_delay = 0.25
+casts_per_turn = 3
