@@ -26,6 +26,8 @@ func _init() -> void:
 	_test_ai_vs_ai_finishes()
 	_test_range_always_displayed()
 	_test_demo_map()
+	_test_water_rules()
+	_test_lake_map()
 	print("Tests terminés : %s" % ("OK" if _failures == 0 else "%d échec(s)" % _failures))
 	quit(1 if _failures > 0 else 0)
 
@@ -360,3 +362,70 @@ func _test_demo_map() -> void:
 		for cell in zones[team]:
 			_check(grid.is_walkable(cell), "case de placement libre %s" % cell)
 	map.free()
+
+
+func _test_water_rules() -> void:
+	# Rivière verticale en x = 2 sur une grille 6x3.
+	var river: Array[Vector2i] = [Vector2i(2, 0), Vector2i(2, 1), Vector2i(2, 2)]
+	var none: Array[Vector2i] = []
+	var grid := BattleGrid.new(6, 3, none, river)
+	_check(not grid.is_walkable(Vector2i(2, 1)), "eau : infranchissable")
+	_check(grid.find_path(Vector2i(0, 1), Vector2i(4, 1)).is_empty(), "eau : aucun chemin à travers la rivière")
+	_check(not grid.reachable_cells(Vector2i(1, 1), 5).has(Vector2i(3, 1)), "eau : l'autre rive est hors d'atteinte")
+	_check(grid.has_line_of_sight(Vector2i(0, 1), Vector2i(4, 1)), "eau : la ligne de vue passe au-dessus")
+	_check(not grid.is_obstacle(Vector2i(2, 1)), "eau : n'est pas un obstacle")
+
+	var state := CombatState.new(grid, 5)
+	var a := Fighter.new(0, "A", 0, Vector2i(0, 1))
+	var b := Fighter.new(1, "B", 1, Vector2i(4, 1))
+	var arrow := _spell(3, 2, 6, true, 10)
+	var push_fx: Array[EffectData] = [EffectData.make(K.PUSH, 2)]
+	var push := _effect_spell(1, 1, 1, push_fx)
+	var dash_fx: Array[EffectData] = [EffectData.make(K.DASH, 0)]
+	var dash := _effect_spell(1, 2, 3, dash_fx)
+	dash.target_rule = SpellData.TargetRule.EMPTY
+	dash.line_only = true
+	dash.needs_line_of_sight = true
+	a.spells = [arrow, push, dash]
+	state.add_fighter(a)
+	state.add_fighter(b)
+	state.start()
+	_check(state.try_cast(arrow, b.cell) and b.hp == 90, "eau : on tire par-dessus la rivière")
+	_check(not state.cells_in_range(dash).has(Vector2i(2, 1)), "eau : impossible de bondir dans l'eau")
+	_check(state.try_cast(dash, Vector2i(3, 1)) and a.cell == Vector2i(3, 1), "eau : le bond traverse la rivière")
+	# A est maintenant en (3,1), B en (4,1) : on repousse B vers le bord droit (x = 5 libre, puis bord).
+	_check(state.try_cast(push, b.cell) and b.cell == Vector2i(5, 1), "poussée normale sur la rive")
+
+	# Poussée vers l'eau : la cible s'arrête au bord et subit la collision.
+	state = CombatState.new(BattleGrid.new(6, 3, none, river), 5)
+	a = Fighter.new(0, "A", 0, Vector2i(4, 1))
+	b = Fighter.new(1, "B", 1, Vector2i(3, 1))
+	a.spells = [push]
+	state.add_fighter(a)
+	state.add_fighter(b)
+	state.start()
+	state.try_cast(push, b.cell)
+	_check(b.cell == Vector2i(3, 1) and b.hp == 100 - 2 * CombatState.PUSH_DAMAGE_PER_CELL, "eau : poussée bloquée au bord, avec collision")
+
+
+func _test_lake_map() -> void:
+	var map: BattleMap = load("res://maps/lac.tscn").instantiate()
+	var grid := map.build_grid()
+	_check(map.map_name == "Le lac", "carte du lac : nom")
+	_check(grid.get_water().size() == 24, "carte du lac : 24 cases d'eau (obtenu %d)" % grid.get_water().size())
+	var zones := map.placement_zones()
+	for team in 2:
+		for cell in zones[team]:
+			_check(grid.is_walkable(cell), "lac : case de placement praticable %s" % cell)
+	var path := grid.find_path(zones[0][0], zones[1][0])
+	_check(not path.is_empty(), "lac : on peut rejoindre l'autre rive par un pont")
+	var crosses_bridge := false
+	for cell in path:
+		if (cell.x == 7 or cell.x == 8):
+			crosses_bridge = crosses_bridge or cell.y == 3 or cell.y == 11
+	_check(crosses_bridge, "lac : le chemin passe par un pont")
+	_check(grid.has_line_of_sight(Vector2i(5, 7), Vector2i(10, 7)), "lac : on voit par-dessus la rivière")
+	_check(not grid.has_line_of_sight(Vector2i(5, 6), Vector2i(10, 6)), "lac : la pierre dans l'eau coupe la vue")
+	map.free()
+	var all_maps := DirAccess.get_files_at("res://maps")
+	_check(all_maps.has("demo.tscn") and all_maps.has("lac.tscn"), "les deux cartes sont dans maps/")

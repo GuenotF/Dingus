@@ -67,7 +67,7 @@ func _draw() -> void:
 				var color := COLOR_TILE_A if (x + y) % 2 == 0 else COLOR_TILE_B
 				draw_colored_polygon(poly, color)
 				draw_polyline(_closed(poly), COLOR_TILE_EDGE, 1.0, true)
-			elif not grid.is_obstacle(cell):
+			elif not grid.is_obstacle(cell) and not grid.is_water(cell):
 				draw_polyline(_closed(poly), COLOR_GRID_LINE, 1.0, true)
 
 	for l in layers:

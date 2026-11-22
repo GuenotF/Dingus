@@ -200,7 +200,8 @@ func cells_in_range_from(spell: SpellData, caster: Fighter, origin: Vector2i, ap
 				continue
 			if apply_target_rule:
 				var occupant := fighter_at_from(cell, caster, origin)
-				if spell.target_rule == SpellData.TargetRule.EMPTY and occupant != null:
+				# « Case libre » = une case où l'on peut se tenir (ni occupée, ni dans l'eau).
+				if spell.target_rule == SpellData.TargetRule.EMPTY and (occupant != null or grid.is_water(cell)):
 					continue
 				if spell.target_rule == SpellData.TargetRule.FIGHTER and occupant == null:
 					continue

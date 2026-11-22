@@ -9,13 +9,20 @@ extends Node2D
 ##
 ## Règles lues sur les tuiles (données personnalisées du TileSet) :
 ##   obstacle        (bool) la case bloque le déplacement et la ligne de vue.
+##   water           (bool) eau : infranchissable mais ne bloque pas la ligne de vue.
 ##   placement_team  (int)  1 = équipe 1, 2 = équipe 2 (tuiles du calque Placement).
 ## Une case de la grille sans tuile de Sol est considérée comme un obstacle (vide).
 ##
 ## La carte doit commencer en (0, 0) : la grille va de (0, 0) au coin opposé du Sol.
 
 const OBSTACLE := "obstacle"
+const WATER := "water"
 const PLACEMENT_TEAM := "placement_team"
+
+## Nom affiché dans le menu.
+@export var map_name: String = ""
+## Courte description affichée dans le menu.
+@export_multiline var description: String = ""
 
 
 func ground() -> TileMapLayer:
@@ -36,7 +43,7 @@ func grid_size() -> Vector2i:
 
 func build_grid() -> BattleGrid:
 	var size := grid_size()
-	return BattleGrid.new(size.x, size.y, obstacles())
+	return BattleGrid.new(size.x, size.y, obstacles(), water())
 
 
 ## Cases bloquantes : tuile marquée « obstacle » (sol ou décor), ou absence de sol.
@@ -49,6 +56,18 @@ func obstacles() -> Array[Vector2i]:
 			if ground().get_cell_source_id(cell) == -1 \
 					or _is_obstacle(ground(), cell) or _is_obstacle(decor(), cell):
 				result.append(cell)
+	return result
+
+
+## Cases d'eau : tuile de sol marquée « water » (et sans obstacle posé dessus).
+func water() -> Array[Vector2i]:
+	var result: Array[Vector2i] = []
+	var blocked := obstacles()
+	for cell in ground().get_used_cells():
+		var data := ground().get_cell_tile_data(cell)
+		if data != null and data.get_custom_data(WATER) and not blocked.has(cell):
+			result.append(cell)
+	result.sort()
 	return result
 
 

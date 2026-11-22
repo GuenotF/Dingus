@@ -1,6 +1,8 @@
 class_name BattleGrid
 extends RefCounted
-## Logique pure de la grille : dimensions, obstacles, chemins et zone accessible.
+## Logique pure de la grille : dimensions, obstacles, eau, chemins et zone accessible.
+##   obstacle : bloque le déplacement ET la ligne de vue (rocher, tronc...).
+##   eau      : bloque le déplacement mais PAS la ligne de vue (comme sur Dofus).
 ## Aucun nœud graphique ici : ce code sera réutilisé tel quel par le serveur en phase 5.
 
 const DIRECTIONS: Array[Vector2i] = [
@@ -10,10 +12,11 @@ const DIRECTIONS: Array[Vector2i] = [
 var width: int
 var height: int
 var _obstacles: Dictionary = {} # Vector2i -> true
+var _water: Dictionary = {} # Vector2i -> true
 var _astar := AStarGrid2D.new()
 
 
-func _init(p_width: int, p_height: int, obstacles: Array[Vector2i] = []) -> void:
+func _init(p_width: int, p_height: int, obstacles: Array[Vector2i] = [], water: Array[Vector2i] = []) -> void:
 	width = p_width
 	height = p_height
 	_astar.region = Rect2i(0, 0, width, height)
@@ -23,6 +26,8 @@ func _init(p_width: int, p_height: int, obstacles: Array[Vector2i] = []) -> void
 	_astar.update()
 	for cell in obstacles:
 		add_obstacle(cell)
+	for cell in water:
+		add_water(cell)
 
 
 func is_inside(cell: Vector2i) -> bool:
@@ -39,6 +44,24 @@ func is_obstacle(cell: Vector2i) -> bool:
 	return _obstacles.has(cell)
 
 
+## Eau : infranchissable, mais on voit (et on tire) par-dessus.
+func add_water(cell: Vector2i) -> void:
+	if is_inside(cell) and not is_obstacle(cell):
+		_water[cell] = true
+		_astar.set_point_solid(cell, true)
+
+
+func is_water(cell: Vector2i) -> bool:
+	return _water.has(cell)
+
+
+func get_water() -> Array[Vector2i]:
+	var result: Array[Vector2i] = []
+	for cell in _water:
+		result.append(cell)
+	return result
+
+
 func get_obstacles() -> Array[Vector2i]:
 	var result: Array[Vector2i] = []
 	for cell in _obstacles:
@@ -47,7 +70,7 @@ func get_obstacles() -> Array[Vector2i]:
 
 
 func is_walkable(cell: Vector2i, occupied: Array[Vector2i] = []) -> bool:
-	return is_inside(cell) and not is_obstacle(cell) and not occupied.has(cell)
+	return is_inside(cell) and not is_obstacle(cell) and not is_water(cell) and not occupied.has(cell)
 
 
 ## Cases atteignables depuis `from` en au plus `max_steps` pas (parcours en largeur).
@@ -127,7 +150,7 @@ func find_path(from: Vector2i, to: Vector2i, occupied: Array[Vector2i] = []) -> 
 		_astar.set_point_solid(cell, true)
 	var path: Array[Vector2i] = _astar.get_id_path(from, to)
 	for cell in occupied:
-		if not is_obstacle(cell):
+		if not is_obstacle(cell) and not is_water(cell):
 			_astar.set_point_solid(cell, false)
 	for i in range(1, path.size()):
 		result.append(path[i])

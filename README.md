@@ -81,15 +81,21 @@ dans `CLASS_PATHS` (`scripts/game_config.gd`).
 ```
 godot --headless --path . -s res://tests/simulate_balance.gd
 ```
-Simule 80 combats IA contre IA (placements aléatoires) et affiche les victoires de chaque
-classe. Réglage actuel : environ 43 / 37.
+Simule 80 combats IA contre IA sur **chaque carte** (placements aléatoires) et affiche les victoires
+de chaque classe (Guerrier / Druide). Actuellement : Prairie ≈ 35 / 45, Le lac ≈ 24 / 56
+(la rivière avantage le personnage à distance).
 
 ## Dessiner une carte
 
-Les cartes sont des scènes Godot dans `maps/` (la carte jouée est `maps/demo.tscn`,
-réglée dans `scripts/game_config.gd`).
+Les cartes sont des scènes Godot dans `maps/`. Le menu de départ liste **automatiquement**
+toutes les scènes de ce dossier : une carte ajoutée y apparaît sans toucher au code.
 
-1. **Ouvrir** `maps/demo.tscn` (ou la dupliquer pour créer une nouvelle carte).
+Cartes actuelles :
+- **Prairie** (`demo.tscn`) : rochers et troncs au centre, jeu sur les lignes de vue.
+- **Le lac** (`lac.tscn`) : une rivière coupe le terrain, deux ponts, deux pierres dans l'eau.
+
+1. **Ouvrir** une carte de `maps/`, ou la **dupliquer** (clic droit → Dupliquer) pour en créer une nouvelle.
+   Sur le nœud racine, renseigner `map_name` et `description` (affichés dans le menu).
 2. Dans l'arbre de la scène, **sélectionner un calque** :
    - `Sol` : le terrain. Chaque case peinte fait partie de la grille de combat.
    - `Decor` : rochers, troncs, fleurs... posés sur le sol.
@@ -102,12 +108,15 @@ réglée dans `scripts/game_config.gd`).
 Règles lues sur la carte :
 - une tuile marquée **obstacle** (rochers, troncs, souche, pierres dans l'eau) bloque le déplacement et la
   ligne de vue ; les fleurs et buissons du calque `Decor` se traversent ;
+- une tuile marquée **water** (l'eau, 2 rangées du tileset) bloque le déplacement mais **pas** la ligne
+  de vue : on tire par-dessus. Une poussée s'arrête au bord (avec dégâts de collision), on ne peut pas
+  bondir dans l'eau, mais un bond (Charge) peut passer par-dessus ;
 - une case sans tuile de `Sol` est un trou infranchissable ;
 - la carte doit commencer à la case (0, 0) (coin du haut).
 
-Pour changer quelles tuiles sont des obstacles : ouvrir `assets/tiles/terrain_tileset.tres`,
-onglet **TileSet** en bas → **Paint** → propriété `obstacle`, puis cliquer sur les tuiles.
-L'eau n'a pas encore de règle (elle se traverse pour l'instant).
+Pour changer quelles tuiles sont des obstacles ou de l'eau : ouvrir `assets/tiles/terrain_tileset.tres`,
+onglet **TileSet** en bas → **Paint** → propriété `obstacle` ou `water`, puis cliquer sur les tuiles.
+La rangée d'eau la plus claire (glace) se traverse.
 
 ## Graphismes
 
