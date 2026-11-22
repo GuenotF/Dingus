@@ -36,7 +36,6 @@ func setup(p_fighter: Fighter) -> void:
 		_sprite.sprite_frames = _sprites.sprite_frames()
 		_sprite.centered = false
 		_sprite.scale = Vector2.ONE * _sprites.scale
-		_sprite.position = -_sprites.feet_position * _sprites.scale
 		_sprite.animation_finished.connect(_on_animation_finished)
 		_body.add_child(_sprite)
 		# Le texte doit passer devant le sprite : on le dessine dans un calque au-dessus.
@@ -91,6 +90,8 @@ func play_anim(anim_name: String) -> void:
 		anim_name = "idle"
 	var key := CharacterSprites.animation_key(anim_name, facing)
 	if _sprite.sprite_frames.has_animation(key):
+		# Les pieds ne sont pas au même endroit de l'image selon l'orientation.
+		_sprite.position = -_sprites.feet_for(facing) * _sprites.scale
 		_sprite.play(key)
 
 

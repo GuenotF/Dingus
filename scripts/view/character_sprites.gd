@@ -16,8 +16,13 @@ extends Resource
 ## Case suivante en y- (vers le haut à droite).
 @export var row_up_right: int = 7
 @export_group("Placement")
-## Position des pieds dans une image (en pixels depuis le coin haut gauche).
+## Position des pieds dans une image (en pixels depuis le coin haut gauche), par défaut.
 @export var feet_position: Vector2 = Vector2(64, 100)
+## Pieds par direction (la posture change selon l'orientation). (0, 0) = utiliser feet_position.
+@export var feet_down_right: Vector2 = Vector2.ZERO
+@export var feet_down_left: Vector2 = Vector2.ZERO
+@export var feet_up_left: Vector2 = Vector2.ZERO
+@export var feet_up_right: Vector2 = Vector2.ZERO
 ## Hauteur du personnage au-dessus des pieds (pour placer le nom et la barre de PV).
 @export var height: float = 74.0
 @export var scale: float = 1.0
@@ -55,6 +60,21 @@ func row_for(dir: Vector2i) -> int:
 			return row_up_left
 		_:
 			return row_up_right
+
+
+## Point des pieds dans l'image pour une direction de la grille.
+func feet_for(dir: Vector2i) -> Vector2:
+	var feet: Vector2
+	match dir:
+		Vector2i(1, 0):
+			feet = feet_down_right
+		Vector2i(0, 1):
+			feet = feet_down_left
+		Vector2i(-1, 0):
+			feet = feet_up_left
+		_:
+			feet = feet_up_right
+	return feet if feet != Vector2.ZERO else feet_position
 
 
 ## Construit (une seule fois) les SpriteFrames : une animation par nom et par direction.

@@ -27,8 +27,9 @@ du code seulement si un sort a besoin d'un nouvel effet.
    effets dans `assets/effects/` (assemblés en une ligne et réduits : les originaux sont très lourds).
 3. **Données** :
    - `data/sprites/<nom>.tres` (CharacterSprites : directions lignes 1/3/5/7, pieds, hauteur, animations).
-     **Pieds** : mesurer le milieu entre les deux pieds sur la version *Shadowless* des planches
-     (Idle et Walk, 4 directions), puis vérifier visuellement sur une case avec son centre marqué ;
+     **Pieds** : mesurer, **pour chacune des 4 directions**, le milieu entre les deux pieds sur la version
+     *Shadowless* des planches (70 % Idle, 30 % Walk) → `feet_down_right`, `feet_down_left`, `feet_up_left`,
+     `feet_up_right` ; puis vérifier visuellement sur une case avec son centre marqué ;
    - `data/effects/*.tres` (EffectAnimation : origine, échelle, vitesse, au sol ou non) ;
    - `data/spells/<nom>_*.tres` (SpellData) ;
    - `data/classes/<nom>.tres` (ClassData) — le menu et le simulateur le trouvent automatiquement

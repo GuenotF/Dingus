@@ -62,4 +62,8 @@ fps = 24.0
 [resource]
 script = ExtResource("10_du38x")
 feet_position = Vector2(63, 91)
+feet_down_right = Vector2(63, 90)
+feet_down_left = Vector2(60, 92)
+feet_up_left = Vector2(65, 88)
+feet_up_right = Vector2(64, 93)
 animations = Array[ExtResource("1_1e0ir")]([SubResource("Resource_6hgn4"), SubResource("Resource_q0c1h"), SubResource("Resource_nhglr"), SubResource("Resource_ucemj"), SubResource("Resource_ptkn7"), SubResource("Resource_qhgpk"), SubResource("Resource_0e6e5"), SubResource("Resource_c1dmd")])
