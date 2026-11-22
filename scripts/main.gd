@@ -9,6 +9,7 @@ const AI_MAX_ACTIONS := 30
 const ZONE_COLORS: Array[Color] = [Color(0.95, 0.35, 0.3, 0.45), Color(0.3, 0.55, 1.0, 0.45)]
 
 var state: CombatState
+var map: BattleMap
 var board: BoardView
 var entities: Node2D
 var hud: Hud
@@ -36,11 +37,14 @@ func _ready() -> void:
 
 
 func _build_combat() -> void:
-	var grid := BattleGrid.new(MapLayouts.TEST_SIZE.x, MapLayouts.TEST_SIZE.y, MapLayouts.TEST_OBSTACLES)
-	state = CombatState.new(grid)
-	state.placement_zones = MapLayouts.TEST_PLACEMENT
+	# La carte (dessinée dans l'éditeur) fournit la grille, les obstacles et les zones de placement.
+	map = load(GameConfig.map_path).instantiate()
+	state = CombatState.new(map.build_grid())
+	state.placement_zones = map.placement_zones()
 	for i in 2:
-		var f := Fighter.new(i, "Joueur %d" % (i + 1), i, MapLayouts.TEST_SPAWNS[i], GameConfig.class_for(i))
+		var zone: Array = state.placement_zones[i]
+		var start: Vector2i = zone[0] if not zone.is_empty() else Vector2i(i * (state.grid.width - 1), 0)
+		var f := Fighter.new(i, "Joueur %d" % (i + 1), i, start, GameConfig.class_for(i))
 		state.add_fighter(f)
 
 
@@ -51,19 +55,27 @@ func is_ai(fighter: Fighter) -> bool:
 func _build_scene() -> void:
 	RenderingServer.set_default_clear_color(Color("1d2128"))
 
+	# Carte : les tuiles sont alignées sur la grille du jeu (centre de la case (0, 0) en (0, 0)).
+	add_child(map)
+	map.position = -map.ground().map_to_local(Vector2i.ZERO) * map.scale
+	map.placement().hide() # les zones sont affichées par le plateau pendant le placement
+
 	board = BoardView.new()
+	board.draw_ground = false # le sol vient de la carte ; le plateau ne dessine que la grille et les surbrillances
 	add_child(board)
 	board.setup(state.grid)
 
-	# Obstacles et pions dans le même conteneur trié par Y : la profondeur est automatique.
+	# Décor et personnages dans le même conteneur trié par Y : la profondeur est automatique.
 	entities = Node2D.new()
 	entities.y_sort_enabled = true
 	add_child(entities)
 
-	for cell in state.grid.get_obstacles():
-		var obstacle := ObstacleView.new()
-		obstacle.position = Iso.cell_to_world(cell)
-		entities.add_child(obstacle)
+	var decor := map.decor()
+	map.remove_child(decor)
+	entities.add_child(decor)
+	decor.scale = map.scale
+	decor.position = map.position
+	decor.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 
 	for f in state.fighters:
 		var view := FighterView.new()

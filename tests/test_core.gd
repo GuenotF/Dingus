@@ -25,6 +25,7 @@ func _init() -> void:
 	_test_ai_takes_obvious_kill()
 	_test_ai_vs_ai_finishes()
 	_test_range_always_displayed()
+	_test_demo_map()
 	print("Tests terminés : %s" % ("OK" if _failures == 0 else "%d échec(s)" % _failures))
 	quit(1 if _failures > 0 else 0)
 
@@ -341,3 +342,21 @@ func _test_range_always_displayed() -> void:
 		_check(not state.range_display(spell).is_empty(), "portée affichée : %s" % spell.spell_name)
 	var push: SpellData = state.active_fighter().spells[2]
 	_check(state.range_display(push).size() == 4 and state.cells_in_range(push).is_empty(), "Repousser : 4 cases affichées, aucune ciblable")
+
+
+func _test_demo_map() -> void:
+	# La carte de démo (dessinée avec le TileSet) doit rester jouable et cohérente.
+	var map: BattleMap = load("res://maps/demo.tscn").instantiate()
+	var grid := map.build_grid()
+	_check(grid.width == 15 and grid.height == 15, "carte de démo : 15x15")
+	var obs := map.obstacles()
+	obs.sort()
+	var expected := MapLayouts.TEST_OBSTACLES.duplicate()
+	expected.sort()
+	_check(obs == expected, "carte de démo : obstacles identiques à la carte de test (équilibrage)")
+	var zones := map.placement_zones()
+	for team in 2:
+		_check(zones[team].size() == 6, "carte de démo : 6 cases de placement équipe %d" % team)
+		for cell in zones[team]:
+			_check(grid.is_walkable(cell), "case de placement libre %s" % cell)
+	map.free()

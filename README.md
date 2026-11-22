@@ -42,7 +42,8 @@ scenes/   Scènes Godot.
 tests/    Tests de la logique.
 data/classes/ Classes (.tres) : stats et liste de sorts.
 data/spells/  Sorts (.tres) : portée, zone et liste d'effets, modifiables dans l'inspecteur.
-assets/   (à venir) Graphismes et sons.
+maps/     Cartes de combat (scènes à 3 calques : Sol, Decor, Placement).
+assets/   Graphismes : tileset (assets/tiles/) et personnages (assets/characters/).
 ```
 
 **Règle d'or :** `core/` ne connaît pas `view/`. La vue appelle les méthodes de `CombatState`
@@ -83,9 +84,34 @@ godot --headless --path . -s res://tests/simulate_balance.gd
 Simule 80 combats IA contre IA (placements aléatoires) et affiche les victoires de chaque
 classe. Réglage actuel : environ 43 / 37.
 
+## Dessiner une carte
+
+Les cartes sont des scènes Godot dans `maps/` (la carte jouée est `maps/demo.tscn`,
+réglée dans `scripts/game_config.gd`).
+
+1. **Ouvrir** `maps/demo.tscn` (ou la dupliquer pour créer une nouvelle carte).
+2. Dans l'arbre de la scène, **sélectionner un calque** :
+   - `Sol` : le terrain. Chaque case peinte fait partie de la grille de combat.
+   - `Decor` : rochers, troncs, fleurs... posés sur le sol.
+   - `Placement` : cases de départ (marqueur rouge = joueur 1, bleu = joueur 2).
+     Ce calque est invisible en jeu.
+3. Le panneau **TileMap** s'ouvre en bas : choisir une tuile, puis peindre dans la vue
+   (clic gauche = peindre, clic droit = effacer, outils rectangle et pot de peinture en haut du panneau).
+4. Sauvegarder (Ctrl+S) et lancer (F5).
+
+Règles lues sur la carte :
+- une tuile marquée **obstacle** (rochers, troncs, souche, pierres dans l'eau) bloque le déplacement et la
+  ligne de vue ; les fleurs et buissons du calque `Decor` se traversent ;
+- une case sans tuile de `Sol` est un trou infranchissable ;
+- la carte doit commencer à la case (0, 0) (coin du haut).
+
+Pour changer quelles tuiles sont des obstacles : ouvrir `assets/tiles/terrain_tileset.tres`,
+onglet **TileSet** en bas → **Paint** → propriété `obstacle`, puis cliquer sur les tuiles.
+L'eau n'a pas encore de règle (elle se traverse pour l'instant).
+
 ## Graphismes
 
-Le sol et les blocs sont encore dessinés en code. Les combattants utilisent un **sprite animé**
+La carte utilise le tileset isométrique (`assets/tiles/`). Les combattants utilisent un **sprite animé**
 si leur classe en a un (champ `sprites` de la classe), sinon un pion temporaire.
 
 Actuellement : le **Guerrier** utilise le pack *2D HD Character Knight* (`assets/characters/knight/`).

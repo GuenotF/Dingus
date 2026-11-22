@@ -1,6 +1,8 @@
 class_name MapLayouts
 extends RefCounted
-## Cartes de test. Plus tard, elles pourront venir de fichiers de données ou de Tiled.
+## Carte de test en code, utilisée par les tests et le simulateur d'équilibrage.
+## En jeu, la carte vient d'une scène dessinée dans l'éditeur (maps/demo.tscn),
+## dont les obstacles et les zones reprennent exactement ceux-ci.
 
 const TEST_SIZE := Vector2i(15, 15)
 

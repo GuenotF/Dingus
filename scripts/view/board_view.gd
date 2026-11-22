@@ -8,6 +8,7 @@ const COLOR_TILE_A := Color("3d5a45")
 const COLOR_TILE_B := Color("456650")
 const COLOR_TILE_EDGE := Color(0, 0, 0, 0.25)
 const COLOR_HOVER := Color(1, 1, 1, 0.9)
+const COLOR_GRID_LINE := Color(0, 0, 0, 0.16)
 
 # Couleurs prêtes à l'emploi pour les calques
 const COLOR_REACHABLE := Color(0.35, 0.75, 1.0, 0.35)
@@ -17,6 +18,8 @@ const COLOR_NO_LOS := Color(0.6, 0.6, 0.6, 0.30)
 const COLOR_AREA := Color(1.0, 0.45, 0.2, 0.70)
 
 var grid: BattleGrid
+## false quand le sol vient d'une carte (TileMapLayer) : on ne dessine alors qu'un quadrillage discret.
+var draw_ground := true
 ## Chaque calque : { "cells": Array[Vector2i], "color": Color, "shrink": float }
 var layers: Array[Dictionary] = []
 var hover_cell := Vector2i(-1, -1)
@@ -60,9 +63,12 @@ func _draw() -> void:
 		for x in grid.width:
 			var cell := Vector2i(x, y)
 			var poly := Iso.diamond(Iso.cell_to_world(cell))
-			var color := COLOR_TILE_A if (x + y) % 2 == 0 else COLOR_TILE_B
-			draw_colored_polygon(poly, color)
-			draw_polyline(_closed(poly), COLOR_TILE_EDGE, 1.0, true)
+			if draw_ground:
+				var color := COLOR_TILE_A if (x + y) % 2 == 0 else COLOR_TILE_B
+				draw_colored_polygon(poly, color)
+				draw_polyline(_closed(poly), COLOR_TILE_EDGE, 1.0, true)
+			elif not grid.is_obstacle(cell):
+				draw_polyline(_closed(poly), COLOR_GRID_LINE, 1.0, true)
 
 	for l in layers:
 		for cell in l.cells:
