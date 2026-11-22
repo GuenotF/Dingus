@@ -1,6 +1,6 @@
 class_name SettingsPanel
 extends ColorRect
-## Fenêtre « Paramètres » : volumes, son coupé, plein écran. Réutilisée par le menu principal
+## Fenêtre « Paramètres » : volumes, son coupé, plein écran, particules. Réutilisée par le menu principal
 ## et le menu pause. Les réglages sont ceux de l'autoload Settings (appliqués et mémorisés tout de suite).
 
 const W := preload("res://scripts/view/hud_widgets.gd")
@@ -13,6 +13,7 @@ var _master_value: Label
 var _voice_value: Label
 var _mute: Button
 var _fullscreen: Button
+var _particles: Button
 
 
 func _ready() -> void:
@@ -59,6 +60,15 @@ func _ready() -> void:
 	_fullscreen.toggled.connect(func(on: bool) -> void: Settings.set_fullscreen(on))
 	box.add_child(fullscreen_row[1])
 
+	var particles_row := _toggle_row("Particules d'ambiance")
+	_particles = particles_row[0]
+	_particles.toggle_mode = false
+	_particles.custom_minimum_size = Vector2(110, 34)
+	# Un clic passe au niveau suivant : aucune → réduites → complètes → aucune...
+	_particles.pressed.connect(func() -> void:
+		Settings.set_particles_level((Settings.particles_level + 1) % Settings.PARTICLES_LABELS.size()))
+	box.add_child(particles_row[1])
+
 	var back := W.menu_button("Retour", true)
 	back.pressed.connect(close)
 	box.add_child(back)
@@ -97,6 +107,7 @@ func _sync() -> void:
 	_mute.text = "Oui" if Settings.muted else "Non"
 	_fullscreen.set_pressed_no_signal(Settings.fullscreen)
 	_fullscreen.text = "Oui" if Settings.fullscreen else "Non"
+	_particles.text = Settings.PARTICLES_LABELS[Settings.particles_level]
 
 
 ## [slider, label de valeur, ligne complète]

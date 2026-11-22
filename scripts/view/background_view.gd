@@ -19,6 +19,8 @@ const SOCLE_START := 10.0
 
 var _tint := Color("232830")
 var _corners := PackedVector2Array() # haut, droite, bas, gauche du plateau
+var _particles: CPUParticles2D
+var _full_amount := 0
 
 
 ## `grid` : grille de combat ; `map` : fournit la teinte et l'ambiance.
@@ -36,6 +38,8 @@ func setup(grid: BattleGrid, map: BattleMap) -> void:
 	_build_backdrop()
 	if variant >= AMBIANCE:
 		_build_particles(map.ambiance, Iso.cell_to_world(last) * 0.5 + Vector2(0, 20))
+		Settings.changed.connect(_apply_particles_level)
+		_apply_particles_level()
 	queue_redraw()
 
 
@@ -164,5 +168,19 @@ func _build_particles(kind: String, centre: Vector2) -> void:
 					Color(glow, 0.9), Color(glow, 0.15), Color(glow, 0.7), Color(glow, 0)])
 	p.color_ramp = ramp
 	p.preprocess = p.lifetime # le décor est déjà « rempli » dès la première image
-	p.emitting = true
+	p.emitting = false # démarré par _apply_particles_level selon le réglage du joueur
+	_full_amount = p.amount
+	_particles = p
 	add_child(p)
+
+
+## Réglage « Particules d'ambiance » : 0 aucune (rien n'est calculé), 1 réduites (40 %), 2 complètes.
+func _apply_particles_level() -> void:
+	if _particles == null:
+		return
+	var level := Settings.particles_level
+	var wanted := 0 if level == 0 else (maxi(8, int(_full_amount * 0.4)) if level == 1 else _full_amount)
+	if wanted > 0 and _particles.amount != wanted:
+		_particles.amount = wanted
+	_particles.visible = wanted > 0
+	_particles.emitting = wanted > 0
