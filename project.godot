@@ -23,6 +23,7 @@ config/features=PackedStringArray("4.7")
 
 GameConfig="*res://scripts/game_config.gd"
 Sound="*res://scripts/audio/sound.gd"
+Settings="*res://scripts/settings.gd"
 
 [display]
 

@@ -6,6 +6,8 @@ const W := preload("res://scripts/view/hud_widgets.gd")
 const ICON_HUMAN := preload("res://assets/ui/icon_human.svg")
 const ICON_AI := preload("res://assets/ui/icon_ai.svg")
 const ICON_EDIT := preload("res://assets/ui/icon_edit.svg")
+const ICON_SETTINGS := preload("res://assets/ui/icon_settings.svg")
+const ICON_QUIT := preload("res://assets/ui/icon_quit.svg")
 const NAME_MAX_LENGTH := 16
 const TEAM_NAME_COLORS: Array[Color] = [Color("f2a19d"), Color("9cc6f2")]
 ## Échelle du personnage dans le menu (les sprites font 128 px).
@@ -18,6 +20,7 @@ var _panels: Array[PlayerPanel] = []
 ## Infobulle des sorts, la même qu'en combat.
 var tooltip: SpellTooltip
 
+var _settings: SettingsPanel
 var _map_view: SubViewport
 var _map_name: Label
 var _map_size: Label
@@ -71,7 +74,27 @@ func _ready() -> void:
 	row.add_child(_panels[1])
 	tooltip = SpellTooltip.new()
 	add_child(tooltip)
+	_build_corner_buttons()
 	_refresh_map()
+
+
+## Coin haut droit : Paramètres et Quitter.
+func _build_corner_buttons() -> void:
+	var corner := HBoxContainer.new()
+	corner.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	corner.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	corner.offset_right = -18
+	corner.offset_top = 18
+	corner.add_theme_constant_override("separation", 10)
+	add_child(corner)
+	var settings_button := W.icon_button(ICON_SETTINGS, "Paramètres")
+	corner.add_child(settings_button)
+	var quit_button := W.icon_button(ICON_QUIT, "Quitter le jeu")
+	quit_button.pressed.connect(func() -> void: get_tree().quit())
+	corner.add_child(quit_button)
+	_settings = SettingsPanel.new()
+	add_child(_settings)
+	settings_button.pressed.connect(_settings.open)
 
 
 func _build_center() -> Control:

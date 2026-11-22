@@ -120,9 +120,9 @@ func _begin_placement_of(index: int) -> void:
 	hud.show_placement(f, is_ai(f))
 	_refresh_highlights()
 	if is_ai(f):
-		await get_tree().create_timer(0.6).timeout
+		await get_tree().create_timer(0.6, false).timeout
 		state.place(f, _ai_placement_cell(f))
-		await get_tree().create_timer(0.4).timeout
+		await get_tree().create_timer(0.4, false).timeout
 		_begin_placement_of(index + 1)
 
 
@@ -160,6 +160,14 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		_refresh_highlights()
 		return
+	# Échap : annule le sort choisi, sinon ouvre le menu pause (même pendant le tour de l'IA).
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+		if selected_spell != null and not _input_locked():
+			_cancel_spell()
+		elif not state.is_over:
+			hud.open_pause()
+		get_viewport().set_input_as_handled()
+		return
 	if _input_locked():
 		return
 	if event is InputEventMouseButton and event.pressed:
@@ -171,8 +179,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		match event.keycode:
 			KEY_SPACE:
 				_on_main_button()
-			KEY_ESCAPE:
-				_cancel_spell()
 			KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6:
 				_select_spell(event.keycode - KEY_1)
 
@@ -225,7 +231,7 @@ func _mouse_cell() -> Vector2i:
 
 func _run_ai_turn(fighter: Fighter) -> void:
 	for i in AI_MAX_ACTIONS:
-		await get_tree().create_timer(AI_STEP_DELAY).timeout
+		await get_tree().create_timer(AI_STEP_DELAY, false).timeout
 		await _wait_idle()
 		if state.is_over or state.active_fighter() != fighter:
 			return
@@ -237,7 +243,7 @@ func _run_ai_turn(fighter: Fighter) -> void:
 				# On montre brièvement la cible, comme le ferait un joueur.
 				selected_spell = action.spell
 				_refresh_ui(action.cell)
-				await get_tree().create_timer(0.45).timeout
+				await get_tree().create_timer(0.45, false).timeout
 				selected_spell = null
 				state.try_cast(action.spell, action.cell)
 			_:
@@ -353,7 +359,7 @@ func _on_spell_cast(caster: Fighter, spell: SpellData, target: Vector2i, cells: 
 	_set_busy(true)
 	if spell.projectile is EffectAnimation or spell.impact is EffectAnimation:
 		_deferring = true
-		await get_tree().create_timer(spell.cast_delay).timeout
+		await get_tree().create_timer(spell.cast_delay, false).timeout
 		if spell.projectile is EffectAnimation:
 			var from := caster_view.position + Vector2(0, -40)
 			var to := Iso.cell_to_world(target) + Vector2(0, -28)
@@ -363,10 +369,10 @@ func _on_spell_cast(caster: Fighter, spell: SpellData, target: Vector2i, cells: 
 			EffectView.impact(self, spell.impact, Iso.cell_to_world(target))
 		board.flash(cells)
 		_flush_deferred()
-		await get_tree().create_timer(0.45).timeout
+		await get_tree().create_timer(0.45, false).timeout
 	else:
 		board.flash(cells)
-		await get_tree().create_timer(0.5).timeout
+		await get_tree().create_timer(0.5, false).timeout
 	_set_busy(false)
 
 
@@ -436,7 +442,7 @@ func _on_combat_ended(winner_team: int) -> void:
 	for f in state.fighters:
 		if f.team == winner_team:
 			winner_name = "%s (%s)" % [f.display_name, f.class_data.class_label if f.class_data else "?"]
-	await get_tree().create_timer(1.0).timeout
+	await get_tree().create_timer(1.0, false).timeout
 	_refresh_highlights()
 	hud.show_victory(winner_name)
 	for f in state.fighters:

@@ -15,7 +15,8 @@ Prototype de jeu tactique 1v1 au tour par tour, en vue isométrique (style Dofus
 | Survol d'une case | Aperçu du chemin |
 | Clic gauche | Se placer (avant le combat), se déplacer, ou lancer le sort choisi |
 | 1 à 4 | Choisir un sort |
-| Clic droit / Échap | Annuler le sort choisi |
+| Clic droit | Annuler le sort choisi |
+| Échap / bouton ⚙ | Annuler le sort choisi, sinon ouvrir le menu pause |
 | Espace / bouton | Prêt (placement) / Fin du tour |
 | F11 | Plein écran / fenêtre |
 | M | Couper / remettre le son |
@@ -81,7 +82,7 @@ godot --headless --path . -s res://tests/test_core.gd
 - [x] Phase 1 — Grille iso, déplacement A*, tours
 - [x] Phase 2 — PA, sorts (Resources), ligne de vue, PV, victoire
 - [x] Phase 3 — Classes, effets, placement, IA simple, menu
-- [ ] Phase 4 — Animations, sons, interface
+- [x] Phase 4 — Animations, sons, interface
 - [ ] Phase 5 — Multijoueur en ligne
 - [ ] Phase 6 — Export Windows / Web
 
@@ -174,6 +175,16 @@ le **Mage de feu** et l'**Archer** le pack *2D HD Character pack 1* (`assets/cha
    (Guerrier : `melee`, `jump`, `kick`, `cast`). Une animation absente est simplement ignorée.
 
 Les images sont versionnées normalement dans Git (pas de LFS nécessaire).
+
+## Menus et paramètres
+
+- **Menu pause** (Échap ou bouton ⚙ en haut à gauche du combat) : Reprendre, Rejouer, Paramètres,
+  Menu principal, Quitter le jeu. Le combat est gelé tant qu'il est ouvert (l'IA attend aussi).
+  Rejouer, Menu principal et Quitter demandent confirmation. Code : `scripts/view/pause_menu.gd`.
+- **Paramètres** (aussi depuis l'icône ⚙ du menu principal, à côté de l'icône Quitter) : volume général,
+  volume des voix, son coupé, plein écran. Code : `scripts/view/settings_panel.gd`.
+- Les réglages sont gérés par l'autoload `Settings` (`scripts/settings.gd`) et mémorisés dans
+  `user://settings.cfg` (sous Windows : `%APPDATA%\Godot\app_userdata\Dingus`).
 
 ## Sons
 

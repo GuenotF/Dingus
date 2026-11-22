@@ -42,11 +42,10 @@ func map_info(path: String) -> Dictionary:
 	return info
 
 
-## F11 : bascule plein écran / fenêtre maximisée, partout dans le jeu.
+## F11 : bascule plein écran / fenêtre maximisée, partout dans le jeu (réglage mémorisé).
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F11:
-		var fullscreen := DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
-		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MAXIMIZED if fullscreen else DisplayServer.WINDOW_MODE_FULLSCREEN)
+		Settings.toggle_fullscreen()
 		get_viewport().set_input_as_handled()
 
 

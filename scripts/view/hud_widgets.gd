@@ -66,6 +66,54 @@ static func draw_resource_icon(ci: CanvasItem, center: Vector2, is_pa: bool, siz
 		ci.draw_set_transform(Vector2.ZERO)
 
 
+## Style de bouton des menus (pause, paramètres, icônes rondes).
+static func button_box(bg: Color, border: Color, radius: int) -> StyleBoxFlat:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = bg
+	sb.border_color = border
+	sb.set_border_width_all(1)
+	sb.set_corner_radius_all(radius)
+	sb.set_content_margin_all(8)
+	return sb
+
+
+## Bouton de menu. `accent` : plein doré (action principale), sinon sombre à liseré.
+static func menu_button(text: String, accent: bool = false) -> Button:
+	var b := Button.new()
+	b.text = text
+	b.custom_minimum_size = Vector2(260, 46)
+	b.focus_mode = Control.FOCUS_NONE
+	b.add_theme_font_size_override("font_size", 19)
+	var normal := GOLD if accent else Color("1b1f27")
+	var hover := GOLD.lightened(0.15) if accent else Color("2a303c")
+	var pressed := GOLD.darkened(0.15) if accent else Color("14171d")
+	var border := GOLD if accent else PANEL_BORDER
+	b.add_theme_stylebox_override("normal", button_box(normal, border, 10))
+	b.add_theme_stylebox_override("hover", button_box(hover, GOLD, 10))
+	b.add_theme_stylebox_override("pressed", button_box(pressed, GOLD, 10))
+	var text_color := Color("1b1408") if accent else TEXT
+	for c in ["font_color", "font_hover_color", "font_pressed_color"]:
+		b.add_theme_color_override(c, text_color)
+	return b
+
+
+## Bouton rond avec une icône blanche (SVG), pour les coins de l'écran.
+static func icon_button(icon: Texture2D, tip: String, size: int = 44) -> Button:
+	var b := Button.new()
+	b.icon = icon
+	b.expand_icon = true
+	b.tooltip_text = tip
+	b.focus_mode = Control.FOCUS_NONE
+	b.custom_minimum_size = Vector2(size, size)
+	b.add_theme_constant_override("icon_max_width", int(size * 0.5))
+	b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var radius := size / 2
+	b.add_theme_stylebox_override("normal", button_box(PANEL_BG, PANEL_BORDER, radius))
+	b.add_theme_stylebox_override("hover", button_box(Color("2a303c"), GOLD, radius))
+	b.add_theme_stylebox_override("pressed", button_box(Color("14171d"), GOLD, radius))
+	return b
+
+
 # --- Orbe de PV --------------------------------------------------------------------
 
 class HpOrb extends Control:

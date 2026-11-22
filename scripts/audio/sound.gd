@@ -5,7 +5,6 @@ extends Node
 const VOICE_BUS := "Voix"
 ## Une voix par personnage à la fois : une nouvelle réplique coupe la précédente du même personnage.
 var _voice_players: Dictionary = {} # clé (id du combattant, ou autre) -> AudioStreamPlayer
-var muted := false
 
 
 func _ready() -> void:
@@ -40,8 +39,7 @@ func play_voice(voice: Resource, moment: String, key: Variant = "menu") -> void:
 
 
 func toggle_mute() -> void:
-	muted = not muted
-	AudioServer.set_bus_mute(AudioServer.get_bus_index("Master"), muted)
+	Settings.set_muted(not Settings.muted)
 
 
 func _unhandled_input(event: InputEvent) -> void:

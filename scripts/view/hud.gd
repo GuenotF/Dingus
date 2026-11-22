@@ -39,12 +39,17 @@ var _tooltip: SpellTooltip
 var _victory: Control
 var _victory_label: Label
 
+# Pause
+var _pause_menu: PauseMenu
+var _pause_button: Button
+
 
 func _ready() -> void:
 	_build_bottom_bar()
 	_build_turn_order()
 	_build_tooltip()
 	_build_victory()
+	_build_pause()
 
 
 # --- Construction ----------------------------------------------------------------
@@ -152,6 +157,22 @@ func _build_turn_order() -> void:
 func _build_tooltip() -> void:
 	_tooltip = SpellTooltip.new()
 	add_child(_tooltip)
+
+
+func _build_pause() -> void:
+	_pause_button = HudWidgets.icon_button(preload("res://assets/ui/icon_settings.svg"), "Menu (Échap)")
+	_pause_button.position = Vector2(16, 16)
+	_pause_button.pressed.connect(open_pause)
+	add_child(_pause_button)
+	_pause_menu = PauseMenu.new()
+	_pause_menu.restart_requested.connect(func() -> void: restart_pressed.emit())
+	_pause_menu.menu_requested.connect(func() -> void: menu_pressed.emit())
+	add_child(_pause_menu)
+
+
+func open_pause() -> void:
+	_tooltip.hide()
+	_pause_menu.open()
 
 
 func _build_victory() -> void:
@@ -324,6 +345,7 @@ func set_input_enabled(enabled: bool) -> void:
 func show_victory(winner_name: String) -> void:
 	_victory_label.text = "%s gagne !" % winner_name if winner_name != "" else "Égalité !"
 	_victory.show()
+	_pause_button.hide()
 	_tooltip.hide()
 	_main_button.disabled = true
 
