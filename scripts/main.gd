@@ -270,6 +270,8 @@ func _refresh_ui(forced_hover: Vector2i = Vector2i(-1, -1)) -> void:
 func _refresh_highlights(forced_hover: Vector2i = Vector2i(-1, -1)) -> void:
 	var layers: Array[Dictionary] = []
 	var hover := forced_hover if forced_hover != Vector2i(-1, -1) else _mouse_cell()
+	for fighter in state.fighters:
+		fighter_views[fighter.id].set_hovered(fighter.cell == hover)
 
 	if state.phase == CombatState.Phase.PLACEMENT:
 		var placer := _placing_fighter()

@@ -28,6 +28,8 @@ var _sprites: CharacterSprites
 var _dead := false
 ## Aperçu du sort visé sur ce personnage (voir CombatState.preview_cast), vide sinon.
 var _preview: Dictionary = {}
+## Le curseur est sur ce personnage : ses PV s'affichent à côté de son nom.
+var _hovered := false
 
 
 func setup(p_fighter: Fighter) -> void:
@@ -70,6 +72,14 @@ func set_preview(preview: Dictionary) -> void:
 	if preview == _preview:
 		return
 	_preview = preview
+	refresh()
+
+
+## Affiche les PV (chiffre) seulement quand le curseur survole le personnage.
+func set_hovered(hovered: bool) -> void:
+	if hovered == _hovered:
+		return
+	_hovered = hovered
 	refresh()
 
 
@@ -228,7 +238,7 @@ func _draw_body() -> void:
 		_draw_labels(_body)
 
 
-## Nom, barre de PV et statuts, au-dessus de la tête.
+## Nom, barre de PV et statuts, au-dessus de la tête (le chiffre des PV seulement au survol).
 func _draw_labels(canvas: CanvasItem) -> void:
 	if fighter == null:
 		return
@@ -259,7 +269,7 @@ func _draw_labels(canvas: CanvasItem) -> void:
 		canvas.draw_rect(Rect2(bar_pos + Vector2(0, BAR_SIZE.y + 1), Vector2(BAR_SIZE.x, 2)), team_color)
 
 	# Nom + PV
-	var label := "%s  %d" % [fighter.display_name, fighter.hp]
+	var label := "%s  %d" % [fighter.display_name, fighter.hp] if _hovered else fighter.display_name
 	var size := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13)
 	var name_pos := Vector2(-size.x * 0.5, top - 17)
 	canvas.draw_string_outline(font, name_pos, label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, 3, Color(0, 0, 0, 0.8))
