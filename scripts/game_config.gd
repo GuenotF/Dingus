@@ -14,6 +14,8 @@ var map_path: String = "res://maps/demo.tscn"
 var player_classes: Array[int] = [0, 1]
 ## true = ce joueur est contrôlé par l'IA.
 var player_is_ai: Array[bool] = [false, true]
+## Noms choisis dans le menu (vide = « Joueur N »), affichés en combat.
+var player_names: Array[String] = ["", ""]
 
 
 ## Toutes les cartes du dossier maps/ (une nouvelle carte y apparaît automatiquement dans le menu).
@@ -46,6 +48,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		var fullscreen := DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MAXIMIZED if fullscreen else DisplayServer.WINDOW_MODE_FULLSCREEN)
 		get_viewport().set_input_as_handled()
+
+
+## Nom affiché du joueur (0 ou 1).
+func player_name(player: int) -> String:
+	var n := player_names[player].strip_edges()
+	return n if n != "" else "Joueur %d" % (player + 1)
 
 
 func class_for(player: int) -> ClassData:

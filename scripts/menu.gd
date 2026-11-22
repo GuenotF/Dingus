@@ -5,6 +5,8 @@ extends Control
 const W := preload("res://scripts/view/hud_widgets.gd")
 const ICON_HUMAN := preload("res://assets/ui/icon_human.svg")
 const ICON_AI := preload("res://assets/ui/icon_ai.svg")
+const ICON_EDIT := preload("res://assets/ui/icon_edit.svg")
+const NAME_MAX_LENGTH := 16
 const TEAM_NAME_COLORS: Array[Color] = [Color("f2a19d"), Color("9cc6f2")]
 ## Échelle du personnage dans le menu (les sprites font 128 px).
 const PREVIEW_SCALE := 2.6
@@ -13,6 +15,8 @@ var _classes: Array[ClassData] = []
 var _map_paths: Array[String] = []
 var _map_index := 0
 var _panels: Array[PlayerPanel] = []
+## Infobulle des sorts, la même qu'en combat.
+var tooltip: SpellTooltip
 
 var _map_view: SubViewport
 var _map_name: Label
@@ -65,6 +69,8 @@ func _ready() -> void:
 	row.add_child(_panels[0])
 	row.add_child(_build_center())
 	row.add_child(_panels[1])
+	tooltip = SpellTooltip.new()
+	add_child(tooltip)
 	_refresh_map()
 
 
@@ -200,6 +206,7 @@ func _on_start() -> void:
 	for player in 2:
 		GameConfig.player_classes[player] = _panels[player].class_index
 		GameConfig.player_is_ai[player] = _panels[player].is_ai
+		GameConfig.player_names[player] = _panels[player].player_name
 	get_tree().change_scene_to_file("res://scenes/main.tscn")
 
 
@@ -273,8 +280,12 @@ class PlayerPanel extends PanelContainer:
 	var player := 0
 	var class_index := 0
 	var is_ai := false
+	var player_name := ""
 
 	var _stage: CharacterStage
+	var _name_label: Label
+	var _name_edit: LineEdit
+	var _name_button: Button
 	var _name: Label
 	var _tagline: Label
 	var _stats: HBoxContainer
@@ -288,6 +299,7 @@ class PlayerPanel extends PanelContainer:
 		player = p_player
 		class_index = GameConfig.player_classes[player]
 		is_ai = GameConfig.player_is_ai[player]
+		player_name = GameConfig.player_name(player)
 		var team: Color = W.TEAM_COLORS[player]
 		custom_minimum_size = Vector2(380, 540)
 		add_theme_stylebox_override("panel", _card_with_top(team))
@@ -298,13 +310,7 @@ class PlayerPanel extends PanelContainer:
 		# En-tête : nom du joueur + pilule Humain / IA (miroir pour le joueur 2)
 		var head := HBoxContainer.new()
 		v.add_child(head)
-		var title := Label.new()
-		title.text = "Joueur %d" % (player + 1)
-		title.add_theme_font_size_override("font_size", 18)
-		title.add_theme_color_override("font_color", TEAM_NAME_COLORS[player])
-		title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		if player == 1:
-			title.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		var title := _build_name_field()
 		var pill := _build_pill(team)
 		if player == 0:
 			head.add_child(title)
@@ -349,6 +355,66 @@ class PlayerPanel extends PanelContainer:
 		_dots.alignment = BoxContainer.ALIGNMENT_CENTER
 		v.add_child(_dots)
 		_refresh()
+
+	## Nom du joueur, modifiable : crayon (ou double-clic) → champ de saisie, Entrée pour valider.
+	func _build_name_field() -> HBoxContainer:
+		var box := HBoxContainer.new()
+		box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		box.alignment = BoxContainer.ALIGNMENT_BEGIN if player == 0 else BoxContainer.ALIGNMENT_END
+		box.add_theme_constant_override("separation", 6)
+		_name_label = Label.new()
+		_name_label.text = player_name
+		_name_label.add_theme_font_size_override("font_size", 18)
+		_name_label.add_theme_color_override("font_color", TEAM_NAME_COLORS[player])
+		_name_label.mouse_filter = Control.MOUSE_FILTER_STOP
+		_name_label.gui_input.connect(func(e: InputEvent) -> void:
+			if e is InputEventMouseButton and e.double_click:
+				_start_edit())
+		_name_edit = LineEdit.new()
+		_name_edit.max_length = NAME_MAX_LENGTH
+		_name_edit.custom_minimum_size = Vector2(150, 32)
+		_name_edit.add_theme_font_size_override("font_size", 16)
+		_name_edit.placeholder_text = "Joueur %d" % (player + 1)
+		_name_edit.hide()
+		_name_edit.text_submitted.connect(func(_t: String) -> void: _end_edit())
+		_name_edit.focus_exited.connect(_end_edit)
+		_name_button = Button.new()
+		_name_button.icon = ICON_EDIT
+		_name_button.flat = true
+		_name_button.focus_mode = Control.FOCUS_NONE
+		_name_button.tooltip_text = "Modifier le nom"
+		_name_button.custom_minimum_size = Vector2(32, 32)
+		_name_button.add_theme_constant_override("icon_max_width", 16)
+		_name_button.add_theme_color_override("icon_normal_color", W.TEXT_DIM)
+		_name_button.add_theme_color_override("icon_hover_color", Color.WHITE)
+		_name_button.pressed.connect(_start_edit)
+		if player == 0:
+			box.add_child(_name_label)
+			box.add_child(_name_edit)
+			box.add_child(_name_button)
+		else:
+			box.add_child(_name_button)
+			box.add_child(_name_label)
+			box.add_child(_name_edit)
+		return box
+
+	func _start_edit() -> void:
+		_name_edit.text = player_name
+		_name_label.hide()
+		_name_button.hide()
+		_name_edit.show()
+		_name_edit.grab_focus()
+		_name_edit.select_all()
+
+	func _end_edit() -> void:
+		if not _name_edit.visible:
+			return
+		var text := _name_edit.text.strip_edges()
+		player_name = text if text != "" else "Joueur %d" % (player + 1)
+		_name_label.text = player_name
+		_name_edit.hide()
+		_name_label.show()
+		_name_button.show()
 
 	static func MenuScript() -> GDScript:
 		return load("res://scripts/menu.gd")
@@ -438,6 +504,8 @@ class PlayerPanel extends PanelContainer:
 		_stats.add_child(_chip("%d PV" % data.max_hp, Color("f3d6d2"), Color("2a1414"), Color("5a2a28")))
 		_stats.add_child(_chip("%d PA" % data.max_pa, W.PA_TEXT, Color("1b2634"), Color("2f4a68")))
 		_stats.add_child(_chip("%d PM" % data.max_pm, W.PM_TEXT, Color("19291f"), Color("2f5a3c")))
+		if menu.tooltip:
+			menu.tooltip.hide()
 		for c in _spells.get_children():
 			c.queue_free()
 		for spell in data.spells:
@@ -464,9 +532,12 @@ class PlayerPanel extends PanelContainer:
 		p.add_child(l)
 		return p
 
-	static func _spell_icon(spell: SpellData) -> PanelContainer:
+	## Icône d'un sort ; au survol, l'infobulle détaillée comme en combat.
+	func _spell_icon(spell: SpellData) -> PanelContainer:
 		var p := PanelContainer.new()
-		p.tooltip_text = "%s · %d PA\n%s" % [spell.spell_name, spell.pa_cost, spell.describe()]
+		p.mouse_entered.connect(func() -> void:
+			menu.tooltip.show_spell(spell, p.get_global_rect(), SpellTooltip.limits_text(spell)))
+		p.mouse_exited.connect(func() -> void: menu.tooltip.hide())
 		p.custom_minimum_size = Vector2(44, 44)
 		var sb := StyleBoxFlat.new()
 		sb.bg_color = Color("2a2a2a")

@@ -48,7 +48,7 @@ func _build_combat() -> void:
 	for i in 2:
 		var zone: Array = state.placement_zones[i]
 		var start: Vector2i = zone[0] if not zone.is_empty() else Vector2i(i * (state.grid.width - 1), 0)
-		var f := Fighter.new(i, "Joueur %d" % (i + 1), i, start, GameConfig.class_for(i))
+		var f := Fighter.new(i, GameConfig.player_name(i), i, start, GameConfig.class_for(i))
 		state.add_fighter(f)
 
 

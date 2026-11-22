@@ -9,8 +9,6 @@ signal spell_pressed(index: int)
 signal restart_pressed
 signal menu_pressed
 
-const TOOLTIP_WIDTH := 270
-
 
 var _state: CombatState
 var _selected: SpellData
@@ -36,13 +34,7 @@ var _chips_box: HBoxContainer
 var _chips: Array[HudWidgets.FighterChip] = []
 
 # Infobulle
-var _tooltip: PanelContainer
-var _tt_name: Label
-var _tt_cost: Label
-var _tt_range: Label
-var _tt_effects: Label
-var _tt_status: Label
-var _tt_hint: Label
+var _tooltip: SpellTooltip
 
 var _victory: Control
 var _victory_label: Label
@@ -158,51 +150,8 @@ func _build_turn_order() -> void:
 
 
 func _build_tooltip() -> void:
-	_tooltip = PanelContainer.new()
-	var sb := HudWidgets.panel_style(Color("5a5040"), 8, 12)
-	sb.bg_color = Color(0.055, 0.063, 0.082, 0.96)
-	_tooltip.add_theme_stylebox_override("panel", sb)
-	_tooltip.custom_minimum_size = Vector2(TOOLTIP_WIDTH, 0)
-	_tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_tooltip.hide()
+	_tooltip = SpellTooltip.new()
 	add_child(_tooltip)
-	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 5)
-	_tooltip.add_child(v)
-	var head := HBoxContainer.new()
-	v.add_child(head)
-	_tt_name = _label(16, Color("f1e3c2"))
-	_tt_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	head.add_child(_tt_name)
-	_tt_cost = _label(14, Color("6fb0f0"))
-	head.add_child(_tt_cost)
-	_tt_range = _wrapped(_label(12, HudWidgets.TEXT_DIM))
-	v.add_child(_tt_range)
-	var line := ColorRect.new()
-	line.color = HudWidgets.PANEL_BORDER
-	line.custom_minimum_size = Vector2(0, 1)
-	v.add_child(line)
-	_tt_effects = _wrapped(_label(14, HudWidgets.TEXT))
-	v.add_child(_tt_effects)
-	_tt_status = _wrapped(_label(12, Color("8fd3a0")))
-	v.add_child(_tt_status)
-	_tt_hint = _wrapped(_label(12, HudWidgets.TEXT_DIM))
-	_tt_hint.text = "Clic : lancer   ·   Clic droit / Échap : annuler"
-	v.add_child(_tt_hint)
-
-
-func _label(font_size: int, color: Color) -> Label:
-	var l := Label.new()
-	l.add_theme_font_size_override("font_size", font_size)
-	l.add_theme_color_override("font_color", color)
-	return l
-
-
-## Retour à la ligne dans une largeur fixe (sinon le label se réduit à une colonne).
-func _wrapped(l: Label) -> Label:
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	l.custom_minimum_size = Vector2(TOOLTIP_WIDTH - 24, 0)
-	return l
 
 
 func _build_victory() -> void:
@@ -345,15 +294,7 @@ func _update_tooltip() -> void:
 		return
 	# L'infobulle recouvre la ligne d'aide : elle reprend l'aide utile quand un sort est sélectionné.
 	_hint.modulate.a = 0.0
-	_tt_hint.visible = slot.spell == _selected
 	var spell := slot.spell
-	_tt_name.text = spell.spell_name
-	_tt_cost.text = "%d PA" % spell.pa_cost
-	_tt_range.text = _range_text(spell)
-	var effects: Array[String] = []
-	for e in spell.effects:
-		effects.append(e.describe())
-	_tt_effects.text = "  ·  ".join(effects)
 	var status := ""
 	var color := Color("8fd3a0")
 	match slot.look:
@@ -373,36 +314,7 @@ func _update_tooltip() -> void:
 				status = "1 lancer par tour"
 	if spell.cooldown > 0 and slot.look != HudWidgets.SpellSlot.Look.COOLDOWN:
 		status += "  ·  recharge %d tours" % spell.cooldown
-	_tt_status.text = status
-	_tt_status.add_theme_color_override("font_color", color)
-	_tooltip.reset_size()
-	_tooltip.show()
-	# Au-dessus de la case, sans sortir de l'écran.
-	var view := _tooltip.get_viewport_rect().size
-	var pos := slot.get_global_rect().position + Vector2(slot.size.x * 0.5 - _tooltip.size.x * 0.5, -_tooltip.size.y - 16)
-	pos.x = clampf(pos.x, 8, view.x - _tooltip.size.x - 8)
-	_tooltip.position = pos
-
-
-func _range_text(spell: SpellData) -> String:
-	var parts: Array[String] = []
-	if spell.range_max == 0:
-		parts.append("Sur soi")
-	elif spell.range_min == spell.range_max:
-		parts.append("Portée %d" % spell.range_max)
-	else:
-		parts.append("Portée %d–%d" % [spell.range_min, spell.range_max])
-	if spell.range_max > 0:
-		parts.append("ligne de vue" if spell.needs_line_of_sight else "sans ligne de vue")
-	if spell.line_only:
-		parts.append("en ligne")
-	if spell.area == SpellData.AreaShape.CROSS:
-		parts.append("zone en croix" if spell.range_max > 0 else "autour de soi")
-	if spell.target_rule == SpellData.TargetRule.EMPTY:
-		parts.append("case libre")
-	elif spell.target_rule == SpellData.TargetRule.FIGHTER:
-		parts.append("sur un personnage")
-	return "  ·  ".join(parts)
+	_tooltip.show_spell(spell, slot.get_global_rect(), status, color, spell == _selected)
 
 
 func set_input_enabled(enabled: bool) -> void:
