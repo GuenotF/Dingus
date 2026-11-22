@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="SpellData" format=3]
+
+[ext_resource type="Script" path="res://scripts/core/effect_data.gd" id="1_0y07n"]
+[ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="2_gjro2"]
+
+[sub_resource type="Resource" id="Resource_l04ik"]
+script = ExtResource("1_0y07n")
+kind = 4
+min_value = 0
+max_value = 0
+
+[resource]
+script = ExtResource("2_gjro2")
+spell_name = "Roulade"
+pa_cost = 2
+animation = "jump"
+range_min = 2
+range_max = 3
+line_only = true
+target_rule = 1
+effects = Array[ExtResource("1_0y07n")]([SubResource("Resource_l04ik")])
+casts_per_turn = 1
+cooldown = 2

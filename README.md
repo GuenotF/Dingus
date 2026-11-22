@@ -32,6 +32,7 @@ ou par l'IA (2 joueurs sur le même écran, contre l'IA, ou IA contre IA pour re
 |---|---|---|---|---|
 | Guerrier | 150 | 6 | 3 | Coup d'épée, Charge (bond), Repousser (poussée 2), Cri (+1 PM) |
 | Mage de feu | 135 | 6 | 4 | Flammèche, Boule de feu, Pluie de feu (zone sans ligne de vue), Nova de flammes (autour de soi, repousse) |
+| Archer | 125 | 6 | 3 | Flèche (portée 8), Flèche entravante (−2 PM), Flèche de recul (repousse 2), Roulade (bond) |
 
 Créer un nouveau personnage : voir [docs/creation_personnage.md](docs/creation_personnage.md)
 (checklist, étapes, critères d'équilibrage, modèle de fiche).
@@ -90,8 +91,18 @@ dans `CLASS_PATHS` (`scripts/game_config.gd`).
 godot --headless --path . -s res://tests/simulate_balance.gd
 ```
 Simule 80 combats IA contre IA pour **chaque paire de personnages** sur **chaque carte** et affiche
-victoires, durée moyenne et avantage du premier joueur. Actuellement, Guerrier / Mage de feu :
-Prairie 52 / 47 %, Le lac 53 / 46 %, environ 6 tours.
+victoires, durée moyenne et avantage du premier joueur. Options pour cibler un cas :
+`-- personnage=Archer adversaire=Mage carte=Prairie parties=20 graine=1`.
+
+Résultats actuels (victoires du premier nommé) :
+
+| Duel | Prairie | Le lac | Place du village |
+|---|---|---|---|
+| Guerrier / Mage de feu | 56 / 43 % | 48 / 51 % | 63 / 36 % |
+| Archer / Guerrier | 48 / 51 % | 85 / 15 % | 47 / 52 % |
+| Archer / Mage de feu | 41 / 58 % | 50 / 50 % | 53 / 46 % |
+
+Détail et historique des réglages : `docs/personnages/`.
 
 ## Dessiner une carte
 
@@ -103,7 +114,6 @@ Cartes actuelles :
 - **Le lac** (`lac.tscn`) : une rivière coupe le terrain, deux ponts, deux pierres dans l'eau.
 - **Place du village** (`village.tscn`) : place pavée autour d'un puits, étals, charrette, tonneaux,
   clôtures. Tuiles du pack *Fantasy tileset - 2D Isometric* (`assets/tiles/village/`), en rendu lissé.
-  Équilibrage pas encore mesuré sur cette carte.
 
 1. **Ouvrir** une carte de `maps/`, ou la **dupliquer** (clic droit → Dupliquer) pour en créer une nouvelle.
    Sur le nœud racine, renseigner `map_name` et `description` (affichés dans le menu).
@@ -135,7 +145,8 @@ La rangée d'eau la plus claire (glace) se traverse.
 La carte utilise le tileset isométrique (`assets/tiles/`). Les combattants utilisent un **sprite animé**
 si leur classe en a un (champ `sprites` de la classe), sinon un pion temporaire.
 
-Actuellement : le **Guerrier** utilise le pack *2D HD Character Knight* (`assets/characters/knight/`).
+Actuellement : le **Guerrier** utilise le pack *2D HD Character Knight* (`assets/characters/knight/`),
+le **Mage de feu** et l'**Archer** le pack *2D HD Character pack 1* (`assets/characters/wizard/`, `assets/characters/archer/`).
 
 ### Ajouter un personnage animé
 

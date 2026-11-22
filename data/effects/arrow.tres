@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EffectAnimation" format=3]
+
+[ext_resource type="Script" path="res://scripts/view/effect_animation.gd" id="1_1soml"]
+[ext_resource type="Texture2D" path="res://assets/effects/arrows/arrow.png" id="2_22kvu"]
+
+[resource]
+script = ExtResource("1_1soml")
+texture = ExtResource("2_22kvu")
+origin = Vector2(110, 5)
+additive = false
+speed = 1100.0

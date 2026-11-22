@@ -1,0 +1,70 @@
+[gd_resource type="Resource" script_class="CharacterSprites" format=3]
+
+[ext_resource type="Script" path="res://scripts/view/character_animation.gd" id="1_il4ys"]
+[ext_resource type="Texture2D" path="res://assets/characters/archer/idle.png" id="2_gxc5e"]
+[ext_resource type="Texture2D" path="res://assets/characters/archer/walk.png" id="3_4jhkm"]
+[ext_resource type="Texture2D" path="res://assets/characters/archer/take_damage.png" id="4_tv74k"]
+[ext_resource type="Texture2D" path="res://assets/characters/archer/die.png" id="5_ktpal"]
+[ext_resource type="Texture2D" path="res://assets/characters/archer/attack1.png" id="6_208tx"]
+[ext_resource type="Texture2D" path="res://assets/characters/archer/attack2.png" id="7_at6fr"]
+[ext_resource type="Texture2D" path="res://assets/characters/archer/attack3.png" id="8_7bblm"]
+[ext_resource type="Texture2D" path="res://assets/characters/archer/rolling.png" id="9_wah05"]
+[ext_resource type="Script" path="res://scripts/view/character_sprites.gd" id="10_wkjh1"]
+
+[sub_resource type="Resource" id="Resource_4cltj"]
+script = ExtResource("1_il4ys")
+texture = ExtResource("2_gxc5e")
+fps = 12.0
+loop = true
+
+[sub_resource type="Resource" id="Resource_5umo1"]
+script = ExtResource("1_il4ys")
+name = "walk"
+texture = ExtResource("3_4jhkm")
+fps = 20.0
+loop = true
+
+[sub_resource type="Resource" id="Resource_l5tgy"]
+script = ExtResource("1_il4ys")
+name = "hit"
+texture = ExtResource("4_tv74k")
+fps = 24.0
+
+[sub_resource type="Resource" id="Resource_dctmu"]
+script = ExtResource("1_il4ys")
+name = "die"
+texture = ExtResource("5_ktpal")
+
+[sub_resource type="Resource" id="Resource_ofm7e"]
+script = ExtResource("1_il4ys")
+name = "attack1"
+texture = ExtResource("6_208tx")
+fps = 26.0
+
+[sub_resource type="Resource" id="Resource_0orkx"]
+script = ExtResource("1_il4ys")
+name = "attack2"
+texture = ExtResource("7_at6fr")
+fps = 26.0
+
+[sub_resource type="Resource" id="Resource_yswi3"]
+script = ExtResource("1_il4ys")
+name = "attack3"
+texture = ExtResource("8_7bblm")
+fps = 26.0
+
+[sub_resource type="Resource" id="Resource_nvrjx"]
+script = ExtResource("1_il4ys")
+name = "jump"
+texture = ExtResource("9_wah05")
+fps = 30.0
+
+[resource]
+script = ExtResource("10_wkjh1")
+feet_position = Vector2(63, 94)
+feet_down_right = Vector2(63, 94)
+feet_down_left = Vector2(64, 93)
+feet_up_left = Vector2(63, 91)
+feet_up_right = Vector2(62, 99)
+height = 70.0
+animations = Array[ExtResource("1_il4ys")]([SubResource("Resource_4cltj"), SubResource("Resource_5umo1"), SubResource("Resource_l5tgy"), SubResource("Resource_dctmu"), SubResource("Resource_ofm7e"), SubResource("Resource_0orkx"), SubResource("Resource_yswi3"), SubResource("Resource_nvrjx")])

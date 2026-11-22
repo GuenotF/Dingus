@@ -1,7 +1,9 @@
 extends SceneTree
-## Équilibrage : simule 80 combats IA contre IA pour chaque paire de personnages,
+## Équilibrage (options : -- personnage=X adversaire=Y carte=Z parties=N graine=K) : simule 80 combats IA contre IA pour chaque paire de personnages,
 ## sur chaque carte de maps/ (placements aléatoires, chacun commence une fois sur deux).
 ##   godot --headless --path . -s res://tests/simulate_balance.gd
+## Filtres optionnels (après --) : un personnage et/ou une carte (début du nom suffit), ex.
+##   godot --headless --path . -s res://tests/simulate_balance.gd -- personnage=Archer carte=Prairie
 ## Critères visés : 40 à 60 % de victoires, 6 à 12 tours en moyenne, aucun combat sans fin.
 
 const GAMES_PER_SIDE := 40
@@ -40,6 +42,22 @@ func _run(map: BattleMap, a_class: ClassData, b_class: ClassData, a_first: bool,
 
 
 func _init() -> void:
+	var only_class := ""
+	var only_map := ""
+	var only_opponent := ""
+	var games := GAMES_PER_SIDE
+	var first_seed := 1
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("personnage="):
+			only_class = arg.split("=")[1].to_lower()
+		elif arg.begins_with("carte="):
+			only_map = arg.split("=")[1].to_lower()
+		elif arg.begins_with("parties="):
+			games = int(arg.split("=")[1])
+		elif arg.begins_with("graine="):
+			first_seed = int(arg.split("=")[1])
+		elif arg.begins_with("adversaire="):
+			only_opponent = arg.split("=")[1].to_lower()
 	var classes: Array[ClassData] = []
 	for file in DirAccess.get_files_at("res://data/classes"):
 		if file.trim_suffix(".remap").ends_with(".tres"):
@@ -53,14 +71,21 @@ func _init() -> void:
 		for j in range(i + 1, classes.size()):
 			var a := classes[i]
 			var b := classes[j]
+			if only_class != "" and not (a.class_label.to_lower().begins_with(only_class) or b.class_label.to_lower().begins_with(only_class)):
+				continue
+			if only_opponent != "" and not (a.class_label.to_lower().begins_with(only_opponent) or b.class_label.to_lower().begins_with(only_opponent)):
+				continue
 			print("\n%s contre %s" % [a.class_label, b.class_label])
 			for path in maps:
 				var map: BattleMap = load(path).instantiate()
+				if only_map != "" and not map.map_name.to_lower().begins_with(only_map):
+					map.free()
+					continue
 				var wins := [0, 0]
 				var first_wins := 0
 				var turns := 0
 				var unfinished := 0
-				for s in range(1, GAMES_PER_SIDE + 1):
+				for s in range(first_seed, first_seed + games):
 					for a_first in [true, false]:
 						var r := _run(map, a, b, a_first, s)
 						if r.winner >= 0:

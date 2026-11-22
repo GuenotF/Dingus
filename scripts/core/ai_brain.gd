@@ -95,7 +95,9 @@ static func score_cast(state: CombatState, me: Fighter, origin: Vector2i, spell:
 			EffectData.Kind.MOD_PM, EffectData.Kind.MOD_PA:
 				for v in victims:
 					if v.team != me.team and avg < 0:
-						score += 3.0 * -avg
+						# Ralentir un combattant au corps à corps vaut cher pour un personnage à distance.
+						var kiting := effect.kind == EffectData.Kind.MOD_PM and me.preferred_range() > 1 and v.preferred_range() <= 1
+						score += (6.0 if kiting else 3.0) * -avg
 					elif v.team == me.team and avg > 0:
 						score += 5.0 * avg if _nearest_enemy_distance(state, me, origin) > 1 else 0.5
 			EffectData.Kind.DASH:
@@ -103,7 +105,9 @@ static func score_cast(state: CombatState, me: Fighter, origin: Vector2i, spell:
 				if me.preferred_range() <= 1:
 					score += 12.0 if d == 1 else maxf(0.0, 4.0 - d)
 				else:
-					score += 3.0 if d >= me.preferred_range() else -3.0
+					# Un tireur ne roule que pour se dégager, pas « pour rien » en début de combat.
+					var before := _nearest_enemy_distance(state, me, origin)
+					score += 3.0 * (d - before) if before < me.preferred_range() and d > before else -3.0
 	return score - spell.pa_cost * 0.1
 
 
