@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="1_4j7s1"]
+
+[resource]
+script = ExtResource("1_4j7s1")
+spell_name = "Bombe"
+pa_cost = 5
+range_max = 4
+damage_min = 12
+damage_max = 16
+area = 1
+casts_per_turn = 1

@@ -70,6 +70,49 @@ func reachable_cells(from: Vector2i, max_steps: int, occupied: Array[Vector2i] =
 	return costs
 
 
+static func distance(a: Vector2i, b: Vector2i) -> int:
+	return absi(a.x - b.x) + absi(a.y - b.y)
+
+
+## Ligne de vue entre deux cases. Les obstacles et les cases de `blockers` coupent la vue ;
+## les extrémités ne comptent pas. Symétrique : on accepte si le tracé est libre dans un sens
+## ou dans l'autre (Bresenham peut différer selon le sens sur les diagonales parfaites).
+func has_line_of_sight(from: Vector2i, to: Vector2i, blockers: Array[Vector2i] = []) -> bool:
+	return _ray_is_clear(from, to, blockers) or _ray_is_clear(to, from, blockers)
+
+
+func _ray_is_clear(from: Vector2i, to: Vector2i, blockers: Array[Vector2i]) -> bool:
+	for cell in line_cells(from, to):
+		if cell == from or cell == to:
+			continue
+		if is_obstacle(cell) or blockers.has(cell):
+			return false
+	return true
+
+
+## Cases traversées par une ligne de Bresenham, extrémités comprises.
+static func line_cells(from: Vector2i, to: Vector2i) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	var dx := absi(to.x - from.x)
+	var dy := -absi(to.y - from.y)
+	var sx := 1 if from.x < to.x else -1
+	var sy := 1 if from.y < to.y else -1
+	var err := dx + dy
+	var current := from
+	while true:
+		cells.append(current)
+		if current == to:
+			break
+		var e2 := 2 * err
+		if e2 >= dy:
+			err += dy
+			current.x += sx
+		if e2 <= dx:
+			err += dx
+			current.y += sy
+	return cells
+
+
 ## Chemin le plus court (sans la case de départ). Vide si la case est inaccessible.
 func find_path(from: Vector2i, to: Vector2i, occupied: Array[Vector2i] = []) -> Array[Vector2i]:
 	var result: Array[Vector2i] = []

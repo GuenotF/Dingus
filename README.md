@@ -8,12 +8,14 @@ Prototype de jeu tactique 1v1 au tour par tour, en vue isométrique (style Dofus
 2. Dans Godot : **Importer** → sélectionner `project.godot`.
 3. Appuyer sur **F5**.
 
-## Contrôles (phase 1)
+## Contrôles
 
 | Action | Effet |
 |---|---|
 | Survol d'une case | Aperçu du chemin |
-| Clic gauche | Déplacer le personnage actif |
+| Clic gauche | Déplacer le personnage actif, ou lancer le sort choisi |
+| 1 / 2 / 3 | Choisir un sort (Coup d'épée, Flèche, Bombe) |
+| Clic droit / Échap | Annuler le sort choisi |
 | Espace / bouton | Fin du tour |
 
 Les deux joueurs jouent sur le même écran, chacun à son tour.
@@ -27,7 +29,7 @@ scripts/
   main.gd Assemble core + view et gère les entrées.
 scenes/   Scènes Godot.
 tests/    Tests de la logique.
-data/     (à venir) Sorts, classes, cartes.
+data/spells/  Sorts (.tres), modifiables dans l'inspecteur Godot.
 assets/   (à venir) Graphismes et sons.
 ```
 
@@ -45,11 +47,17 @@ godot --headless --path . -s res://tests/test_core.gd
 
 - [x] Phase 0 — Mise en place
 - [x] Phase 1 — Grille iso, déplacement A*, tours
-- [ ] Phase 2 — PA, sorts (Resources), ligne de vue, PV, victoire
+- [x] Phase 2 — PA, sorts (Resources), ligne de vue, PV, victoire
 - [ ] Phase 3 — Classes, effets, IA simple
 - [ ] Phase 4 — Animations, sons, interface
 - [ ] Phase 5 — Multijoueur en ligne
 - [ ] Phase 6 — Export Windows / Web
+
+## Ajouter ou modifier un sort
+
+Dans le panneau FileSystem de Godot, duplique un fichier de `data/spells/`, modifie ses
+valeurs dans l'inspecteur (coût, portée, ligne de vue, dégâts, zone, lancers par tour),
+puis ajoute son chemin dans `SPELL_PATHS` (`scripts/main.gd`).
 
 ## Graphismes
 
