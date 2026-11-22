@@ -13,6 +13,7 @@ extends Node2D
 ##   obstacle        (bool) la case bloque le déplacement et la ligne de vue.
 ##   water           (bool) eau : infranchissable mais ne bloque pas la ligne de vue.
 ##   placement_team  (int)  1 = équipe 1, 2 = équipe 2 (tuiles du calque Placement).
+##   destructible_hp (int)  PV d'un obstacle qu'on peut détruire (0 = indestructible).
 ## Une case de la grille sans tuile de Sol est considérée comme un obstacle (vide).
 ##
 ## La carte doit commencer en (0, 0) : la grille va de (0, 0) au coin opposé du Sol.
@@ -20,6 +21,8 @@ extends Node2D
 const OBSTACLE := "obstacle"
 const WATER := "water"
 const PLACEMENT_TEAM := "placement_team"
+## (int) PV d'un obstacle destructible ; 0 ou absent = indestructible.
+const DESTRUCTIBLE_HP := "destructible_hp"
 
 ## Nom affiché dans le menu.
 @export var map_name: String = ""
@@ -55,7 +58,28 @@ func grid_size() -> Vector2i:
 
 func build_grid() -> BattleGrid:
 	var size := grid_size()
-	return BattleGrid.new(size.x, size.y, obstacles(), water())
+	var grid := BattleGrid.new(size.x, size.y, obstacles(), water())
+	var hp_by_cell := destructibles()
+	for cell in hp_by_cell:
+		grid.add_destructible(cell, hp_by_cell[cell])
+	return grid
+
+
+## Obstacles destructibles : case -> PV (tuile de sol, de surcouche ou de décor portant `destructible_hp`).
+func destructibles() -> Dictionary:
+	var result: Dictionary = {}
+	for layer: TileMapLayer in [ground(), ground_detail(), decor()]:
+		if layer == null or layer.tile_set == null \
+				or layer.tile_set.get_custom_data_layer_by_name(DESTRUCTIBLE_HP) == -1:
+			continue
+		for cell in layer.get_used_cells():
+			var data := layer.get_cell_tile_data(cell)
+			if data == null or not data.get_custom_data(OBSTACLE):
+				continue
+			var hp: int = data.get_custom_data(DESTRUCTIBLE_HP)
+			if hp > 0:
+				result[cell] = hp
+	return result
 
 
 ## Cases bloquantes : tuile marquée « obstacle » (sol ou décor), ou absence de sol.

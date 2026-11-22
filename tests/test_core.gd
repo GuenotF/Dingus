@@ -33,6 +33,9 @@ func _init() -> void:
 	_test_cast_preview()
 	_test_drain()
 	_test_ai_sacrifice()
+	_test_destructibles_grid()
+	_test_destructibles_spells()
+	_test_desert_destructibles()
 	print("Tests terminés : %s" % ("OK" if _failures == 0 else "%d échec(s)" % _failures))
 	quit(1 if _failures > 0 else 0)
 
@@ -540,3 +543,98 @@ func _test_ai_sacrifice() -> void:
 	var weak := near.active_fighter()
 	weak.hp = 30
 	_check(AiBrain.score_cast(near, weak, Vector2i(0, 0), pact, Vector2i(0, 0)) < 0.0, "IA : pas de sacrifice quand les PV sont bas")
+
+
+func _test_destructibles_grid() -> void:
+	var grid := BattleGrid.new(8, 3)
+	grid.add_destructible(Vector2i(3, 1), 50)
+	_check(grid.is_obstacle(Vector2i(3, 1)) and grid.is_destructible(Vector2i(3, 1)), "destructible : bloque comme un obstacle")
+	_check(grid.destructible_hp(Vector2i(3, 1)) == 50 and grid.destructible_max_hp(Vector2i(3, 1)) == 50, "destructible : PV de départ")
+	_check(not grid.has_line_of_sight(Vector2i(0, 1), Vector2i(6, 1)), "destructible intact : coupe la ligne de vue")
+	_check(grid.damage_destructible(Vector2i(3, 1), 20) == 20 and grid.destructible_hp(Vector2i(3, 1)) == 30, "dégâts partiels")
+	_check(grid.is_obstacle(Vector2i(3, 1)), "encore debout à 30 PV")
+	_check(grid.damage_destructible(Vector2i(3, 1), 500) == 30, "les PV perdus sont plafonnés aux PV restants")
+	_check(not grid.is_obstacle(Vector2i(3, 1)) and not grid.is_destructible(Vector2i(3, 1)), "détruit : plus d'obstacle")
+	_check(grid.is_walkable(Vector2i(3, 1)), "détruit : case praticable")
+	_check(grid.has_line_of_sight(Vector2i(0, 1), Vector2i(6, 1)), "détruit : ligne de vue dégagée")
+	_check(not grid.find_path(Vector2i(0, 1), Vector2i(6, 1)).is_empty(), "détruit : chemin trouvé à travers la case")
+	_check(grid.damage_destructible(Vector2i(3, 1), 10) == 0, "plus de dégâts sur une case détruite")
+	var walls: Array[Vector2i] = [Vector2i(5, 1)]
+	var solid := BattleGrid.new(8, 3, walls)
+	_check(solid.damage_destructible(Vector2i(5, 1), 99) == 0 and solid.is_obstacle(Vector2i(5, 1)), "un obstacle ordinaire est indestructible")
+
+
+func _test_destructibles_spells() -> void:
+	var hit := _spell(2, 1, 6, true, 30, 5)
+	var state := _duel([hit], Vector2i(0, 1), Vector2i(9, 9))
+	state.grid.add_destructible(Vector2i(3, 1), 70)
+	var walls: Array[Vector2i] = [Vector2i(5, 1)]
+	for cell in walls:
+		state.grid.add_obstacle(cell)
+	var zone := state.cells_in_range(hit)
+	_check(zone.has(Vector2i(3, 1)) and zone[Vector2i(3, 1)], "un destructible visible est une cible valide")
+	_check(not zone.has(Vector2i(5, 1)), "un obstacle ordinaire n'est pas ciblable")
+	var preview := state.preview_obstacles(hit, Vector2i(3, 1))
+	_check(preview.size() == 1 and preview[0].damage_max == 30 and preview[0].hp == 70, "aperçu des dégâts sur le destructible")
+	var log: Array = []
+	state.obstacle_damaged.connect(func(cell: Vector2i, amount: int, left: int) -> void: log.append(["dmg", cell, amount, left]))
+	state.obstacle_destroyed.connect(func(cell: Vector2i) -> void: log.append(["destroyed", cell]))
+	_check(state.try_cast(hit, Vector2i(3, 1)), "sort lancé sur un destructible")
+	_check(state.grid.destructible_hp(Vector2i(3, 1)) == 40, "70 - 30 = 40 PV")
+	state.try_cast(hit, Vector2i(3, 1))
+	state.try_cast(hit, Vector2i(3, 1))
+	_check(not state.grid.is_obstacle(Vector2i(3, 1)), "détruit au 3e coup")
+	_check(log.size() == 4 and log[2][0] == "dmg" and log[3] == ["destroyed", Vector2i(3, 1)], "signaux : 3 dégâts puis la destruction")
+	_check(state.fighters[1].hp == 100, "aucun combattant touché au passage")
+	_check(state.cells_in_range(hit).has(Vector2i(5, 1)) == false, "le mur ordinaire reste intouchable")
+
+	# Un sort qui ne fait pas de dégâts, ou qui exige une case libre, ne vise pas les destructibles.
+	var heal: Array[EffectData] = [EffectData.make(EffectData.Kind.HEAL, 10)]
+	var heal_spell := _effect_spell(1, 1, 5, heal)
+	var s2 := _duel([heal_spell], Vector2i(0, 1), Vector2i(9, 9))
+	s2.grid.add_destructible(Vector2i(2, 1), 40)
+	_check(not s2.cells_in_range(heal_spell).has(Vector2i(2, 1)), "un soin ne vise pas un destructible")
+	var empty_rule := _spell(1, 1, 5, false, 10)
+	empty_rule.target_rule = SpellData.TargetRule.EMPTY
+	var s3 := _duel([empty_rule], Vector2i(0, 1), Vector2i(9, 9))
+	s3.grid.add_destructible(Vector2i(2, 1), 40)
+	_check(not s3.cells_in_range(empty_rule).has(Vector2i(2, 1)), "« case libre » exclut les destructibles")
+
+	# Zone en croix : touche le combattant ET le destructible voisin.
+	var cross := _spell(1, 1, 6, false, 25, 5)
+	cross.area = SpellData.AreaShape.CROSS
+	cross.area_size = 1
+	var s4 := _duel([cross], Vector2i(0, 1), Vector2i(4, 1))
+	s4.grid.add_destructible(Vector2i(4, 2), 60)
+	s4.try_cast(cross, Vector2i(4, 1))
+	_check(s4.fighters[1].hp == 75 and s4.grid.destructible_hp(Vector2i(4, 2)) == 35, "zone : combattant et destructible touchés")
+
+	# Poussée : le choc contre un destructible l'abîme aussi.
+	var push_fx: Array[EffectData] = [EffectData.make(EffectData.Kind.PUSH, 2)]
+	var push := _effect_spell(1, 1, 1, push_fx)
+	var s5 := _duel([push], Vector2i(1, 1), Vector2i(2, 1))
+	s5.grid.add_destructible(Vector2i(4, 1), 60)
+	s5.try_cast(push, Vector2i(2, 1))
+	var expected := CombatState.PUSH_DAMAGE_PER_CELL
+	_check(s5.fighters[1].cell == Vector2i(3, 1) and s5.fighters[1].hp == 100 - expected, "poussée stoppée par le destructible")
+	_check(s5.grid.destructible_hp(Vector2i(4, 1)) == 60 - expected, "le choc abîme le destructible")
+
+
+func _test_desert_destructibles() -> void:
+	var map: BattleMap = load("res://maps/desert.tscn").instantiate()
+	var grid := map.build_grid()
+	var destructibles := map.destructibles()
+	var columns := 0
+	var rocks := 0
+	for cell in destructibles:
+		_check(grid.is_obstacle(cell) and grid.is_destructible(cell), "désert : destructible %s est aussi un obstacle" % cell)
+		if destructibles[cell] == 80:
+			columns += 1
+		elif destructibles[cell] == 120:
+			rocks += 1
+	_check(columns == 8, "désert : 8 colonnes destructibles (80 PV), trouvé %d" % columns)
+	_check(rocks > 0, "désert : des rochers destructibles (120 PV)")
+	_check(not destructibles.has(Vector2i(7, 7)), "désert : le sphinx est indestructible")
+	_check(not destructibles.has(Vector2i(7, 5)) and not destructibles.has(Vector2i(7, 9)), "désert : les obélisques sont indestructibles")
+	_check(grid.get_obstacles().size() == 25, "désert : toujours 25 obstacles")
+	map.free()

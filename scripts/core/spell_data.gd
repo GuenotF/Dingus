@@ -42,6 +42,16 @@ enum TargetRule {
 @export_range(0, 10) var cooldown: int = 0
 
 
+## Ce sort abîme-t-il les obstacles destructibles ? Oui s'il fait des dégâts et vise n'importe quelle case.
+func damages_obstacles() -> bool:
+	if target_rule != TargetRule.ANY:
+		return false
+	for effect in effects:
+		if effect.kind == EffectData.Kind.DAMAGE or effect.kind == EffectData.Kind.DRAIN:
+			return true
+	return false
+
+
 ## Cases touchées si le sort est lancé sur `center`.
 func affected_cells(center: Vector2i) -> Array[Vector2i]:
 	var cells: Array[Vector2i] = [center]

@@ -3,6 +3,7 @@ extends RefCounted
 ## Logique pure de la grille : dimensions, obstacles, eau, chemins et zone accessible.
 ##   obstacle : bloque le déplacement ET la ligne de vue (rocher, tronc...).
 ##   eau      : bloque le déplacement mais PAS la ligne de vue (comme sur Dofus).
+##   destructible : un obstacle avec des PV ; détruit, il disparaît (case praticable, vue dégagée).
 ## Aucun nœud graphique ici : ce code sera réutilisé tel quel par le serveur en phase 5.
 
 const DIRECTIONS: Array[Vector2i] = [
@@ -13,6 +14,7 @@ var width: int
 var height: int
 var _obstacles: Dictionary = {} # Vector2i -> true
 var _water: Dictionary = {} # Vector2i -> true
+var _destructibles: Dictionary = {} # Vector2i -> {"hp": int, "max_hp": int} (obstacles qu'on peut détruire)
 var _astar := AStarGrid2D.new()
 
 
@@ -42,6 +44,48 @@ func add_obstacle(cell: Vector2i) -> void:
 
 func is_obstacle(cell: Vector2i) -> bool:
 	return _obstacles.has(cell)
+
+
+## Obstacle destructible : se comporte comme un obstacle tant qu'il lui reste des PV.
+func add_destructible(cell: Vector2i, hp: int) -> void:
+	if is_inside(cell) and hp > 0:
+		add_obstacle(cell)
+		_destructibles[cell] = {"hp": hp, "max_hp": hp}
+
+
+func is_destructible(cell: Vector2i) -> bool:
+	return _destructibles.has(cell)
+
+
+## PV restants d'un destructible (0 si la case n'en contient pas).
+func destructible_hp(cell: Vector2i) -> int:
+	return _destructibles[cell].hp if _destructibles.has(cell) else 0
+
+
+func destructible_max_hp(cell: Vector2i) -> int:
+	return _destructibles[cell].max_hp if _destructibles.has(cell) else 0
+
+
+## Retire des PV à un destructible et renvoie les PV réellement perdus.
+## À 0 PV l'obstacle disparaît : la case devient praticable et ne coupe plus la vue.
+func damage_destructible(cell: Vector2i, amount: int) -> int:
+	if not _destructibles.has(cell):
+		return 0
+	var entry: Dictionary = _destructibles[cell]
+	var dealt := mini(maxi(amount, 0), entry.hp)
+	entry.hp -= dealt
+	if entry.hp <= 0:
+		_destructibles.erase(cell)
+		_obstacles.erase(cell)
+		_astar.set_point_solid(cell, false)
+	return dealt
+
+
+func get_destructibles() -> Array[Vector2i]:
+	var result: Array[Vector2i] = []
+	for cell in _destructibles:
+		result.append(cell)
+	return result
 
 
 ## Eau : infranchissable, mais on voit (et on tire) par-dessus.

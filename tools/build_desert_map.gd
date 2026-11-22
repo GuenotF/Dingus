@@ -16,6 +16,8 @@ const SCENE_PATH := "res://maps/desert.tscn"
 const NAMES := ["Ground A1", "Ground W4", "Ground E1", "Ground A18", "Ground E10", "Ground E11", "Ground E12", "Ground E13", "Ground E14", "Ground E15", "Ground E2", "Ground E3", "Flora C1", "Flora C2", "Flora C3", "Flora C4", "Stone A1", "Stone A12", "Stone A2", "Stone A23", "Stone A24", "Stone A3", "Tree A1", "Tree A2", "Tree A3", "Tree A4", "Wall A6"]
 ## Préfixes des tuiles qui bloquent déplacement et ligne de vue.
 const OBSTACLES := ["Stone", "Wall", "Tree"]
+## Obstacles destructibles et leurs PV : rochers et colonnes (ni le sphinx, ni les obélisques, ni les palmiers).
+const DESTRUCTIBLE_HP := {"Stone A1": 120, "Stone A12": 120, "Stone A2": 120, "Stone A3": 120, "Wall A6": 80}
 const WATER_TILE := "Ground W4"
 const SAND_TILE := "Ground A1"
 
@@ -254,6 +256,9 @@ func _build_tileset() -> TileSet:
 	ts.add_custom_data_layer()
 	ts.set_custom_data_layer_name(2, "water")
 	ts.set_custom_data_layer_type(2, TYPE_BOOL)
+	ts.add_custom_data_layer()
+	ts.set_custom_data_layer_name(3, "destructible_hp")
+	ts.set_custom_data_layer_type(3, TYPE_INT)
 
 	var tiles := TileSetAtlasSource.new()
 	tiles.resource_name = "Désert"
@@ -269,6 +274,8 @@ func _build_tileset() -> TileSet:
 		for prefix in OBSTACLES:
 			if tile_name.begins_with(prefix):
 				data.set_custom_data("obstacle", true)
+		if DESTRUCTIBLE_HP.has(tile_name):
+			data.set_custom_data("destructible_hp", DESTRUCTIBLE_HP[tile_name])
 		if tile_name == WATER_TILE:
 			data.set_custom_data("water", true)
 

@@ -20,6 +20,9 @@ signal fighter_healed(fighter: Fighter, amount: int)
 signal fighter_displaced(fighter: Fighter, from: Vector2i, to: Vector2i)
 signal status_changed(fighter: Fighter)
 signal fighter_died(fighter: Fighter)
+## Un obstacle destructible encaisse des dégâts (`hp_left` > 0) ou est détruit (signal suivant).
+signal obstacle_damaged(cell: Vector2i, amount: int, hp_left: int)
+signal obstacle_destroyed(cell: Vector2i)
 signal combat_ended(winner_team: int)
 
 var grid: BattleGrid
@@ -193,7 +196,10 @@ func cells_in_range_from(spell: SpellData, caster: Fighter, origin: Vector2i, ap
 	for y in range(origin.y - spell.range_max, origin.y + spell.range_max + 1):
 		for x in range(origin.x - spell.range_max, origin.x + spell.range_max + 1):
 			var cell := Vector2i(x, y)
-			if not grid.is_inside(cell) or grid.is_obstacle(cell):
+			if not grid.is_inside(cell):
+				continue
+			# Un destructible est une cible valide pour les sorts de dégâts ; les autres obstacles non.
+			if grid.is_obstacle(cell) and not (grid.is_destructible(cell) and spell.damages_obstacles()):
 				continue
 			var dist := BattleGrid.distance(origin, cell)
 			if dist < spell.range_min or dist > spell.range_max:
@@ -298,10 +304,20 @@ func try_cast(spell: SpellData, target: Vector2i) -> bool:
 		if v != null and (spell.affects_caster or v != caster):
 			victims.append(v)
 
+	# Destructibles dans la zone : fixés eux aussi au moment du lancer.
+	var obstacle_cells: Array[Vector2i] = []
+	if spell.damages_obstacles():
+		for cell in cells:
+			if grid.is_destructible(cell):
+				obstacle_cells.append(cell)
+
 	for effect in spell.effects:
 		if effect.kind == EffectData.Kind.DASH:
 			_apply_dash(caster, target)
 			continue
+		if effect.kind == EffectData.Kind.DAMAGE or effect.kind == EffectData.Kind.DRAIN:
+			for cell in obstacle_cells:
+				_damage_obstacle(cell, rng.randi_range(effect.min_value, effect.max_value))
 		for victim in victims:
 			if victim.is_alive():
 				_apply_effect(effect, caster, victim, spell)
@@ -336,6 +352,8 @@ func _apply_effect(effect: EffectData, caster: Fighter, victim: Fighter, spell: 
 			# Comme sur Dofus : une poussée bloquée blesse, une attraction non.
 			if effect.kind == EffectData.Kind.PUSH and preview.blocked > 0:
 				_damage(victim, preview.blocked * PUSH_DAMAGE_PER_CELL)
+				# Le choc abîme aussi l'obstacle destructible contre lequel on a été projeté.
+				_damage_obstacle(victim.cell + dir, preview.blocked * PUSH_DAMAGE_PER_CELL)
 		EffectData.Kind.MOD_PM, EffectData.Kind.MOD_PA:
 			var amount := rng.randi_range(effect.min_value, effect.max_value)
 			var on_active := victim == active_fighter()
@@ -355,6 +373,34 @@ func _apply_dash(caster: Fighter, target: Vector2i) -> void:
 	var from := caster.cell
 	caster.cell = target
 	fighter_displaced.emit(caster, from, target)
+
+
+## Abîme un obstacle destructible (sans effet sur une case qui n'en contient pas).
+func _damage_obstacle(cell: Vector2i, amount: int) -> void:
+	if not grid.is_destructible(cell):
+		return
+	var dealt := grid.damage_destructible(cell, amount)
+	obstacle_damaged.emit(cell, dealt, grid.destructible_hp(cell))
+	if not grid.is_destructible(cell):
+		obstacle_destroyed.emit(cell)
+
+
+## Aperçu des dégâts d'un lancer sur les destructibles de la zone, sans rien modifier :
+## { "cell", "damage_min", "damage_max", "hp" }.
+func preview_obstacles(spell: SpellData, target: Vector2i) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	if active_fighter() == null or not spell.damages_obstacles() or not can_cast_at(spell, target):
+		return result
+	for cell in spell.affected_cells(target):
+		if not grid.is_destructible(cell):
+			continue
+		var p := {"cell": cell, "damage_min": 0, "damage_max": 0, "hp": grid.destructible_hp(cell)}
+		for effect in spell.effects:
+			if effect.kind == EffectData.Kind.DAMAGE or effect.kind == EffectData.Kind.DRAIN:
+				p.damage_min += effect.min_value
+				p.damage_max += effect.max_value
+		result.append(p)
+	return result
 
 
 ## Retire des PV et renvoie les PV réellement perdus.
