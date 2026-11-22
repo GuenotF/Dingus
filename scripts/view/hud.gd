@@ -15,6 +15,8 @@ const TOOLTIP_WIDTH := 270
 var _state: CombatState
 var _selected: SpellData
 var _hovered_slot := -1
+## Vrai après un clic sur la case survolée : l'infobulle reste cachée jusqu'à ce que la souris en sorte.
+var _tooltip_dismissed := false
 
 # Barre du bas
 var _bar: PanelContainer
@@ -291,7 +293,9 @@ func _update_slots(state: CombatState, fighter: Fighter, selected: SpellData, is
 	while _slots.size() < fighter.spells.size():
 		var slot := HudWidgets.SpellSlot.new(_slots.size())
 		var index := _slots.size()
-		slot.pressed.connect(func() -> void: spell_pressed.emit(index))
+		slot.pressed.connect(func() -> void:
+			_tooltip_dismissed = true
+			spell_pressed.emit(index))
 		slot.mouse_entered.connect(func() -> void: _on_slot_hover(index, true))
 		slot.mouse_exited.connect(func() -> void: _on_slot_hover(index, false))
 		_spell_box.add_child(slot)
@@ -322,21 +326,19 @@ func _update_slots(state: CombatState, fighter: Fighter, selected: SpellData, is
 func _on_slot_hover(index: int, entered: bool) -> void:
 	if entered:
 		_hovered_slot = index
+		_tooltip_dismissed = false
 	elif _hovered_slot == index:
 		_hovered_slot = -1
+		_tooltip_dismissed = false
 	_update_tooltip()
 
 
-## Infobulle : le sort survolé, sinon le sort sélectionné.
+## Infobulle du sort survolé, cachée dès qu'on clique pour lancer (elle masquerait la carte).
 func _update_tooltip() -> void:
 	var fighter := _state.active_fighter() if _state else null
 	var slot: HudWidgets.SpellSlot = null
-	if _hovered_slot >= 0 and _hovered_slot < _slots.size() and _slots[_hovered_slot].visible:
+	if _hovered_slot >= 0 and _hovered_slot < _slots.size() and _slots[_hovered_slot].visible and not _tooltip_dismissed:
 		slot = _slots[_hovered_slot]
-	elif _selected:
-		for s in _slots:
-			if s.visible and s.spell == _selected:
-				slot = s
 	if fighter == null or slot == null or slot.spell == null or not _spell_box.visible:
 		_tooltip.hide()
 		_hint.modulate.a = 1.0
