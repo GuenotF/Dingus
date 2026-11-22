@@ -10,6 +10,10 @@ extends RefCounted
 
 const MIN_CAST_SCORE := 1.0
 const MOVE_MARGIN := 0.5
+## Valeur d'un obstacle destructible qui nous sépare d'un ennemi (avant pondération par les dégâts infligés).
+const OPEN_SHOT_VALUE := 12.0
+const OPEN_PATH_VALUE := 10.0
+const SHORTCUT_VALUE := 6.0
 
 
 static func next_action(state: CombatState) -> Dictionary:
@@ -65,6 +69,10 @@ static func score_cast(state: CombatState, me: Fighter, origin: Vector2i, spell:
 		return _score_sacrifice(state, me, origin, spell)
 
 	var score := 0.0
+	if spell.damages_obstacles():
+		for cell in spell.affected_cells(target):
+			if state.grid.is_destructible(cell):
+				score += _obstacle_value(state, me, origin, spell, cell)
 	for effect in spell.effects:
 		var avg := effect.average()
 		match effect.kind:
@@ -121,6 +129,43 @@ static func score_cast(state: CombatState, me: Fighter, origin: Vector2i, spell:
 					var before := _nearest_enemy_distance(state, me, origin)
 					score += 3.0 * (d - before) if before < me.preferred_range() and d > before else -3.0
 	return score - spell.pa_cost * 0.1
+
+
+## Intérêt de casser un obstacle destructible : il nous masque un ennemi à portée de tir,
+## ou barre la route (ou l'allonge beaucoup). Pondéré par la part de ses PV que le sort enlève,
+## avec un minimum pour que l'IA s'acharne sur un obstacle déjà entamé.
+static func _obstacle_value(state: CombatState, me: Fighter, origin: Vector2i, spell: SpellData, cell: Vector2i) -> float:
+	var hp := state.grid.destructible_hp(cell)
+	if hp <= 0:
+		return 0.0
+	var damage := 0.0
+	for effect in spell.effects:
+		if effect.kind == EffectData.Kind.DAMAGE or effect.kind == EffectData.Kind.DRAIN:
+			damage += effect.average()
+	var gain := 0.0
+	var blockers := state.occupied_cells(me)
+	var reach := _longest_attack_range(me)
+	for e in state.enemies_of(me):
+		if BattleGrid.distance(origin, e.cell) <= reach \
+				and not state.grid.has_line_of_sight(origin, e.cell, blockers) \
+				and state.grid.has_line_of_sight_without(origin, e.cell, cell, blockers):
+			gain = maxf(gain, OPEN_SHOT_VALUE)
+		var before := state.grid.find_path(origin, e.cell).size()
+		var after := state.grid.path_length_without(origin, e.cell, cell)
+		if after > 0 and before == 0:
+			gain = maxf(gain, OPEN_PATH_VALUE)
+		elif after > 0 and before - after >= 3:
+			gain = maxf(gain, SHORTCUT_VALUE)
+	return gain * (0.3 + 0.7 * minf(1.0, damage / hp))
+
+
+static func _longest_attack_range(me: Fighter) -> int:
+	var best := 0
+	for spell in me.spells:
+		for effect in spell.effects:
+			if effect.kind == EffectData.Kind.DAMAGE or effect.kind == EffectData.Kind.DRAIN:
+				best = maxi(best, spell.range_max)
+	return best
 
 
 ## Sort sur soi qui coûte des PV pour gagner des PA (ex. Pacte de sang).

@@ -155,6 +155,30 @@ func has_line_of_sight(from: Vector2i, to: Vector2i, blockers: Array[Vector2i] =
 	return true
 
 
+## Comme has_line_of_sight, mais en faisant comme si `ignored` n'était pas un obstacle
+## (« et si je détruisais cette case ? », utilisé par l'IA).
+func has_line_of_sight_without(from: Vector2i, to: Vector2i, ignored: Vector2i, blockers: Array[Vector2i] = []) -> bool:
+	for cell in line_cells(from, to):
+		if cell == from or cell == to or cell == ignored:
+			continue
+		if is_obstacle(cell) or blockers.has(cell):
+			return false
+	return true
+
+
+## Longueur du chemin de `from` à `to` si `ignored` n'était pas un obstacle (-1 si aucun chemin).
+func path_length_without(from: Vector2i, to: Vector2i, ignored: Vector2i) -> int:
+	var was_obstacle := _obstacles.has(ignored)
+	if was_obstacle:
+		_obstacles.erase(ignored)
+		_astar.set_point_solid(ignored, false)
+	var path := find_path(from, to)
+	if was_obstacle:
+		_obstacles[ignored] = true
+		_astar.set_point_solid(ignored, true)
+	return path.size() if not path.is_empty() else -1
+
+
 ## Toutes les cases traversées par le segment entre les centres, extrémités comprises.
 ## Quand le segment passe exactement par un coin, il va directement à la case en diagonale :
 ## les deux cases qui partagent ce coin ne sont pas traversées.

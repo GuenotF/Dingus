@@ -36,6 +36,7 @@ func _init() -> void:
 	_test_destructibles_grid()
 	_test_destructibles_spells()
 	_test_desert_destructibles()
+	_test_ai_destructibles()
 	print("Tests terminés : %s" % ("OK" if _failures == 0 else "%d échec(s)" % _failures))
 	quit(1 if _failures > 0 else 0)
 
@@ -638,3 +639,71 @@ func _test_desert_destructibles() -> void:
 	_check(not destructibles.has(Vector2i(7, 5)) and not destructibles.has(Vector2i(7, 9)), "désert : les obélisques sont indestructibles")
 	_check(grid.get_obstacles().size() == 25, "désert : toujours 25 obstacles")
 	map.free()
+
+
+func _test_ai_destructibles() -> void:
+	# Couloir : seul un destructible sépare les deux combattants, l'IA doit le casser pour tirer.
+	var hit := _spell(2, 1, 12, true, 30, 5)
+	var state := CombatState.new(BattleGrid.new(10, 1), 7)
+	var a := Fighter.new(0, "A", 0, Vector2i(0, 0))
+	var b := Fighter.new(1, "B", 1, Vector2i(9, 0))
+	var spells: Array[SpellData] = [hit]
+	a.spells = spells
+	b.spells = spells
+	state.add_fighter(a)
+	state.add_fighter(b)
+	state.grid.add_destructible(Vector2i(4, 0), 60)
+	state.start()
+	var action := _first_ai_cast(state)
+	_check(action.get("type") == "cast" and action.cell == Vector2i(4, 0), "IA : casse le destructible qui masque l'ennemi (couloir)")
+	# Un obstacle ordinaire au même endroit : aucune idée de tir inutile.
+	var walls: Array[Vector2i] = [Vector2i(4, 0)]
+	var plain := CombatState.new(BattleGrid.new(10, 1, walls), 7)
+	var c := Fighter.new(0, "A", 0, Vector2i(0, 0))
+	var d := Fighter.new(1, "B", 1, Vector2i(9, 0))
+	c.spells = spells
+	d.spells = spells
+	plain.add_fighter(c)
+	plain.add_fighter(d)
+	plain.start()
+	var plain_cast := _first_ai_cast(plain)
+	_check(plain_cast.is_empty() or plain_cast.cell != Vector2i(4, 0), "IA : ne vise pas un obstacle indestructible")
+	# Un destructible qui ne gêne personne est ignoré, l'ennemi visible reste la priorité.
+	var open := CombatState.new(BattleGrid.new(10, 3), 7)
+	var e := Fighter.new(0, "A", 0, Vector2i(0, 1))
+	var f := Fighter.new(1, "B", 1, Vector2i(6, 1))
+	e.spells = spells
+	f.spells = spells
+	open.add_fighter(e)
+	open.add_fighter(f)
+	open.grid.add_destructible(Vector2i(3, 0), 60)
+	open.start()
+	var shot := _first_ai_cast(open)
+	_check(shot.get("type") == "cast" and shot.cell == Vector2i(6, 1), "IA : tire sur l'ennemi visible plutôt que sur un obstacle hors de propos")
+	# Le combat finit : l'IA enchaîne coups sur l'obstacle puis tire (aucune boucle infinie).
+	var guard := 0
+	while not state.is_over and guard < 200:
+		var act := AiBrain.next_action(state)
+		match act.type:
+			"cast":
+				state.try_cast(act.spell, act.cell)
+			"move":
+				state.try_move(act.cell)
+			_:
+				state.end_turn()
+		guard += 1
+	_check(state.is_over, "IA : combat dans le couloir terminé après destruction (%d actions)" % guard)
+
+
+## Joue les déplacements de l'IA jusqu'à son premier sort et renvoie cette action (vide si elle ne lance rien).
+func _first_ai_cast(state: CombatState) -> Dictionary:
+	for i in 10:
+		var action := AiBrain.next_action(state)
+		match action.type:
+			"cast":
+				return action
+			"move":
+				state.try_move(action.cell)
+			_:
+				return {}
+	return {}
