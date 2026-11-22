@@ -135,11 +135,14 @@ func _test_line_of_sight() -> void:
 	_check(grid.has_line_of_sight(Vector2i(0, 0), Vector2i(2, 0)) , "la case cible ne bloque pas")
 	var blockers: Array[Vector2i] = [Vector2i(2, 1)]
 	_check(not grid.has_line_of_sight(Vector2i(0, 1), Vector2i(4, 1), blockers), "un pion coupe la vue")
-	# Stricte : frôler le coin d'un obstacle coupe la vue
+	# Façon Dofus : frôler le coin d'un obstacle en diagonale ne coupe pas la vue
 	var corner: Array[Vector2i] = [Vector2i(1, 0)]
 	var g2 := BattleGrid.new(6, 6, corner)
-	_check(not g2.has_line_of_sight(Vector2i(0, 0), Vector2i(2, 2)), "diagonale qui frôle un coin bloquée")
-	_check(not g2.has_line_of_sight(Vector2i(2, 2), Vector2i(0, 0)), "idem dans l'autre sens")
+	_check(g2.has_line_of_sight(Vector2i(0, 0), Vector2i(2, 2)), "diagonale qui frôle un coin : visible")
+	_check(g2.has_line_of_sight(Vector2i(2, 2), Vector2i(0, 0)), "idem dans l'autre sens")
+	_check(g2.has_line_of_sight(Vector2i(0, 0), Vector2i(4, 4)), "longue diagonale qui frôle un coin : visible")
+	var on_diag: Array[Vector2i] = [Vector2i(1, 1)]
+	_check(not BattleGrid.new(6, 6, on_diag).has_line_of_sight(Vector2i(0, 0), Vector2i(2, 2)), "obstacle sur la diagonale : bloqué")
 	_check(not g2.has_line_of_sight(Vector2i(0, 0), Vector2i(2, 1)), "segment qui traverse l'obstacle bloqué")
 	_check(g2.has_line_of_sight(Vector2i(0, 1), Vector2i(2, 2)), "segment qui passe à côté visible")
 	var all_cells := BattleGrid.line_cells(Vector2i(0, 0), Vector2i(3, 1))

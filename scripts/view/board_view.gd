@@ -13,8 +13,8 @@ const COLOR_GRID_LINE := Color(0, 0, 0, 0.16)
 # Couleurs prêtes à l'emploi pour les calques
 const COLOR_REACHABLE := Color(0.35, 0.75, 1.0, 0.35)
 const COLOR_PATH := Color(0.45, 0.9, 1.0, 0.75)
-const COLOR_RANGE := Color(0.3, 0.55, 1.0, 0.45)
-const COLOR_NO_LOS := Color(0.6, 0.6, 0.6, 0.30)
+const COLOR_RANGE := Color(0.25, 0.6, 1.0, 0.55)
+const COLOR_NO_LOS := Color(0.05, 0.05, 0.08, 0.5) # voile sombre : à portée mais sans ligne de vue
 const COLOR_AREA := Color(1.0, 0.45, 0.2, 0.70)
 
 var grid: BattleGrid

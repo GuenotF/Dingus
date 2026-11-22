@@ -97,8 +97,9 @@ static func distance(a: Vector2i, b: Vector2i) -> int:
 	return absi(a.x - b.x) + absi(a.y - b.y)
 
 
-## Ligne de vue stricte (façon Dofus) : on trace le segment entre les centres des deux cases.
-## Toute case que le segment touche, même en passant exactement par un coin, doit être libre.
+## Ligne de vue façon Dofus : on trace le segment entre les centres des deux cases.
+## Toute case que le segment traverse doit être libre. Passer exactement par le coin d'une case
+## ne compte pas : on voit en diagonale en frôlant un obstacle.
 ## Les obstacles et les cases de `blockers` coupent la vue ; les extrémités ne comptent pas.
 ## Symétrique par construction.
 func has_line_of_sight(from: Vector2i, to: Vector2i, blockers: Array[Vector2i] = []) -> bool:
@@ -110,9 +111,9 @@ func has_line_of_sight(from: Vector2i, to: Vector2i, blockers: Array[Vector2i] =
 	return true
 
 
-## Toutes les cases touchées par le segment entre les centres (« supercover »),
-## extrémités comprises. Quand le segment passe exactement par un coin,
-## les deux cases qui partagent ce coin sont incluses.
+## Toutes les cases traversées par le segment entre les centres, extrémités comprises.
+## Quand le segment passe exactement par un coin, il va directement à la case en diagonale :
+## les deux cases qui partagent ce coin ne sont pas traversées.
 static func line_cells(from: Vector2i, to: Vector2i) -> Array[Vector2i]:
 	var cells: Array[Vector2i] = [from]
 	var nx := absi(to.x - from.x)
@@ -125,9 +126,7 @@ static func line_cells(from: Vector2i, to: Vector2i) -> Array[Vector2i]:
 	while ix < nx or iy < ny:
 		var decision := (1 + 2 * ix) * ny - (1 + 2 * iy) * nx
 		if decision == 0:
-			# Passage exact par un coin : les deux voisines sont touchées.
-			cells.append(current + Vector2i(sx, 0))
-			cells.append(current + Vector2i(0, sy))
+			# Passage exact par un coin : on passe en diagonale sans toucher les deux voisines.
 			current += Vector2i(sx, sy)
 			ix += 1
 			iy += 1

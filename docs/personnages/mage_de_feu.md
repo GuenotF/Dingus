@@ -31,3 +31,10 @@ Résultats (80 combats par carte) :
 |---|---|---|---|---|
 | Prairie | 52 % | 47 % | 5,9 | 55 % |
 | Le lac | 53 % | 46 % | 6,1 | 41 % |
+
+Après la ligne de vue permissive en diagonale (passer par le coin d'un obstacle ne bloque plus) :
+
+| Carte | Guerrier | Mage de feu | Tours moy. | 1er joueur gagne |
+|---|---|---|---|---|
+| Prairie | 56 % | 43 % | 5,8 | 51 % |
+| Le lac | 48 % | 51 % | 6,1 | 43 % |

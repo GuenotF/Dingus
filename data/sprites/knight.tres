@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="CharacterSprites" load_steps=19 format=3]
+[gd_resource type="Resource" script_class="CharacterSprites" format=3]
 
 [ext_resource type="Script" path="res://scripts/view/character_animation.gd" id="1_g1m66"]
 [ext_resource type="Texture2D" path="res://assets/characters/knight/idle.png" id="2_657wq"]
@@ -61,4 +61,5 @@ fps = 24.0
 
 [resource]
 script = ExtResource("10_4ey2i")
+feet_position = Vector2(61, 96)
 animations = Array[ExtResource("1_g1m66")]([SubResource("Resource_wqhbv"), SubResource("Resource_vx3fw"), SubResource("Resource_dkssb"), SubResource("Resource_m681c"), SubResource("Resource_kkx1n"), SubResource("Resource_nqvoq"), SubResource("Resource_gqsl0"), SubResource("Resource_34tf2")])
