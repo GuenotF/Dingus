@@ -213,3 +213,9 @@ Actuellement : le **Guerrier** parle (*Warrior Voice Pack* de John Carroll,
 [johncarroll.itch.io](https://johncarroll.itch.io/) ; 52 répliques converties en OGG).
 L'Archer, le Mage de feu et le Chevalier maudit n'ont pas encore de voix.
 
+
+## Police
+
+L'interface utilise la police *Vinque Antique* (Typodermic), à placer dans `assets/fonts/vinque_antique_bd.otf`.
+Le fichier n'est volontairement pas versionné (licence Desktop) ; s'il est absent, Godot utilise sa police par défaut.
+La description des sorts reste dans la police par défaut.

@@ -38,6 +38,7 @@ func _init() -> void:
 	line.custom_minimum_size = Vector2(0, 1)
 	v.add_child(line)
 	_effects = _wrapped(_label(14, HudWidgets.TEXT))
+	_effects.add_theme_font_override("font", GameConfig.body_font) # description du sort : police d'origine, plus lisible
 	v.add_child(_effects)
 	_status = _wrapped(_label(12, Color("8fd3a0")))
 	v.add_child(_status)

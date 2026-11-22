@@ -8,6 +8,21 @@ const CLASS_PATHS: Array[String] = [
 	"res://data/classes/chevalier_maudit.tres",
 ]
 
+## Police de l'interface (assets/fonts/). Absente (non versionnée, voir .gitignore) : police par défaut de Godot.
+const FONT_PATH := "res://assets/fonts/vinque_antique_bd.otf"
+## Police d'origine de Godot, gardée pour les textes qui doivent rester lisibles (description des sorts).
+var body_font: Font
+
+
+func _ready() -> void:
+	body_font = ThemeDB.fallback_font
+	if ResourceLoader.exists(FONT_PATH):
+		var font: FontFile = load(FONT_PATH)
+		font.fallbacks = [body_font] # symboles absents de la police (flèches, puces...)
+		ThemeDB.fallback_font = font
+		ThemeDB.get_default_theme().default_font = font
+
+
 ## Carte de combat (scène dessinée dans l'éditeur, voir scripts/map/battle_map.gd).
 var map_path: String = "res://maps/demo.tscn"
 
