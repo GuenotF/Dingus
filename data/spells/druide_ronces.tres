@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/effect_data.gd" id="1_2brku"]
+[ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="2_dda0e"]
+
+[sub_resource type="Resource" id="Resource_7o4re"]
+script = ExtResource("1_2brku")
+min_value = 8
+
+[sub_resource type="Resource" id="Resource_utwrj"]
+script = ExtResource("1_2brku")
+kind = 5
+min_value = -2
+max_value = -2
+duration = 1
+
+[resource]
+script = ExtResource("2_dda0e")
+spell_name = "Ronces"
+pa_cost = 4
+range_min = 2
+range_max = 5
+area = 1
+effects = Array[ExtResource("1_2brku")]([SubResource("Resource_7o4re"), SubResource("Resource_utwrj")])
+casts_per_turn = 1

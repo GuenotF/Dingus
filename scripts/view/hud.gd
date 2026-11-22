@@ -1,16 +1,17 @@
 class_name Hud
 extends CanvasLayer
-## Interface : joueur actif, barre de sorts, fin de tour, écran de victoire.
+## Interface : joueur actif, barre de sorts, fin de tour / prêt, placement, victoire.
 
-signal end_turn_pressed
+signal main_button_pressed # « Fin du tour » ou « Prêt » selon la phase
 signal spell_pressed(index: int)
 signal restart_pressed
+signal menu_pressed
 
 var _info: Label
-var _end_turn: Button
+var _main_button: Button
 var _spell_bar: HBoxContainer
 var _spell_buttons: Array[Button] = []
-var _spell_info: Label
+var _hint: Label
 var _victory: Control
 var _victory_label: Label
 
@@ -25,13 +26,12 @@ func _ready() -> void:
 	_info = Label.new()
 	_info.add_theme_font_size_override("font_size", 18)
 	box.add_child(_info)
-	_end_turn = Button.new()
-	_end_turn.text = "Fin du tour (Espace)"
-	_end_turn.focus_mode = Control.FOCUS_NONE
-	_end_turn.pressed.connect(func() -> void: end_turn_pressed.emit())
-	box.add_child(_end_turn)
+	_main_button = Button.new()
+	_main_button.focus_mode = Control.FOCUS_NONE
+	_main_button.pressed.connect(func() -> void: main_button_pressed.emit())
+	box.add_child(_main_button)
 
-	# --- Bas : barre de sorts + description
+	# --- Bas : aide contextuelle + barre de sorts
 	var bottom := VBoxContainer.new()
 	bottom.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 	bottom.grow_horizontal = Control.GROW_DIRECTION_BOTH
@@ -39,12 +39,12 @@ func _ready() -> void:
 	bottom.offset_bottom = -16
 	bottom.alignment = BoxContainer.ALIGNMENT_END
 	add_child(bottom)
-	_spell_info = Label.new()
-	_spell_info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_spell_info.add_theme_font_size_override("font_size", 15)
-	_spell_info.add_theme_color_override("font_outline_color", Color.BLACK)
-	_spell_info.add_theme_constant_override("outline_size", 4)
-	bottom.add_child(_spell_info)
+	_hint = Label.new()
+	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_hint.add_theme_font_size_override("font_size", 15)
+	_hint.add_theme_color_override("font_outline_color", Color.BLACK)
+	_hint.add_theme_constant_override("outline_size", 4)
+	bottom.add_child(_hint)
 	_spell_bar = HBoxContainer.new()
 	_spell_bar.alignment = BoxContainer.ALIGNMENT_CENTER
 	_spell_bar.add_theme_constant_override("separation", 8)
@@ -60,28 +60,42 @@ func _ready() -> void:
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_victory.add_child(center)
 	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 20)
+	vbox.add_theme_constant_override("separation", 16)
 	center.add_child(vbox)
 	_victory_label = Label.new()
 	_victory_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_victory_label.add_theme_font_size_override("font_size", 48)
 	vbox.add_child(_victory_label)
-	var restart := Button.new()
-	restart.text = "Rejouer"
-	restart.custom_minimum_size = Vector2(200, 48)
-	restart.add_theme_font_size_override("font_size", 22)
-	restart.pressed.connect(func() -> void: restart_pressed.emit())
-	vbox.add_child(restart)
+	for entry in [["Rejouer", restart_pressed], ["Menu", menu_pressed]]:
+		var b := Button.new()
+		b.text = entry[0]
+		b.custom_minimum_size = Vector2(220, 46)
+		b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		b.add_theme_font_size_override("font_size", 20)
+		var sig: Signal = entry[1]
+		b.pressed.connect(func() -> void: sig.emit())
+		vbox.add_child(b)
 
 
-func show_fighter(fighter: Fighter, turn_number: int) -> void:
-	_info.text = "Tour %d — %s\nPV %d/%d   PA %d   PM %d" % [
-		turn_number, fighter.display_name, fighter.hp, fighter.max_hp, fighter.pa, fighter.pm,
+func show_placement(fighter: Fighter, is_ai: bool) -> void:
+	_info.text = "Placement — %s (%s)\nChoisis ta case de départ" % [fighter.display_name, _class_name(fighter)]
+	_main_button.text = "Prêt (Espace)"
+	_main_button.disabled = is_ai
+	_spell_bar.hide()
+	_hint.text = "Clique sur une case de ta couleur pour t'y placer" if not is_ai else "L'IA se place…"
+
+
+func show_fighter(fighter: Fighter, turn_number: int, is_ai: bool) -> void:
+	_info.text = "Tour %d — %s (%s)%s\nPV %d/%d   PA %d   PM %d" % [
+		turn_number, fighter.display_name, _class_name(fighter), "  · IA" if is_ai else "",
+		fighter.hp, fighter.max_hp, fighter.pa, fighter.pm,
 	]
+	_main_button.text = "Fin du tour (Espace)"
+	_spell_bar.show()
 
 
-## Reconstruit et met à jour la barre de sorts du combattant actif.
-func show_spells(state: CombatState, selected: SpellData) -> void:
+## Met à jour la barre de sorts du combattant actif.
+func show_spells(state: CombatState, selected: SpellData, is_ai: bool) -> void:
 	var fighter := state.active_fighter()
 	if fighter == null:
 		return
@@ -100,29 +114,27 @@ func show_spells(state: CombatState, selected: SpellData) -> void:
 		if not button.visible:
 			continue
 		var spell := fighter.spells[i]
-		button.text = "%d · %s\n%d PA" % [i + 1, spell.spell_name, spell.pa_cost]
-		button.disabled = not state.can_use_spell(spell)
+		var cd := fighter.cooldown_left(spell)
+		button.text = "%d · %s\n%d PA%s" % [i + 1, spell.spell_name, spell.pa_cost, "   ⟳ %d" % cd if cd > 0 else ""]
+		button.disabled = is_ai or not state.can_use_spell(spell)
 		button.set_pressed_no_signal(spell == selected)
-	_spell_info.text = _describe(selected) if selected else "Clic : se déplacer   ·   1-3 : choisir un sort"
-
-
-func _describe(spell: SpellData) -> String:
-	var parts: Array[String] = [spell.spell_name]
-	parts.append("portée %d-%d" % [spell.range_min, spell.range_max] if spell.range_min != spell.range_max else "portée %d" % spell.range_max)
-	parts.append("%d-%d dégâts" % [spell.damage_min, spell.damage_max])
-	if spell.area == SpellData.AreaShape.CROSS:
-		parts.append("zone en croix")
-	if not spell.needs_line_of_sight:
-		parts.append("sans ligne de vue")
-	parts.append("%d/tour" % spell.casts_per_turn)
-	return "  ·  ".join(parts) + "\nClic : lancer   ·   Clic droit / Échap : annuler"
+	if is_ai:
+		_hint.text = "L'IA réfléchit…"
+	elif selected:
+		_hint.text = "%s  ·  %s\nClic : lancer   ·   Clic droit / Échap : annuler" % [selected.spell_name, selected.describe()]
+	else:
+		_hint.text = "Clic : se déplacer   ·   1-4 : choisir un sort   ·   Espace : fin du tour"
 
 
 func set_input_enabled(enabled: bool) -> void:
-	_end_turn.disabled = not enabled
+	_main_button.disabled = not enabled
 
 
 func show_victory(winner_name: String) -> void:
 	_victory_label.text = "%s gagne !" % winner_name if winner_name != "" else "Égalité !"
 	_victory.show()
-	_end_turn.disabled = true
+	_main_button.disabled = true
+
+
+func _class_name(fighter: Fighter) -> String:
+	return fighter.class_data.class_label if fighter.class_data else "?"

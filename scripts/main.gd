@@ -1,13 +1,12 @@
 extends Node2D
-## Point d'entrée : assemble la logique (core) et l'affichage (view), puis gère les entrées.
-## Contrôles : survol = aperçu, clic gauche = se déplacer ou lancer le sort choisi,
-## 1-3 = choisir un sort, clic droit / Échap = annuler, Espace = fin du tour.
+## Scène de combat : assemble la logique (core), l'affichage (view) et les contrôleurs
+## (joueur humain ou IA), puis gère les entrées.
+## Contrôles : survol = aperçu, clic gauche = se déplacer / lancer le sort choisi / se placer,
+## 1-4 = choisir un sort, clic droit / Échap = annuler, Espace = fin du tour / prêt.
 
-const SPELL_PATHS: Array[String] = [
-	"res://data/spells/coup_epee.tres",
-	"res://data/spells/fleche.tres",
-	"res://data/spells/bombe.tres",
-]
+const AI_STEP_DELAY := 0.35
+const AI_MAX_ACTIONS := 30
+const ZONE_COLORS: Array[Color] = [Color(0.95, 0.35, 0.3, 0.45), Color(0.3, 0.55, 1.0, 0.45)]
 
 var state: CombatState
 var board: BoardView
@@ -16,31 +15,37 @@ var hud: Hud
 var fighter_views: Dictionary = {} # Fighter.id -> FighterView
 var selected_spell: SpellData = null
 var busy := false # vrai pendant une animation : on ignore les entrées
+var placing_index := 0 # combattant en cours de placement
 
 
 func _ready() -> void:
 	_build_combat()
 	_build_scene()
+	state.fighter_placed.connect(_on_fighter_placed)
 	state.turn_started.connect(_on_turn_started)
 	state.fighter_moved.connect(_on_fighter_moved)
 	state.spell_cast.connect(_on_spell_cast)
 	state.fighter_damaged.connect(_on_fighter_damaged)
+	state.fighter_healed.connect(_on_fighter_healed)
+	state.fighter_displaced.connect(_on_fighter_displaced)
+	state.status_changed.connect(_on_status_changed)
 	state.fighter_died.connect(_on_fighter_died)
 	state.combat_ended.connect(_on_combat_ended)
-	state.start()
+	state.begin_placement()
+	_begin_placement_of(0)
 
 
 func _build_combat() -> void:
 	var grid := BattleGrid.new(MapLayouts.TEST_SIZE.x, MapLayouts.TEST_SIZE.y, MapLayouts.TEST_OBSTACLES)
 	state = CombatState.new(grid)
-	var spells: Array[SpellData] = []
-	for path in SPELL_PATHS:
-		spells.append(load(path))
-	var names := ["Joueur 1", "Joueur 2"]
+	state.placement_zones = MapLayouts.TEST_PLACEMENT
 	for i in 2:
-		var f := Fighter.new(i, names[i], i, MapLayouts.TEST_SPAWNS[i])
-		f.spells = spells
+		var f := Fighter.new(i, "Joueur %d" % (i + 1), i, MapLayouts.TEST_SPAWNS[i], GameConfig.class_for(i))
 		state.add_fighter(f)
+
+
+func is_ai(fighter: Fighter) -> bool:
+	return fighter != null and GameConfig.player_is_ai[fighter.id]
 
 
 func _build_scene() -> void:
@@ -73,17 +78,74 @@ func _build_scene() -> void:
 
 	hud = Hud.new()
 	add_child(hud)
-	hud.end_turn_pressed.connect(_end_turn)
+	hud.main_button_pressed.connect(_on_main_button)
 	hud.spell_pressed.connect(_select_spell)
 	hud.restart_pressed.connect(func() -> void: get_tree().reload_current_scene())
+	hud.menu_pressed.connect(func() -> void: get_tree().change_scene_to_file("res://scenes/menu.tscn"))
+
+
+# --- Placement ---------------------------------------------------------------
+
+func _placing_fighter() -> Fighter:
+	if state.phase != CombatState.Phase.PLACEMENT or placing_index >= state.fighters.size():
+		return null
+	return state.fighters[placing_index]
+
+
+func _begin_placement_of(index: int) -> void:
+	placing_index = index
+	if index >= state.fighters.size():
+		state.start()
+		return
+	var f := _placing_fighter()
+	for id in fighter_views:
+		fighter_views[id].is_active = (id == f.id)
+	hud.show_placement(f, is_ai(f))
+	_refresh_highlights()
+	if is_ai(f):
+		await get_tree().create_timer(0.6).timeout
+		state.place(f, _ai_placement_cell(f))
+		await get_tree().create_timer(0.4).timeout
+		_begin_placement_of(index + 1)
+
+
+## L'IA choisit une case de sa zone : au hasard parmi les cases qui ont le plus d'issues.
+func _ai_placement_cell(f: Fighter) -> Vector2i:
+	var cells := state.placement_cells(f.team)
+	cells.shuffle()
+	var best := f.cell
+	var best_exits := -1
+	for cell in cells:
+		var occupant := state.fighter_at(cell)
+		if occupant != null and occupant != f:
+			continue
+		var exits := 0
+		for dir in BattleGrid.DIRECTIONS:
+			if state.grid.is_walkable(cell + dir):
+				exits += 1
+		if exits > best_exits:
+			best_exits = exits
+			best = cell
+	return best
 
 
 # --- Entrées -----------------------------------------------------------------
 
+func _input_locked() -> bool:
+	if busy or state.is_over:
+		return true
+	if state.phase == CombatState.Phase.PLACEMENT:
+		return is_ai(_placing_fighter())
+	return is_ai(state.active_fighter())
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		_refresh_highlights()
-	elif event is InputEventMouseButton and event.pressed:
+		return
+	if _input_locked():
+		return
+	if event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			_on_left_click(_mouse_cell())
 		elif event.button_index == MOUSE_BUTTON_RIGHT:
@@ -91,7 +153,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event is InputEventKey and event.pressed and not event.echo:
 		match event.keycode:
 			KEY_SPACE:
-				_end_turn()
+				_on_main_button()
 			KEY_ESCAPE:
 				_cancel_spell()
 			KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6:
@@ -99,9 +161,10 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _on_left_click(cell: Vector2i) -> void:
-	if busy or state.is_over:
-		return
-	if selected_spell:
+	if state.phase == CombatState.Phase.PLACEMENT:
+		state.place(_placing_fighter(), cell)
+		_refresh_highlights()
+	elif selected_spell:
 		var spell := selected_spell
 		if state.can_cast_at(spell, cell):
 			selected_spell = null
@@ -110,9 +173,19 @@ func _on_left_click(cell: Vector2i) -> void:
 		state.try_move(cell)
 
 
+func _on_main_button() -> void:
+	if _input_locked():
+		return
+	if state.phase == CombatState.Phase.PLACEMENT:
+		_begin_placement_of(placing_index + 1)
+	else:
+		selected_spell = null
+		state.end_turn()
+
+
 func _select_spell(index: int) -> void:
 	var f := state.active_fighter()
-	if busy or state.is_over or f == null or index < 0 or index >= f.spells.size():
+	if _input_locked() or f == null or index < 0 or index >= f.spells.size():
 		return
 	var spell := f.spells[index]
 	if selected_spell == spell or not state.can_use_spell(spell):
@@ -127,32 +200,69 @@ func _cancel_spell() -> void:
 	_refresh_ui()
 
 
-func _end_turn() -> void:
-	if not busy:
-		selected_spell = null
-		state.end_turn()
-
-
 func _mouse_cell() -> Vector2i:
 	return Iso.world_to_cell(board.get_local_mouse_position())
 
 
+# --- IA ------------------------------------------------------------------------
+
+func _run_ai_turn(fighter: Fighter) -> void:
+	for i in AI_MAX_ACTIONS:
+		await get_tree().create_timer(AI_STEP_DELAY).timeout
+		await _wait_idle()
+		if state.is_over or state.active_fighter() != fighter:
+			return
+		var action := AiBrain.next_action(state)
+		match action.type:
+			"move":
+				state.try_move(action.cell)
+			"cast":
+				# On montre brièvement la cible, comme le ferait un joueur.
+				selected_spell = action.spell
+				_refresh_ui(action.cell)
+				await get_tree().create_timer(0.45).timeout
+				selected_spell = null
+				state.try_cast(action.spell, action.cell)
+			_:
+				break
+		await _wait_idle()
+	if not state.is_over and state.active_fighter() == fighter:
+		state.end_turn()
+
+
+func _wait_idle() -> void:
+	while busy:
+		await get_tree().process_frame
+
+
 # --- Affichage ---------------------------------------------------------------
 
-func _refresh_ui() -> void:
+func _refresh_ui(forced_hover: Vector2i = Vector2i(-1, -1)) -> void:
 	var f := state.active_fighter()
-	if f:
-		hud.show_fighter(f, state.turn_number)
-	hud.show_spells(state, selected_spell)
-	_refresh_highlights()
+	if f and state.phase == CombatState.Phase.FIGHT:
+		hud.show_fighter(f, state.turn_number, is_ai(f))
+		hud.show_spells(state, selected_spell, is_ai(f))
+	_refresh_highlights(forced_hover)
 
 
-func _refresh_highlights() -> void:
+func _refresh_highlights(forced_hover: Vector2i = Vector2i(-1, -1)) -> void:
 	var layers: Array[Dictionary] = []
+	var hover := forced_hover if forced_hover != Vector2i(-1, -1) else _mouse_cell()
+
+	if state.phase == CombatState.Phase.PLACEMENT:
+		var placer := _placing_fighter()
+		for team in state.placement_zones.size():
+			var color: Color = ZONE_COLORS[team % ZONE_COLORS.size()]
+			if placer == null or team != placer.team:
+				color.a *= 0.35
+			layers.append(BoardView.layer(state.placement_cells(team), color))
+		board.set_layers(layers, hover)
+		return
+
 	if busy or state.is_over:
 		board.set_layers(layers, Vector2i(-1, -1))
 		return
-	var hover := _mouse_cell()
+
 	if selected_spell:
 		var in_range := state.cells_in_range(selected_spell)
 		var seen: Array[Vector2i] = []
@@ -170,22 +280,31 @@ func _refresh_highlights() -> void:
 		board.set_layers(layers, hover, BoardView.COLOR_HOVER if castable else Color(1, 0.3, 0.3, 0.8))
 	else:
 		layers.append(BoardView.layer(state.reachable_for_active().keys(), BoardView.COLOR_REACHABLE))
-		layers.append(BoardView.layer(state.path_for_active(hover), BoardView.COLOR_PATH, 6.0))
+		if not is_ai(state.active_fighter()):
+			layers.append(BoardView.layer(state.path_for_active(hover), BoardView.COLOR_PATH, 6.0))
 		board.set_layers(layers, hover)
 
 
 func _set_busy(value: bool) -> void:
 	busy = value
-	hud.set_input_enabled(not value and not state.is_over)
+	hud.set_input_enabled(not value and not state.is_over and not is_ai(state.active_fighter()))
 	_refresh_ui()
 
 
-# --- Réactions aux événements du combat ---------------------------------------
+# --- Réactions aux événements du combat -----------------------------------------
+
+func _on_fighter_placed(fighter: Fighter) -> void:
+	fighter_views[fighter.id].snap()
+
 
 func _on_turn_started(fighter: Fighter, _turn_number: int) -> void:
+	selected_spell = null
 	for id in fighter_views:
 		fighter_views[id].is_active = (id == fighter.id)
+	hud.set_input_enabled(not is_ai(fighter))
 	_refresh_ui()
+	if is_ai(fighter):
+		_run_ai_turn(fighter)
 
 
 func _on_fighter_moved(fighter: Fighter, path: Array[Vector2i]) -> void:
@@ -199,7 +318,7 @@ func _on_fighter_moved(fighter: Fighter, path: Array[Vector2i]) -> void:
 func _on_spell_cast(_caster: Fighter, _spell: SpellData, _target: Vector2i, cells: Array[Vector2i]) -> void:
 	board.flash(cells)
 	_set_busy(true)
-	await get_tree().create_timer(0.45).timeout
+	await get_tree().create_timer(0.5).timeout
 	_set_busy(false)
 
 
@@ -207,7 +326,22 @@ func _on_fighter_damaged(fighter: Fighter, amount: int) -> void:
 	var view: FighterView = fighter_views[fighter.id]
 	var caster := state.active_fighter()
 	view.play_hit(Iso.cell_to_world(caster.cell) if caster != fighter else view.position + Vector2(0, -1))
-	FloatingText.spawn(entities.get_parent(), view.position, "-%d" % amount, Color("ff6b5b"))
+	FloatingText.spawn(self, view.position, "-%d" % amount, Color("ff6b5b"))
+
+
+func _on_fighter_healed(fighter: Fighter, amount: int) -> void:
+	var view: FighterView = fighter_views[fighter.id]
+	view.play_heal()
+	FloatingText.spawn(self, view.position, "+%d" % amount, Color("6be07a"))
+
+
+func _on_fighter_displaced(fighter: Fighter, _from: Vector2i, to: Vector2i) -> void:
+	# Le lanceur qui se déplace lui-même = bond ; sinon poussée / attraction.
+	fighter_views[fighter.id].play_slide(to, fighter == state.active_fighter())
+
+
+func _on_status_changed(fighter: Fighter) -> void:
+	fighter_views[fighter.id].refresh()
 
 
 func _on_fighter_died(fighter: Fighter) -> void:
@@ -218,7 +352,7 @@ func _on_combat_ended(winner_team: int) -> void:
 	var winner_name := ""
 	for f in state.fighters:
 		if f.team == winner_team:
-			winner_name = f.display_name
+			winner_name = "%s (%s)" % [f.display_name, f.class_data.class_label if f.class_data else "?"]
 	await get_tree().create_timer(1.0).timeout
 	_refresh_highlights()
 	hud.show_victory(winner_name)

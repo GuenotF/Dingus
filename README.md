@@ -13,12 +13,23 @@ Prototype de jeu tactique 1v1 au tour par tour, en vue isométrique (style Dofus
 | Action | Effet |
 |---|---|
 | Survol d'une case | Aperçu du chemin |
-| Clic gauche | Déplacer le personnage actif, ou lancer le sort choisi |
-| 1 / 2 / 3 | Choisir un sort (Coup d'épée, Flèche, Bombe) |
+| Clic gauche | Se placer (avant le combat), se déplacer, ou lancer le sort choisi |
+| 1 à 4 | Choisir un sort |
 | Clic droit / Échap | Annuler le sort choisi |
-| Espace / bouton | Fin du tour |
+| Espace / bouton | Prêt (placement) / Fin du tour |
 
-Les deux joueurs jouent sur le même écran, chacun à son tour.
+Le menu permet de choisir la classe de chaque joueur et s'il est contrôlé par un humain
+ou par l'IA (2 joueurs sur le même écran, contre l'IA, ou IA contre IA pour regarder).
+
+## Classes
+
+| Classe | PV | PA | PM | Sorts |
+|---|---|---|---|---|
+| Guerrier | 105 | 6 | 3 | Coup d'épée, Charge (bond), Repousser (poussée 2), Cri (+1 PM) |
+| Druide | 105 | 6 | 4 | Épine, Ronces (zone, −2 PM), Attirer (attraction 2), Soin |
+
+Une poussée bloquée par un obstacle, un pion ou le bord inflige 8 dégâts par case
+non parcourue. Les bonus et malus s'affichent au-dessus du pion avec leur durée.
 
 ## Structure
 
@@ -29,7 +40,8 @@ scripts/
   main.gd Assemble core + view et gère les entrées.
 scenes/   Scènes Godot.
 tests/    Tests de la logique.
-data/spells/  Sorts (.tres), modifiables dans l'inspecteur Godot.
+data/classes/ Classes (.tres) : stats et liste de sorts.
+data/spells/  Sorts (.tres) : portée, zone et liste d'effets, modifiables dans l'inspecteur.
 assets/   (à venir) Graphismes et sons.
 ```
 
@@ -48,16 +60,28 @@ godot --headless --path . -s res://tests/test_core.gd
 - [x] Phase 0 — Mise en place
 - [x] Phase 1 — Grille iso, déplacement A*, tours
 - [x] Phase 2 — PA, sorts (Resources), ligne de vue, PV, victoire
-- [ ] Phase 3 — Classes, effets, IA simple
+- [x] Phase 3 — Classes, effets, placement, IA simple, menu
 - [ ] Phase 4 — Animations, sons, interface
 - [ ] Phase 5 — Multijoueur en ligne
 - [ ] Phase 6 — Export Windows / Web
 
 ## Ajouter ou modifier un sort
 
-Dans le panneau FileSystem de Godot, duplique un fichier de `data/spells/`, modifie ses
-valeurs dans l'inspecteur (coût, portée, ligne de vue, dégâts, zone, lancers par tour),
-puis ajoute son chemin dans `SPELL_PATHS` (`scripts/main.gd`).
+Dans le panneau FileSystem de Godot, duplique un fichier de `data/spells/` et modifie-le
+dans l'inspecteur : coût, portée, ligne de vue, zone, recharge, et surtout la liste
+**Effets** (dégâts, soin, poussée, attraction, bond, bonus/malus de PA ou PM).
+Ajoute-le ensuite à la liste `spells` d'une classe dans `data/classes/`.
+
+Pour une nouvelle classe : duplique un fichier de `data/classes/` et ajoute son chemin
+dans `CLASS_PATHS` (`scripts/game_config.gd`).
+
+## Équilibrage
+
+```
+godot --headless --path . -s res://tests/simulate_balance.gd
+```
+Simule 80 combats IA contre IA (placements aléatoires) et affiche les victoires de chaque
+classe. Réglage actuel : environ 43 / 37.
 
 ## Graphismes
 

@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SpellData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/effect_data.gd" id="1_jm5op"]
+[ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="2_ap341"]
+
+[sub_resource type="Resource" id="Resource_2wkwi"]
+script = ExtResource("1_jm5op")
+min_value = 8
+
+[sub_resource type="Resource" id="Resource_1qrl8"]
+script = ExtResource("1_jm5op")
+kind = 2
+min_value = 2
+max_value = 2
+
+[resource]
+script = ExtResource("2_ap341")
+spell_name = "Repousser"
+target_rule = 2
+effects = Array[ExtResource("1_jm5op")]([SubResource("Resource_2wkwi"), SubResource("Resource_1qrl8")])
+casts_per_turn = 1

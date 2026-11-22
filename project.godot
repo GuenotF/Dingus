@@ -12,8 +12,12 @@ config_version=5
 
 config/name="Tactique Iso"
 config/description="Prototype de jeu tactique 1v1 tour par tour en vue isométrique."
-run/main_scene="res://scenes/main.tscn"
+run/main_scene="res://scenes/menu.tscn"
 config/features=PackedStringArray("4.5")
+
+[autoload]
+
+GameConfig="*res://scripts/game_config.gd"
 
 [display]
 

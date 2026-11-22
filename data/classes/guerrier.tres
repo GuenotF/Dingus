@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ClassData" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/class_data.gd" id="1_agf2w"]
+[ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="2_lqkkp"]
+[ext_resource type="Resource" path="res://data/spells/guerrier_coup_epee.tres" id="3_cgr3x"]
+[ext_resource type="Resource" path="res://data/spells/guerrier_charge.tres" id="4_5ov2b"]
+[ext_resource type="Resource" path="res://data/spells/guerrier_repousser.tres" id="5_sjibn"]
+[ext_resource type="Resource" path="res://data/spells/guerrier_cri.tres" id="6_hs0jc"]
+
+[resource]
+script = ExtResource("1_agf2w")
+class_label = "Guerrier"
+color = Color(0.8784314, 0.34117648, 0.30980393, 1)
+max_hp = 105
+spells = Array[ExtResource("2_lqkkp")]([ExtResource("3_cgr3x"), ExtResource("4_5ov2b"), ExtResource("5_sjibn"), ExtResource("6_hs0jc")])

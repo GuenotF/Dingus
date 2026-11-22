@@ -16,6 +16,14 @@ func _init() -> void:
 	_test_cast_costs_and_limits()
 	_test_area_hits_caster_too()
 	_test_death_and_victory()
+	_test_push_and_collision()
+	_test_pull_and_dash()
+	_test_heal_capped()
+	_test_pm_status_and_cooldown()
+	_test_placement()
+	_test_class_data_files()
+	_test_ai_takes_obvious_kill()
+	_test_ai_vs_ai_finishes()
 	print("Tests terminés : %s" % ("OK" if _failures == 0 else "%d échec(s)" % _failures))
 	quit(1 if _failures > 0 else 0)
 
@@ -89,9 +97,16 @@ func _spell(cost: int, rmin: int, rmax: int, los: bool, dmg: int, casts: int = 3
 	s.range_min = rmin
 	s.range_max = rmax
 	s.needs_line_of_sight = los
-	s.damage_min = dmg
-	s.damage_max = dmg
+	var effects: Array[EffectData] = [EffectData.make(EffectData.Kind.DAMAGE, dmg)]
+	s.effects = effects
 	s.casts_per_turn = casts
+	return s
+
+
+func _effect_spell(cost: int, rmin: int, rmax: int, effects: Array[EffectData]) -> SpellData:
+	var s := _spell(cost, rmin, rmax, false, 0)
+	s.effects = effects
+	s.casts_per_turn = 5
 	return s
 
 
@@ -175,3 +190,142 @@ func _test_death_and_victory() -> void:
 	_check(state.is_over and ended[0] == 0, "victoire de l'équipe 0")
 	_check(not state.try_move(Vector2i(0, 1)), "plus d'action après la fin")
 	_check(state.fighter_at(Vector2i(1, 0)) == null, "un mort ne bloque plus la case")
+
+
+# --- Phase 3 : effets, statuts, placement, classes, IA ----------------------------
+
+const K := EffectData.Kind
+
+
+func _test_push_and_collision() -> void:
+	var fx: Array[EffectData] = [EffectData.make(K.PUSH, 2)]
+	var push := _effect_spell(1, 1, 1, fx)
+	var state := _duel([push], Vector2i(1, 1), Vector2i(2, 1))
+	_check(state.try_cast(push, Vector2i(2, 1)), "poussée lancée")
+	_check(state.fighters[1].cell == Vector2i(4, 1) and state.fighters[1].hp == 100, "poussée libre de 2 cases, sans dégâts")
+	var walls: Array[Vector2i] = [Vector2i(4, 1)]
+	state = _duel([push], Vector2i(1, 1), Vector2i(2, 1), walls)
+	state.try_cast(push, Vector2i(2, 1))
+	_check(state.fighters[1].cell == Vector2i(3, 1), "poussée stoppée par le mur")
+	_check(state.fighters[1].hp == 100 - CombatState.PUSH_DAMAGE_PER_CELL, "1 case bloquée = dégâts de collision")
+	state = _duel([push], Vector2i(8, 1), Vector2i(9, 1))
+	state.try_cast(push, Vector2i(9, 1))
+	_check(state.fighters[1].hp == 100 - 2 * CombatState.PUSH_DAMAGE_PER_CELL, "bord de carte = 2 cases bloquées")
+
+
+func _test_pull_and_dash() -> void:
+	var fx: Array[EffectData] = [EffectData.make(K.PULL, 2)]
+	var pull := _effect_spell(1, 1, 5, fx)
+	var state := _duel([pull], Vector2i(0, 0), Vector2i(2, 0))
+	state.try_cast(pull, Vector2i(2, 0))
+	_check(state.fighters[1].cell == Vector2i(1, 0) and state.fighters[1].hp == 100, "attraction stoppée contre le lanceur, sans dégâts")
+	var dash_fx: Array[EffectData] = [EffectData.make(K.DASH, 0)]
+	var dash := _effect_spell(1, 2, 3, dash_fx)
+	dash.target_rule = SpellData.TargetRule.EMPTY
+	state = _duel([dash], Vector2i(0, 0), Vector2i(9, 9))
+	_check(state.try_cast(dash, Vector2i(3, 0)) and state.fighters[0].cell == Vector2i(3, 0), "bond sur une case libre")
+	state = _duel([dash], Vector2i(0, 0), Vector2i(2, 0))
+	_check(not state.try_cast(dash, Vector2i(2, 0)), "bond refusé sur une case occupée")
+
+
+func _test_heal_capped() -> void:
+	var fx: Array[EffectData] = [EffectData.make(K.HEAL, 30)]
+	var heal := _effect_spell(1, 0, 3, fx)
+	heal.target_rule = SpellData.TargetRule.FIGHTER
+	var state := _duel([heal], Vector2i(0, 0), Vector2i(9, 9))
+	var me := state.active_fighter()
+	me.hp = 80
+	_check(not state.cells_in_range(heal).has(Vector2i(1, 0)), "soin : case vide non ciblable")
+	_check(state.try_cast(heal, me.cell) and me.hp == 100, "soin sur soi plafonné aux PV max")
+
+
+func _test_pm_status_and_cooldown() -> void:
+	var slow_fx: Array[EffectData] = [EffectData.make(K.MOD_PM, -1, EffectData.SAME_AS_MIN, 1)]
+	var slow := _effect_spell(1, 1, 5, slow_fx)
+	var buff_fx: Array[EffectData] = [EffectData.make(K.MOD_PM, 1, EffectData.SAME_AS_MIN, 1)]
+	var cry := _effect_spell(1, 0, 0, buff_fx)
+	cry.cooldown = 3
+	var state := _duel([slow, cry], Vector2i(0, 0), Vector2i(3, 0))
+	var a := state.fighters[0]
+	var b := state.fighters[1]
+	state.try_cast(slow, b.cell)
+	_check(b.statuses.size() == 1, "malus posé sur B")
+	_check(state.try_cast(cry, a.cell) and a.pm == 4, "Cri : +1 PM immédiat")
+	_check(not state.can_use_spell(cry), "Cri en recharge")
+	state.end_turn()
+	_check(b.pm == 2 and b.statuses.size() == 1, "B commence avec 2 PM, malus visible pendant son tour")
+	state.end_turn()
+	_check(b.statuses.is_empty(), "le malus expire à la fin du tour de B")
+	_check(a.pm == 4 and a.statuses.size() == 1, "le bonus du Cri dure aussi au tour suivant")
+	_check(not state.can_use_spell(cry), "recharge : encore indisponible")
+	state.end_turn()
+	state.end_turn()
+	_check(a.pm == 3, "bonus expiré")
+	_check(not state.can_use_spell(cry), "recharge 3 : indisponible 2 tours")
+	state.end_turn()
+	state.end_turn()
+	_check(state.can_use_spell(cry), "recharge terminée")
+
+
+func _test_placement() -> void:
+	var state := CombatState.new(BattleGrid.new(10, 10), 7)
+	state.placement_zones = [[Vector2i(0, 0), Vector2i(0, 1)], [Vector2i(9, 9)]]
+	var a := Fighter.new(0, "A", 0, Vector2i(0, 0))
+	var b := Fighter.new(1, "B", 1, Vector2i(9, 9))
+	state.add_fighter(a)
+	state.add_fighter(b)
+	_check(not state.place(a, Vector2i(0, 1)), "placement refusé hors phase")
+	state.begin_placement()
+	_check(state.place(a, Vector2i(0, 1)) and a.cell == Vector2i(0, 1), "placement dans sa zone")
+	_check(not state.place(a, Vector2i(9, 9)), "placement refusé dans la zone adverse")
+	_check(not state.place(a, Vector2i(5, 5)), "placement refusé hors zone")
+	_check(state.active_fighter() == null and not state.try_move(Vector2i(0, 2)), "pas d'action pendant le placement")
+	state.start()
+	_check(state.active_fighter() == a, "le combat démarre")
+
+
+func _test_class_data_files() -> void:
+	for path in ["res://data/classes/guerrier.tres", "res://data/classes/druide.tres"]:
+		var c: ClassData = load(path)
+		_check(c != null and c.spells.size() == 4, "%s : 4 sorts" % path)
+		if c:
+			for s in c.spells:
+				_check(s != null and not s.effects.is_empty(), "%s : sort avec effets" % path)
+
+
+func _class_duel(a_cell: Vector2i, b_cell: Vector2i, rng_seed: int) -> CombatState:
+	var grid := BattleGrid.new(MapLayouts.TEST_SIZE.x, MapLayouts.TEST_SIZE.y, MapLayouts.TEST_OBSTACLES)
+	var state := CombatState.new(grid, rng_seed)
+	state.add_fighter(Fighter.new(0, "G", 0, a_cell, load("res://data/classes/guerrier.tres")))
+	state.add_fighter(Fighter.new(1, "D", 1, b_cell, load("res://data/classes/druide.tres")))
+	state.start()
+	return state
+
+
+func _test_ai_takes_obvious_kill() -> void:
+	var state := _class_duel(Vector2i(5, 5), Vector2i(6, 5), 3)
+	state.fighters[1].hp = 15
+	var action := AiBrain.next_action(state)
+	_check(action.type == "cast" and action.cell == Vector2i(6, 5), "l'IA achève un ennemi au contact")
+
+
+func _test_ai_vs_ai_finishes() -> void:
+	for rng_seed in [1, 2, 3, 4, 5]:
+		var state := _class_duel(MapLayouts.TEST_SPAWNS[0], MapLayouts.TEST_SPAWNS[1], rng_seed)
+		var actions := 0
+		while not state.is_over and state.turn_number <= 40 and actions < 2000:
+			var action := AiBrain.next_action(state)
+			actions += 1
+			var ok := true
+			match action.type:
+				"move":
+					ok = state.try_move(action.cell)
+				"cast":
+					ok = state.try_cast(action.spell, action.cell)
+				_:
+					state.end_turn()
+			_check(ok, "action IA valide (%s)" % action.type)
+			if not ok:
+				state.end_turn()
+		_check(state.is_over, "IA contre IA : combat terminé (graine %d, tour %d, PV %d/%d)" % [rng_seed, state.turn_number, state.fighters[0].hp, state.fighters[1].hp])
+		print("  graine %d : gagnant %d au tour %d" % [rng_seed, state.winner_team, state.turn_number])

@@ -11,4 +11,11 @@ const TEST_OBSTACLES: Array[Vector2i] = [
 	Vector2i(5, 12), Vector2i(12, 6),
 ]
 
+## Case de départ par défaut de chaque équipe (doit appartenir à sa zone de placement).
 const TEST_SPAWNS: Array[Vector2i] = [Vector2i(2, 7), Vector2i(12, 7)]
+
+## Cases où chaque équipe peut se placer avant le combat.
+const TEST_PLACEMENT: Array = [
+	[Vector2i(1, 5), Vector2i(2, 5), Vector2i(2, 7), Vector2i(3, 7), Vector2i(1, 8), Vector2i(2, 9)],
+	[Vector2i(13, 5), Vector2i(12, 5), Vector2i(12, 7), Vector2i(11, 7), Vector2i(13, 8), Vector2i(12, 9)],
+]
