@@ -29,6 +29,7 @@ func _init() -> void:
 	_test_water_rules()
 	_test_lake_map()
 	_test_spell_not_affecting_caster()
+	_test_village_map()
 	print("Tests terminés : %s" % ("OK" if _failures == 0 else "%d échec(s)" % _failures))
 	quit(1 if _failures > 0 else 0)
 
@@ -464,3 +465,20 @@ func _test_spell_not_affecting_caster() -> void:
 	_check(mage.hp == 100, "nova : le lanceur n'est pas touché")
 	var push: int = nova.effects[1].min_value
 	_check(foe.hp <= 100 - nova.effects[0].min_value and foe.cell == Vector2i(4 + push, 3), "nova : l'ennemi adjacent est touché et repoussé")
+
+
+func _test_village_map() -> void:
+	var map: BattleMap = load("res://maps/village.tscn").instantiate()
+	var grid := map.build_grid()
+	_check(map.map_name == "Place du village", "village : nom")
+	_check(grid.width == 15 and grid.height == 15, "village : 15x15")
+	_check(map.ground_detail() != null, "village : calque SolDetail présent")
+	_check(grid.is_obstacle(Vector2i(7, 7)), "village : le puits bloque")
+	_check(not grid.is_obstacle(Vector2i(3, 1)), "village : les fleurs se traversent")
+	var zones := map.placement_zones()
+	for team in 2:
+		_check(zones[team].size() == 6, "village : 6 cases de départ équipe %d" % team)
+		for cell in zones[team]:
+			_check(grid.is_walkable(cell), "village : case de départ praticable %s" % cell)
+	_check(not grid.find_path(zones[0][0], zones[1][0]).is_empty(), "village : les deux camps peuvent se rejoindre")
+	map.free()

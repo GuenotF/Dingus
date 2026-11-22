@@ -4,6 +4,8 @@ extends Node2D
 ##
 ## Trois calques TileMapLayer :
 ##   Sol        le terrain ; chaque case peinte fait partie de la grille de combat.
+##   SolDetail  (optionnel) surcouches posées à plat sur le sol (herbe, gravillons...),
+##              toujours sous les personnages.
 ##   Decor      objets posés sur le sol (rochers, troncs, fleurs...).
 ##   Placement  cases de départ de chaque équipe (visible seulement dans l'éditeur).
 ##
@@ -27,6 +29,11 @@ const PLACEMENT_TEAM := "placement_team"
 
 func ground() -> TileMapLayer:
 	return get_node("Sol")
+
+
+## Calque optionnel de surcouches au sol (null si la carte n'en a pas).
+func ground_detail() -> TileMapLayer:
+	return get_node_or_null("SolDetail")
 
 
 func decor() -> TileMapLayer:
@@ -54,7 +61,8 @@ func obstacles() -> Array[Vector2i]:
 		for x in size.x:
 			var cell := Vector2i(x, y)
 			if ground().get_cell_source_id(cell) == -1 \
-					or _is_obstacle(ground(), cell) or _is_obstacle(decor(), cell):
+					or _is_obstacle(ground(), cell) or _is_obstacle(decor(), cell) \
+					or (ground_detail() != null and _is_obstacle(ground_detail(), cell)):
 				result.append(cell)
 	return result
 

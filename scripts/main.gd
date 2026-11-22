@@ -80,7 +80,7 @@ func _build_scene() -> void:
 	entities.add_child(decor)
 	decor.scale = map.scale
 	decor.position = map.position
-	decor.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	decor.texture_filter = map.texture_filter # pixel art net ou rendu lissé, selon la carte
 
 	for f in state.fighters:
 		var view := FighterView.new()

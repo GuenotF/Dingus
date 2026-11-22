@@ -96,11 +96,15 @@ toutes les scènes de ce dossier : une carte ajoutée y apparaît sans toucher a
 Cartes actuelles :
 - **Prairie** (`demo.tscn`) : rochers et troncs au centre, jeu sur les lignes de vue.
 - **Le lac** (`lac.tscn`) : une rivière coupe le terrain, deux ponts, deux pierres dans l'eau.
+- **Place du village** (`village.tscn`) : place pavée autour d'un puits, étals, charrette, tonneaux,
+  clôtures. Tuiles du pack *Fantasy tileset - 2D Isometric* (`assets/tiles/village/`), en rendu lissé.
+  Équilibrage pas encore mesuré sur cette carte.
 
 1. **Ouvrir** une carte de `maps/`, ou la **dupliquer** (clic droit → Dupliquer) pour en créer une nouvelle.
    Sur le nœud racine, renseigner `map_name` et `description` (affichés dans le menu).
 2. Dans l'arbre de la scène, **sélectionner un calque** :
    - `Sol` : le terrain. Chaque case peinte fait partie de la grille de combat.
+   - `SolDetail` (optionnel) : surcouches à plat sur le sol (herbe, gravillons), toujours sous les personnages.
    - `Decor` : rochers, troncs, fleurs... posés sur le sol.
    - `Placement` : cases de départ (marqueur rouge = joueur 1, bleu = joueur 2).
      Ce calque est invisible en jeu.
