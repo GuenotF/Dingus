@@ -264,7 +264,8 @@ func _refresh_highlights(forced_hover: Vector2i = Vector2i(-1, -1)) -> void:
 		return
 
 	if selected_spell:
-		var in_range := state.cells_in_range(selected_spell)
+		# Toute la portée est affichée ; seules les cibles valides sont lançables.
+		var in_range := state.range_display(selected_spell)
 		var seen: Array[Vector2i] = []
 		var blocked: Array[Vector2i] = []
 		for cell in in_range:

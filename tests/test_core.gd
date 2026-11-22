@@ -24,6 +24,7 @@ func _init() -> void:
 	_test_class_data_files()
 	_test_ai_takes_obvious_kill()
 	_test_ai_vs_ai_finishes()
+	_test_range_always_displayed()
 	print("Tests terminés : %s" % ("OK" if _failures == 0 else "%d échec(s)" % _failures))
 	quit(1 if _failures > 0 else 0)
 
@@ -236,6 +237,8 @@ func _test_heal_capped() -> void:
 	var me := state.active_fighter()
 	me.hp = 80
 	_check(not state.cells_in_range(heal).has(Vector2i(1, 0)), "soin : case vide non ciblable")
+	_check(state.range_display(heal).has(Vector2i(1, 0)), "soin : case vide quand même affichée dans la portée")
+	_check(not state.try_cast(heal, Vector2i(1, 0)), "soin : lancer sur case vide refusé")
 	_check(state.try_cast(heal, me.cell) and me.hp == 100, "soin sur soi plafonné aux PV max")
 
 
@@ -329,3 +332,12 @@ func _test_ai_vs_ai_finishes() -> void:
 				state.end_turn()
 		_check(state.is_over, "IA contre IA : combat terminé (graine %d, tour %d, PV %d/%d)" % [rng_seed, state.turn_number, state.fighters[0].hp, state.fighters[1].hp])
 		print("  graine %d : gagnant %d au tour %d" % [rng_seed, state.winner_team, state.turn_number])
+
+
+func _test_range_always_displayed() -> void:
+	# Bug signalé : Repousser (cible = combattant) n'affichait aucune portée sans ennemi au contact.
+	var state := _class_duel(Vector2i(2, 7), Vector2i(12, 7), 1)
+	for spell in state.active_fighter().spells:
+		_check(not state.range_display(spell).is_empty(), "portée affichée : %s" % spell.spell_name)
+	var push: SpellData = state.active_fighter().spells[2]
+	_check(state.range_display(push).size() == 4 and state.cells_in_range(push).is_empty(), "Repousser : 4 cases affichées, aucune ciblable")

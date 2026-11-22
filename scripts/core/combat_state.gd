@@ -174,8 +174,18 @@ func cells_in_range(spell: SpellData) -> Dictionary:
 	return cells_in_range_from(spell, f, f.cell)
 
 
+## Portée à afficher : toutes les cases à portée, ciblables ou non (case -> ligne de vue ok).
+## Contrairement à cells_in_range, ignore la règle de cible (case libre / combattant),
+## pour que la portée reste visible même sans cible valide.
+func range_display(spell: SpellData) -> Dictionary:
+	var f := active_fighter()
+	if f == null:
+		return {}
+	return cells_in_range_from(spell, f, f.cell, false)
+
+
 ## Même calcul, mais comme si `caster` se tenait sur `origin` (utilisé par l'IA).
-func cells_in_range_from(spell: SpellData, caster: Fighter, origin: Vector2i) -> Dictionary:
+func cells_in_range_from(spell: SpellData, caster: Fighter, origin: Vector2i, apply_target_rule: bool = true) -> Dictionary:
 	var result: Dictionary = {}
 	var blockers := occupied_cells(caster)
 	for y in range(origin.y - spell.range_max, origin.y + spell.range_max + 1):
@@ -188,11 +198,12 @@ func cells_in_range_from(spell: SpellData, caster: Fighter, origin: Vector2i) ->
 				continue
 			if spell.line_only and cell.x != origin.x and cell.y != origin.y:
 				continue
-			var occupant := fighter_at_from(cell, caster, origin)
-			if spell.target_rule == SpellData.TargetRule.EMPTY and occupant != null:
-				continue
-			if spell.target_rule == SpellData.TargetRule.FIGHTER and occupant == null:
-				continue
+			if apply_target_rule:
+				var occupant := fighter_at_from(cell, caster, origin)
+				if spell.target_rule == SpellData.TargetRule.EMPTY and occupant != null:
+					continue
+				if spell.target_rule == SpellData.TargetRule.FIGHTER and occupant == null:
+					continue
 			var has_view := not spell.needs_line_of_sight or grid.has_line_of_sight(origin, cell, blockers)
 			result[cell] = has_view
 	return result
