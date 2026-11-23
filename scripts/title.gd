@@ -20,8 +20,6 @@ var _viewport: SubViewport
 var _fade: ColorRect
 var _demo: Node
 var _demo_caption: Label
-var _desc_title: Label
-var _desc_text: Label
 var _settings: SettingsPanel
 var _entries: Array[Button] = []
 
@@ -111,10 +109,10 @@ func _build_menu() -> void:
 	gap.custom_minimum_size = Vector2(0, 18)
 	column.add_child(gap)
 
-	_add_entry(column, ICON_MAP, "Campagne solo", "Une suite de combats contre orcs et gobelins, sur des cartes à part. Gagne de nouveaux sorts au fil de l'aventure.", Callable(), "Bientôt")
-	_add_entry(column, ICON_SWORDS, "Combat 1 contre 1", "Deux joueurs, ou toi contre l'IA. Choisis vos héros et la carte, puis lance le combat.",
+	_add_entry(column, ICON_MAP, "Campagne solo", Callable(), "Bientôt")
+	_add_entry(column, ICON_SWORDS, "Combat 1 contre 1",
 			func() -> void: get_tree().change_scene_to_file("res://scenes/menu.tscn"))
-	_add_entry(column, ICON_GROUP, "Escarmouche", "Combats à plusieurs : 2 contre 2, ou à deux contre un boss.", Callable(), "Plus tard")
+	_add_entry(column, ICON_GROUP, "Escarmouche", Callable(), "Plus tard")
 	var line := ColorRect.new()
 	line.color = W.PANEL_BORDER
 	line.custom_minimum_size = Vector2(0, 1)
@@ -125,32 +123,16 @@ func _build_menu() -> void:
 	line_box.add_theme_constant_override("margin_bottom", 6)
 	line_box.add_child(line)
 	column.add_child(line_box)
-	_add_entry(column, ICON_SETTINGS, "Paramètres", "Son, plein écran, particules et animation du décor.", func() -> void:
+	_add_entry(column, ICON_SETTINGS, "Paramètres", func() -> void:
 		get_viewport().gui_release_focus()
 		_settings.open())
-	_add_entry(column, ICON_QUIT, "Quitter", "Fermer le jeu.", func() -> void: get_tree().quit())
-
-	var gap2 := Control.new()
-	gap2.custom_minimum_size = Vector2(0, 14)
-	column.add_child(gap2)
-	var desc := PanelContainer.new()
-	desc.add_theme_stylebox_override("panel", W.panel_style(W.PANEL_BORDER, 10, 14))
-	desc.custom_minimum_size = Vector2(0, 92)
-	column.add_child(desc)
-	var desc_box := VBoxContainer.new()
-	desc_box.add_theme_constant_override("separation", 4)
-	desc.add_child(desc_box)
-	_desc_title = _label("", 18, W.GOLD)
-	desc_box.add_child(_desc_title)
-	_desc_text = _label("", 14, Color("b5ab96"))
-	_desc_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	desc_box.add_child(_desc_text)
+	_add_entry(column, ICON_QUIT, "Quitter", func() -> void: get_tree().quit())
 
 	_entries[1].grab_focus.call_deferred() # Combat 1 contre 1
 
 
 ## Une entrée du menu. Sans action (`action` vide), elle est « verrouillée » : grisée, avec une étiquette.
-func _add_entry(parent: Control, icon: Texture2D, text: String, description: String, action: Callable, tag: String = "") -> void:
+func _add_entry(parent: Control, icon: Texture2D, text: String, action: Callable, tag: String = "") -> void:
 	var locked := not action.is_valid()
 	var b := Button.new()
 	b.text = text
@@ -181,9 +163,7 @@ func _add_entry(parent: Control, icon: Texture2D, text: String, description: Str
 	b.focus_entered.connect(func() -> void:
 		_set_box(b, active)
 		active.content_margin_left = 14
-		create_tween().tween_property(active, "content_margin_left", 26.0, 0.12).set_trans(Tween.TRANS_QUAD)
-		_desc_title.text = text
-		_desc_text.text = description + ("\n" + tag + " disponible." if locked and tag == "Bientôt" else ""))
+		create_tween().tween_property(active, "content_margin_left", 26.0, 0.12).set_trans(Tween.TRANS_QUAD))
 	b.focus_exited.connect(func() -> void: _set_box(b, idle))
 	b.mouse_entered.connect(b.grab_focus)
 
