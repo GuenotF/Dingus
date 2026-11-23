@@ -1,37 +1,55 @@
-# Gobelin
+# Gobelin — le Pillard (refonte en attente de validation)
 
-**Identité** : harceleur fragile et mobile ; frappe au corps à corps ou de loin, déséquilibre l'adversaire
-(lui vole des PA) et se dégage d'un salto arrière. Servira plus tard d'ennemi de campagne / PVE.
-**Skin** : Goblin 01 (pack *2D Orcs and Goblins - TopDown - V1.0*, dossier `Combined/Goblin 01`, version sans ombre dans
-`Seperate shadows and effects/Goblin 01`). Gobelin vert armé d'une hachette.
-**Distance préférée (IA)** : 1 (corps à corps ; était 2 au premier jet, voir Équilibrage).
+> État du code : le jeu contient encore le premier jet (Estoc, Lancer de hache, Vol à la tire, Backflip). Cette fiche décrit la refonte
+> « Pillard » décidée le 23/11 ; rien n'est codé tant que l'utilisateur n'a pas validé les règles ci-dessous.
 
+**Identité** : pillard fourbe et fragile. Il n'écrase pas l'adversaire, il l'épuise : lui vole des PA, le ralentit, l'aveugle dans la fumée,
+le repousse à coups de pétard. Servira plus tard d'ennemi de campagne / PVE (et se marie bien avec les coffres à bonus).
+**Skin** : Goblin 01 (pack *2D Orcs and Goblins - TopDown - V1.0*). **Distance préférée (IA)** : 1 (à réviser après la refonte).
 **Stats** (provisoires) : PV 110 / PA 6 / PM 4
 
-**Animations de base** : idle = Idle, walk = Walk, hit = TakeDamage 1, die = Die 1 (Die 2 en variante)
+**Animations de base** : idle = Idle, walk = Walk, hit = TakeDamage 1, die = Die 1
 
 | # | Sort | PA | Portée | Effets | Limites | Animation | Projectile / impact |
 |---|------|----|--------|--------|---------|-----------|---------------------|
-| 1 | Estoc | 3 | 1 | 13–15 dégâts | 2/tour | Attack 2 (coup d'estoc) | — |
-| 2 | Lancer de hache | 3 | 2–5, ligne de vue | 9–11 dégâts | 2/tour | Attack 1 (à confirmer en jeu) | hache qui tourne (dessinée, `data/effects/hache.tres`) / — |
-| 3 | Vol à la tire | 3 | 1 | 6–8 dégâts, −1 PA (1 tour) | 1/tour, recharge 2 | Attack 4 (bond d'attaque) | — |
-| 4 | Backflip | 2 | 2–3, en ligne, case libre | bond sur la case | 1/tour, recharge 2 | BackFlip 1 | — |
+| 1 | Vol à la tire | 3 | 1 | 6–8 dégâts ; la cible perd 1 PA (1 tour) **et le gobelin gagne 1 PA tout de suite** | 1/tour, recharge 2 | Attack 4 (bond d'attaque) | — |
+| 2 | Coup bas | 3 | 1 | 8–10 dégâts, −2 PM (1 tour) | 1/tour | Attack 3 (à confirmer en jeu) | — |
+| 3 | Pétard | 2 | 1–4, ligne de vue | 5–7 dégâts, repousse de 2 (collision = dégâts de poussée habituels) | 2/tour | Attack 1 (lancer) | pétard lancé (à dessiner) / explosion (effet de feu existant) |
+| 4 | Fumigène | 3 | 2–5, sans ligne de vue | nuage 2×2 cases pendant 1 tour : ralentit, aveugle (dedans), fait écran (voir règles) | 1/tour, recharge 2 | Attack 1 (lancer) | nuage gris (à dessiner) |
 
-**Intentions** : 2 Estocs (6 PA) ≈ 28 dégâts/tour au contact, plus léger de loin (Lancer de hache ≈ 10).
-Contre un ennemi qui approche : Backflip pour se dégager, Lancer de hache pour continuer à frapper.
-Vol à la tire pour priver l'ennemi d'un PA et casser son tour.
+Retirés par rapport au premier jet : Estoc, Lancer de hache, Backflip (le pétard et le Coup bas donnent la distance ; plus de retraite).
+Assets déjà créés mais inutilisés après la refonte : planches `attack2` et `backflip`, projectile `hache`, icônes Estoc / hache / Backflip.
 
-## Points à valider
+## Règles du fumigène (à valider)
 
-- **Vol à la tire** : décidé avec l'utilisateur : dégâts + −1 PA à la cible (effets existants `DAMAGE` + `MOD_PA`), sans code.
-  Variante « vrai vol » (le gobelin gagne le PA) écartée : demanderait un nouvel effet ; vol de vie écarté (Pacte de sang du Chevalier).
-- **Lancer de hache** (ex-Jet de couteau, renommé à la demande de l'utilisateur) : le pack n'a pas de projectile de hache ;
-  la hache est dessinée par script (15 images, rotation en vol). À juger en jeu (taille, vitesse, sens de rotation).
-- **Animations des sorts** : choisies d'après les planches (Attack 2 = estoc, Attack 4 = bond avec impact, BackFlip = salto) ;
-  à vérifier en jeu (ordre, sens du salto par rapport à la direction du bond).
-- **Backflip** : le salto va vers l'arrière du personnage. Le bond du jeu va vers la case ciblée : vérifier que le sprite
-  regarde bien l'adversaire pendant le saut (sinon, inverser la direction d'affichage pour ce sort).
-- **Portrait** : à recadrer sur la frame 0 d'Idle. **Voix** : aucune pour l'instant. **Description** : à rédiger.
+Demandé : ralentit ; bloque la ligne de vue ; aveugle totalement un combattant qui est dedans ; fait écran pour un combattant qui est
+dehors ; 1 tour ; carré de 2 cases de côté ; recharge 2. Interprétation retenue, à corriger si besoin :
+1. **Zone** : carré 2×2 dont la case visée est le coin haut-gauche (cases x..x+1, y..y+1). Il peut empiéter sur obstacles et combattants.
+2. **Durée** : posé pendant le tour du gobelin, il dure jusqu'au début du tour suivant du gobelin, donc il couvre tout le tour de l'ennemi.
+3. **Ralentissement** : un combattant dans le nuage au début de son tour a −2 PM ce tour-là (le gobelin aussi s'il y reste).
+4. **Aveugle (dedans)** : depuis une case du nuage, on ne peut lancer aucun sort qui demande une ligne de vue (même au contact). Restent
+   permis : les sorts sans ligne de vue (ex. Pluie de feu, Fumigène) et les sorts sur soi. Vaut pour tout le monde, gobelin compris.
+5. **Écran (dehors)** : une case du nuage située entre le lanceur et la cible coupe la ligne de vue (comme un obstacle). Une cible *dans*
+   le nuage reste visible depuis une case voisine hors du nuage (on ne compte que les cases intermédiaires).
+6. **Cumul** : un nouveau nuage pendant que l'ancien dure ne s'empile pas (la recharge de 2 l'empêche de toute façon).
+
+Conséquences à surveiller à l'équilibrage : un ennemi de mêlée pris dans le nuage ne peut plus frapper tant qu'il n'en est pas sorti, avec
+−2 PM pour en sortir : le sort peut neutraliser presque tout un tour. Si c'est trop fort : réduire la durée, le ralentissement, ou
+laisser frapper au contact.
+
+## Ce que ça demande en code (estimation)
+
+- **Nouvel effet « vol de PA »** (cible −1 PA, lanceur +1 PA immédiat) + évaluation par l'IA. Petit.
+- **Nouvelle forme de zone** carré 2×2 (`SpellData.AreaShape`). Petit.
+- **Nuages de fumée** dans `CombatState` (cases + durée), branchés sur la ligne de vue (`cells_in_range_from`) et sur le ralentissement
+  de début de tour, sans toucher à `view/`. Moyen.
+- **IA** : valoriser le fumigène (enfermer un ennemi de mêlée, se cacher d'un tireur), éviter d'y entrer soi-même ; le Pétard comme
+  outil de dégagement. Moyen.
+- **Affichage** : nuage (sprites dessinés par script, comme la hache), pétard, explosion ; indicateur sur un combattant aveuglé. Moyen.
+- **Tests** : nuage et ligne de vue, aveuglement, durée, ralentissement, vol de PA, zone 2×2.
+
+**Intentions** : 6 PA = Vol (3, +1 PA rendu) puis Coup bas (3) puis un Pétard (2) ≈ 3 sorts par tour au contact ; un tour sur deux Fumigène sur
+l'ennemi puis Pétards pour le garder à distance pendant qu'il est aveugle.
 
 ## Mise en place (23/11)
 
