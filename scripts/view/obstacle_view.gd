@@ -45,9 +45,11 @@ func _convert(layer: TileMapLayer, cell: Vector2i, grid: BattleGrid, entities: N
 	sprite.region_enabled = true
 	sprite.region_rect = region
 	sprite.offset = -Vector2(data.texture_origin)
-	sprite.scale = layer.scale
-	sprite.texture_filter = layer.texture_filter
-	sprite.position = layer.position + layer.map_to_local(cell) * layer.scale
+	# Position et échelle dans le repère du monde : le calque de décor a été déplacé dans `entities`
+	# (avec le décalage de la carte), mais le calque de surcouche est resté enfant de la carte.
+	sprite.scale = layer.global_scale
+	sprite.texture_filter = _filter_of(layer)
+	sprite.position = entities.to_local(layer.to_global(layer.map_to_local(cell)))
 	entities.add_child(sprite)
 	var anim := DestructionAnims.sheet_for(layer.tile_set.resource_path, layer.get_cell_atlas_coords(cell))
 	layer.erase_cell(cell)
@@ -64,6 +66,14 @@ func _convert(layer: TileMapLayer, cell: Vector2i, grid: BattleGrid, entities: N
 		"anim": anim,
 	}
 	return true
+
+
+## Filtrage de texture effectif d'un calque (celui de son parent s'il n'en a pas de propre).
+func _filter_of(layer: TileMapLayer) -> CanvasItem.TextureFilter:
+	var item: CanvasItem = layer
+	while item != null and item.texture_filter == CanvasItem.TEXTURE_FILTER_PARENT_NODE:
+		item = item.get_parent() as CanvasItem
+	return item.texture_filter if item != null else CanvasItem.TEXTURE_FILTER_PARENT_NODE
 
 
 ## Haut visible (première ligne non transparente) et couleur moyenne d'une zone de la texture.
