@@ -47,7 +47,8 @@ func _init() -> void:
 			classes.append(load("res://data/classes/" + file.trim_suffix(".remap")))
 	var map_paths: Array[String] = []
 	for file in DirAccess.get_files_at("res://maps"):
-		if file.trim_suffix(".remap").ends_with(".tscn"):
+		# Les cartes « test_* » sont des bancs d'essai : pas dans l'équilibrage.
+		if file.trim_suffix(".remap").ends_with(".tscn") and not file.begins_with("test_"):
 			map_paths.append("res://maps/" + file.trim_suffix(".remap"))
 	map_paths.sort()
 

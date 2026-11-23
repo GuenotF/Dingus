@@ -64,7 +64,7 @@ func _init() -> void:
 			classes.append(load("res://data/classes/" + file.trim_suffix(".remap")))
 	var maps: Array[String] = []
 	for file in DirAccess.get_files_at("res://maps"):
-		if file.trim_suffix(".remap").ends_with(".tscn"):
+		if file.trim_suffix(".remap").ends_with(".tscn") and not file.begins_with("test_"):
 			maps.append("res://maps/" + file.trim_suffix(".remap"))
 	maps.sort()
 	for i in classes.size():

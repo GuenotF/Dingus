@@ -38,6 +38,7 @@ func _init() -> void:
 	_test_desert_destructibles()
 	_test_ai_destructibles()
 	_test_barricade_map()
+	_test_destructibles_test_map()
 	_test_steal_pa()
 	_test_square_area()
 	_test_smoke()
@@ -643,6 +644,24 @@ func _test_desert_destructibles() -> void:
 	_check(not destructibles.has(Vector2i(7, 7)), "désert : le sphinx est indestructible")
 	_check(not destructibles.has(Vector2i(7, 5)) and not destructibles.has(Vector2i(7, 9)), "désert : les obélisques sont indestructibles")
 	_check(grid.get_obstacles().size() == 25, "désert : toujours 25 obstacles")
+	map.free()
+
+
+## Banc d'essai : chaque destructible animé (9 du village, 5 du désert) est bien présent, avec ses PV.
+func _test_destructibles_test_map() -> void:
+	var map: BattleMap = load("res://maps/test_destructibles.tscn").instantiate()
+	var grid := map.build_grid()
+	var zones := map.placement_zones()
+	_check(zones.size() == 2 and zones[0].size() == 9 and zones[1].size() == 9, "banc d'essai : 9 cases de placement par équipe")
+	var destructibles := map.destructibles()
+	_check(destructibles.size() == 14, "banc d'essai : 14 destructibles (%d)" % destructibles.size())
+	for cell in destructibles:
+		_check(grid.is_destructible(cell) and destructibles[cell] > 0, "banc d'essai : %s destructible" % cell)
+	# Chaque destructible a une animation d'effondrement.
+	for layer: TileMapLayer in [map.decor(), map.ground_detail()]:
+		for cell in layer.get_used_cells():
+			var anim := DestructionAnims.sheet_for(layer.tile_set.resource_path, layer.get_cell_atlas_coords(cell))
+			_check(anim != "", "banc d'essai : %s a une animation" % cell)
 	map.free()
 
 
