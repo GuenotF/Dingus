@@ -59,4 +59,7 @@ de 20 à 80 %), d'où des réglages fins.
 Victoires de l'Archer : Chevalier maudit 28 %, Gobelin 17 %, Guerrier 54 %, Mage de feu 51 % ; moyenne 38 %.
 Il tient contre les tireurs et les lourds, mais les personnages rapides le rattrapent. Cartes : très fort sur le lac contre le Guerrier (90 %).
 
-**Deuxième jet** : 4 PM (au lieu de 3) pour mieux fuir, Flèche 14–16 (au lieu de 13–15). À mesurer.
+**Deuxième jet** : 4 PM (au lieu de 3), Flèche 14–16 (au lieu de 13–15). Mesuré sur la prairie (4000 combats) : trop fort, 100 % contre le
+Chevalier maudit (30 % avant) et 78 % contre le Guerrier (45 % avant). Les 4 PM lui permettent de fuir sans fin les personnages à 3 PM.
+
+**Troisième jet** : retour à 3 PM, Flèche 14–16 conservée, PV 130 (au lieu de 125). À mesurer.

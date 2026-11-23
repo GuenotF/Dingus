@@ -79,4 +79,4 @@ nous), Coup bas 10–12, Pétard 6–8. Le Fumigène (recharge 3, décidée avec
 Victoires du Gobelin : Archer 83 %, Chevalier maudit 50 %, Guerrier 19 %, Mage de feu 20 % ; moyenne 43 %.
 Il bat les personnages qui ont du mal à fuir et perd contre les deux gros frappeurs. Cartes : Mage de feu 97 % de défaites sur le lac.
 
-**Troisième jet** : PV 135 (135 = Mage de feu). Les autres chiffres ne bougent pas, pour voir si les PV seuls rapprochent le duel du Guerrier et du Mage.
+**Troisième jet** (mesuré sur la prairie, 4000 combats : Guerrier 34 % au lieu de 20 %, Mage de feu 41 % au lieu de 17 %, Chevalier 62 %) : PV 135 (135 = Mage de feu). Les autres chiffres ne bougent pas, pour voir si les PV seuls rapprochent le duel du Guerrier et du Mage.
