@@ -647,7 +647,7 @@ func _test_desert_destructibles() -> void:
 	map.free()
 
 
-## Banc d'essai : chaque destructible animé (9 du village, 5 du désert) est bien présent, avec ses PV.
+## Banc d'essai : chaque destructible animé (9 du village, 5 du désert) est bien présent, avec ses PV et son animation.
 func _test_destructibles_test_map() -> void:
 	var map: BattleMap = load("res://maps/test_destructibles.tscn").instantiate()
 	var grid := map.build_grid()
@@ -660,6 +660,8 @@ func _test_destructibles_test_map() -> void:
 	# Chaque destructible a une animation d'effondrement.
 	for layer: TileMapLayer in [map.decor(), map.ground_detail()]:
 		for cell in layer.get_used_cells():
+			if not destructibles.has(cell):
+				continue # arbres, palmiers, touffes : animés par le vent, pas destructibles
 			var anim := DestructionAnims.sheet_for(layer.tile_set.resource_path, layer.get_cell_atlas_coords(cell))
 			_check(anim != "", "banc d'essai : %s a une animation" % cell)
 	map.free()
