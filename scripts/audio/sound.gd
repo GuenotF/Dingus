@@ -8,6 +8,8 @@ const SFX_DIR := "res://assets/audio/sfx/"
 ## Nombre maximal de bruitages simultanés (au-delà, on ignore le plus récent).
 const SFX_VOICES := 8
 ## Une voix par personnage à la fois : une nouvelle réplique coupe la précédente du même personnage.
+## Coupe voix et bruitages sans toucher au réglage du joueur (démo de l'écran titre).
+var silenced := false
 var _voice_players: Dictionary = {} # clé (id du combattant, ou autre) -> AudioStreamPlayer
 var _sfx_players: Array[AudioStreamPlayer] = []
 var _sfx_cache: Dictionary = {} # nom -> Array[AudioStream] (variantes nom_1, nom_2...)
@@ -37,6 +39,8 @@ func _ready() -> void:
 ## Joue le bruitage `sfx_name` (variantes assets/audio/sfx/<nom>_1.ogg, _2... tirées au hasard).
 ## Sans fichier : rien (le jeu reste muet plutôt que de planter).
 func play_sfx(sfx_name: String, volume_db: float = 0.0) -> void:
+	if silenced:
+		return
 	var variants := _sfx_variants(sfx_name)
 	if variants.is_empty():
 		return
@@ -67,6 +71,8 @@ func _sfx_variants(sfx_name: String) -> Array:
 ## Joue une réplique de `voice` (CharacterVoice) pour le moment donné. `key` identifie
 ## celui qui parle (une seule réplique à la fois par clé). Sans voix ou sans variante : rien.
 func play_voice(voice: Resource, moment: String, key: Variant = "menu") -> void:
+	if silenced:
+		return
 	var v := voice as CharacterVoice
 	if v == null:
 		return

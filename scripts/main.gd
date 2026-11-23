@@ -24,6 +24,16 @@ var smoke_view: SmokeView
 var _deferring := false
 var _deferred: Array[Callable] = []
 
+## Mode démo (fond animé de l'écran titre) : IA contre IA, sans HUD ni entrées.
+## À régler avant d'ajouter la scène à l'arbre ; sinon la partie vient de GameConfig.
+var demo := false
+## Partie de démo : « map_path » (String) et « classes » (Array de ClassData, un par joueur).
+var demo_setup: Dictionary = {}
+## Au-delà, la démo s'arrête (combat qui s'éternise).
+const DEMO_MAX_TURNS := 30
+## Fin de la démo (victoire ou combat trop long) : l'écran titre en lance une autre.
+signal demo_finished
+
 
 func _ready() -> void:
 	_build_combat()
@@ -72,18 +82,20 @@ func _lift_detail_objects(detail: TileMapLayer, decor: TileMapLayer) -> TileMapL
 
 func _build_combat() -> void:
 	# La carte (dessinée dans l'éditeur) fournit la grille, les obstacles et les zones de placement.
-	map = load(GameConfig.map_path).instantiate()
+	map = load(demo_setup.map_path if demo else GameConfig.map_path).instantiate()
 	state = CombatState.new(map.build_grid())
 	state.placement_zones = map.placement_zones()
 	for i in 2:
 		var zone: Array = state.placement_zones[i]
 		var start: Vector2i = zone[0] if not zone.is_empty() else Vector2i(i * (state.grid.width - 1), 0)
-		var f := Fighter.new(i, GameConfig.player_name(i), i, start, GameConfig.class_for(i))
+		var data: ClassData = demo_setup.classes[i] if demo else GameConfig.class_for(i)
+		var display_name := data.class_label if demo else GameConfig.player_name(i)
+		var f := Fighter.new(i, display_name, i, start, data)
 		state.add_fighter(f)
 
 
 func is_ai(fighter: Fighter) -> bool:
-	return fighter != null and GameConfig.player_is_ai[fighter.id]
+	return fighter != null and (demo or GameConfig.player_is_ai[fighter.id])
 
 
 func _build_scene() -> void:
@@ -147,7 +159,9 @@ func _build_scene() -> void:
 	hud.main_button_pressed.connect(_on_main_button)
 	hud.spell_pressed.connect(_select_spell)
 	hud.restart_pressed.connect(func() -> void: get_tree().reload_current_scene())
-	hud.menu_pressed.connect(func() -> void: get_tree().change_scene_to_file("res://scenes/menu.tscn"))
+	hud.menu_pressed.connect(func() -> void: get_tree().change_scene_to_file("res://scenes/title.tscn"))
+	if demo:
+		hud.visible = false
 
 
 # --- Placement ---------------------------------------------------------------
@@ -206,6 +220,8 @@ func _input_locked() -> bool:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if demo:
+		return
 	if event is InputEventMouseMotion:
 		_refresh_highlights()
 		return
@@ -389,6 +405,9 @@ func _on_fighter_placed(fighter: Fighter) -> void:
 
 
 func _on_turn_started(fighter: Fighter, turn_number: int) -> void:
+	if demo and turn_number > DEMO_MAX_TURNS:
+		demo_finished.emit()
+		return
 	if turn_number == 1:
 		Sound.play_voice(_voice(fighter), "greet", fighter.id) # chacun se présente à son premier tour
 	selected_spell = null
@@ -522,6 +541,10 @@ func _on_combat_ended(winner_team: int) -> void:
 			winner_name = "%s (%s)" % [f.display_name, f.class_data.class_label if f.class_data else "?"]
 	await get_tree().create_timer(1.0, false).timeout
 	_refresh_highlights()
+	if demo:
+		await get_tree().create_timer(2.0, false).timeout
+		demo_finished.emit()
+		return
 	hud.show_victory(winner_name)
 	for f in state.fighters:
 		if f.team == winner_team and f.is_alive():

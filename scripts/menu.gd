@@ -98,6 +98,17 @@ func _build_corner_buttons() -> void:
 	add_child(_settings)
 	settings_button.pressed.connect(_settings.open)
 
+	# Coin haut gauche : retour à l'écran titre (aussi avec Échap).
+	var back := W.icon_button(ICON_CHEVRON_LEFT, "Retour à l'écran titre")
+	back.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	back.position = Vector2(18, 18)
+	back.pressed.connect(_back_to_title)
+	add_child(back)
+
+
+func _back_to_title() -> void:
+	get_tree().change_scene_to_file("res://scenes/title.tscn")
+
 
 func _build_center() -> Control:
 	var col := VBoxContainer.new()
@@ -185,6 +196,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo \
 			and (event.keycode == KEY_ENTER or event.keycode == KEY_KP_ENTER):
 		_on_start()
+	elif event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+		_back_to_title() # la fenêtre Paramètres, si elle est ouverte, a déjà pris l'événement
 
 
 func _change_map(step: int) -> void:
