@@ -94,7 +94,7 @@ func _build_combat() -> void:
 		var zone: Array = state.placement_zones[i]
 		var start: Vector2i = zone[0] if not zone.is_empty() else Vector2i(i * (state.grid.width - 1), 0)
 		var data: ClassData = demo_setup.classes[i] if demo else GameConfig.class_for(i)
-		var display_name := data.class_label if demo else GameConfig.player_name(i)
+		var display_name := data.class_label if demo or (GameConfig.campaign and i == 1) else GameConfig.player_name(i)
 		var f := Fighter.new(i, display_name, i, start, data)
 		state.add_fighter(f)
 
@@ -588,6 +588,8 @@ func _on_combat_ended(winner_team: int) -> void:
 	for f in state.fighters:
 		if f.team == winner_team:
 			winner_name = "%s (%s)" % [f.display_name, f.class_data.class_label if f.class_data else "?"]
+			if GameConfig.campaign and not demo and f.display_name == f.class_data.class_label:
+				winner_name = f.display_name # ennemi de campagne : pas de « Gobelin chapardeur (Gobelin chapardeur) »
 	await get_tree().create_timer(1.0, false).timeout
 	_refresh_highlights()
 	if demo:

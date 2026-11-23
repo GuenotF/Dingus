@@ -41,10 +41,10 @@ func _init() -> void:
 	for k in overrides:
 		cfg[k] = overrides[k]
 
+	# Personnages jouables seulement (les ennemis de campagne, Roster.ENEMY_PATHS, n'y sont pas).
 	var classes: Array[ClassData] = []
-	for file in DirAccess.get_files_at("res://data/classes"):
-		if file.trim_suffix(".remap").ends_with(".tres"):
-			classes.append(load("res://data/classes/" + file.trim_suffix(".remap")))
+	for path in Roster.CLASS_PATHS:
+		classes.append(load(path))
 	var map_paths: Array[String] = []
 	for file in DirAccess.get_files_at("res://maps"):
 		# Les cartes « test_* » sont des bancs d'essai : pas dans l'équilibrage.

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SpellData" format=3]
+
+[ext_resource type="Script" path="res://scripts/core/effect_data.gd" id="1_pgg"]
+[ext_resource type="Texture2D" path="res://assets/ui/spells/pnj_gobelin_gourdin.png" id="2_pgg"]
+[ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="3_pgg"]
+
+[sub_resource type="Resource" id="Resource_pgg1"]
+script = ExtResource("1_pgg")
+min_value = 10
+max_value = 13
+
+[resource]
+script = ExtResource("3_pgg")
+spell_name = "Coup de gourdin"
+animation = "attack1"
+effects = Array[ExtResource("1_pgg")]([SubResource("Resource_pgg1")])
+icon = ExtResource("2_pgg")
+cast_delay = 0.4

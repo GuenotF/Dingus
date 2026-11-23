@@ -1,13 +1,10 @@
 extends Node
 ## Réglages de la partie choisis dans le menu (autoload « GameConfig »).
 
-const CLASS_PATHS: Array[String] = [
-	"res://data/classes/guerrier.tres",
-	"res://data/classes/mage_feu.tres",
-	"res://data/classes/archer.tres",
-	"res://data/classes/chevalier_maudit.tres",
-	"res://data/classes/gobelin.tres",
-]
+## Listes des personnages et des combats de campagne : voir scripts/core/roster.gd.
+const CLASS_PATHS := Roster.CLASS_PATHS
+const ENEMY_PATHS := Roster.ENEMY_PATHS
+const CAMPAIGN_FIGHTS := Roster.CAMPAIGN_FIGHTS
 
 ## Police de l'interface (assets/fonts/). Absente (non versionnée, voir .gitignore) : police par défaut de Godot.
 const FONT_PATH := "res://assets/fonts/vinque_antique_bd.otf"
@@ -31,6 +28,11 @@ var map_path: String = "res://maps/demo.tscn"
 var player_classes: Array[int] = [0, 1]
 ## true = ce joueur est contrôlé par l'IA.
 var player_is_ai: Array[bool] = [false, true]
+## Partie de campagne : le joueur 1 (humain) choisit son héros, le joueur 2 est l'ennemi du combat
+## `campaign_fight` (IA), sur la carte imposée.
+var campaign := false
+var campaign_fight := 0
+var _versus_map_path := ""
 ## Noms choisis dans le menu (vide = « Joueur N »), affichés en combat.
 var player_names: Array[String] = ["", ""]
 
@@ -73,4 +75,29 @@ func player_name(player: int) -> String:
 
 
 func class_for(player: int) -> ClassData:
+	if campaign and player == 1:
+		return load(current_fight().enemy)
 	return load(CLASS_PATHS[player_classes[player]])
+
+
+func current_fight() -> Dictionary:
+	return CAMPAIGN_FIGHTS[clampi(campaign_fight, 0, CAMPAIGN_FIGHTS.size() - 1)]
+
+
+## Prépare une partie de campagne (appelé depuis l'écran titre).
+func start_campaign(fight: int = 0) -> void:
+	if not campaign:
+		_versus_map_path = map_path
+	campaign = true
+	campaign_fight = fight
+	map_path = current_fight().map
+	player_is_ai[0] = false
+	player_is_ai[1] = true
+
+
+## Prépare un combat 1v1 classique (appelé depuis l'écran titre).
+func start_versus() -> void:
+	if campaign:
+		campaign = false
+		if _versus_map_path != "":
+			map_path = _versus_map_path

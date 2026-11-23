@@ -47,6 +47,12 @@ Au centre, l'aperçu de la carte (la vraie scène, flèches ‹ › pour changer
 | Chevalier maudit | 120 | 6 | 3 | Lame sombre (vol de vie), Chaîne infernale (attire de 5, −2 PM), Malédiction (−2 PA), Pacte de sang (−12 PV, +3 PA) |
 | Gobelin | 135 | 6 | 4 | Vol à la tire (vole 1 PA), Coup bas (−2 PM), Pétard (repousse 2), Fumigène (nuage 3×3 : −2 PM, aveugle, fait écran) |
 
+Ennemis de campagne (non jouables, joués par l'IA, listés dans `Roster.ENEMY_PATHS`) :
+
+| Ennemi | PV | PA | PM | Sorts |
+|---|---|---|---|---|
+| Gobelin chapardeur | 90 | 6 | 3 | Coup de gourdin (contact), Jet de caillou (2 à 4 cases) |
+
 Créer un nouveau personnage : voir [docs/creation_personnage.md](docs/creation_personnage.md)
 (checklist, étapes, critères d'équilibrage, modèle de fiche).
 
@@ -98,7 +104,7 @@ Son **icône** (champ `icon`, groupe Visuel) : une image PNG (96 px, en couleur)
 Ajoute-le ensuite à la liste `spells` d'une classe dans `data/classes/`.
 
 Pour une nouvelle classe : duplique un fichier de `data/classes/` et ajoute son chemin
-dans `CLASS_PATHS` (`scripts/game_config.gd`).
+dans `CLASS_PATHS` (`scripts/core/roster.gd`) ; pour un ennemi non jouable, dans `ENEMY_PATHS`.
 
 ## Équilibrage
 
@@ -147,6 +153,9 @@ Cartes actuelles :
   colonnes et obélisques, rochers, oasis à l'est (eau animée par `WaterRipples`). Tuiles du pack
   *2D Desert Fantasy tileset* (`assets/tiles/desert/`), générées par `tools/build_desert_map.gd`
   (modifier les listes du script puis le relancer : `godot --headless --path . -s res://tools/build_desert_map.gd`).
+- **Clairière des gobelins** (`foret.tscn`) : clairière bordée de sapins, bosquets de feuillus et troncs couchés
+  destructibles, rochers solides, carte symétrique. Tuiles du pack *Fantasy tileset - 2D Isometric*
+  (`assets/tiles/foret/`), générées par `tools/build_forest_map.gd`. Sert aussi au premier combat de la campagne.
 
 1. **Ouvrir** une carte de `maps/`, ou la **dupliquer** (clic droit → Dupliquer) pour en créer une nouvelle.
    Sur le nœud racine, renseigner `map_name` et `description` (affichés dans le menu).
@@ -183,7 +192,8 @@ L'eau de l'oasis est animée par le nœud `WaterRipples` (`scripts/map/water_rip
 
 Actuellement : le **Guerrier** utilise le pack *2D HD Character Knight* (`assets/characters/knight/`),
 le **Mage de feu**, l'**Archer** et le **Chevalier maudit** le pack *2D HD Character pack 1* (`assets/characters/wizard/`, `assets/characters/archer/`, `assets/characters/chevalier/`),
-le **Gobelin** le pack *2D Orcs and Goblins - TopDown - V1.0* (`assets/characters/gobelin/`, skin Goblin 01).
+le **Gobelin** le pack *2D Orcs and Goblins - TopDown - V1.0* (`assets/characters/gobelin/`, skin Goblin 01),
+comme l'ennemi **Gobelin chapardeur** (`assets/characters/pnj_gobelin/`, skin Goblin 13).
 
 ### Ajouter un personnage animé
 

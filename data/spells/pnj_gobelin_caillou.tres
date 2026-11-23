@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="SpellData" format=3]
+
+[ext_resource type="Script" path="res://scripts/core/effect_data.gd" id="1_pgc"]
+[ext_resource type="Texture2D" path="res://assets/ui/spells/pnj_gobelin_caillou.png" id="2_pgc"]
+[ext_resource type="Resource" path="res://data/effects/caillou.tres" id="3_pgc"]
+[ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="4_pgc"]
+
+[sub_resource type="Resource" id="Resource_pgc1"]
+script = ExtResource("1_pgc")
+min_value = 6
+max_value = 8
+
+[resource]
+script = ExtResource("4_pgc")
+spell_name = "Jet de caillou"
+animation = "attack2"
+range_min = 2
+range_max = 4
+effects = Array[ExtResource("1_pgc")]([SubResource("Resource_pgc1")])
+icon = ExtResource("2_pgc")
+projectile = ExtResource("3_pgc")
+cast_delay = 0.35

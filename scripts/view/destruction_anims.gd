@@ -19,6 +19,8 @@ const SHEETS := {
 	"bois_petit": {"frames": 17, "scale": 0.9, "keep": true},
 	"bois_grand": {"frames": 17, "scale": 0.85, "keep": true},
 	"paille": {"frames": 16, "scale": 1.0, "keep": false},
+	# Pack « Fantasy tileset - 2D Isometric » (Tree Green Explosion) : arbre feuillu qui éclate en branchages.
+	"arbre_vert": {"frames": 16, "scale": 0.6, "keep": true},
 }
 
 ## TileSet -> { case de l'atlas : nom de planche }
@@ -33,13 +35,17 @@ const ASSIGNMENTS := {
 		Vector2i(7, 3): "bois_grand", Vector2i(4, 3): "bois_grand",
 		Vector2i(0, 4): "paille", Vector2i(1, 4): "paille",
 	},
+	"res://assets/tiles/foret/foret_tileset.tres": {
+		Vector2i(0, 1): "arbre_vert", Vector2i(1, 1): "arbre_vert", Vector2i(2, 1): "arbre_vert",
+		Vector2i(7, 1): "bois_petit", Vector2i(0, 2): "bois_grand",
+	},
 }
 
 ## Matière de chaque planche : choisit le bruitage (assets/audio/sfx/hit_<matière>, destroy_<matière>).
 const MATERIALS := {
 	"pierre_grand": "pierre", "mur_pierre": "pierre",
 	"mur_bois": "bois", "bois_petit": "bois", "bois_grand": "bois",
-	"paille": "paille",
+	"paille": "paille", "arbre_vert": "bois",
 }
 
 static var _cache := {}

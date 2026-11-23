@@ -34,7 +34,10 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for path in GameConfig.CLASS_PATHS:
 		_classes.append(load(path))
-	_map_paths = GameConfig.list_maps()
+	if GameConfig.campaign:
+		_map_paths = [GameConfig.current_fight().map] as Array[String] # carte imposée
+	else:
+		_map_paths = GameConfig.list_maps()
 	_map_index = maxi(0, _map_paths.find(GameConfig.map_path))
 
 	var bg := ColorRect.new()
@@ -60,7 +63,7 @@ func _ready() -> void:
 	title.add_theme_color_override("font_color", W.GOLD)
 	head.add_child(title)
 	var subtitle := Label.new()
-	subtitle.text = "COMBAT 1 CONTRE 1"
+	subtitle.text = ("CAMPAGNE  ·  " + GameConfig.current_fight().title.to_upper()) if GameConfig.campaign else "COMBAT 1 CONTRE 1"
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.add_theme_font_size_override("font_size", 14)
 	subtitle.add_theme_color_override("font_color", W.TEXT_DIM)
@@ -142,10 +145,12 @@ func _build_center() -> Control:
 	_map_view.transparent_bg = true
 	container.add_child(_map_view)
 	var prev := _arrow_button(false, "Carte précédente")
+	prev.visible = not GameConfig.campaign # carte imposée en campagne
 	prev.position = Vector2(6, 71)
 	prev.pressed.connect(func() -> void: _change_map(-1))
 	preview.add_child(prev)
 	var next := _arrow_button(true, "Carte suivante")
+	next.visible = not GameConfig.campaign
 	next.position = Vector2(330 - 46, 71)
 	next.pressed.connect(func() -> void: _change_map(1))
 	preview.add_child(next)
@@ -219,6 +224,7 @@ func _refresh_map() -> void:
 	_map_size.text = "%d × %d" % [info.size.x, info.size.y]
 	_map_description.text = info.description
 	_set_dots(_map_dots, _map_paths.size(), _map_index)
+	_map_dots.visible = _map_paths.size() > 1
 
 	var map: BattleMap = load(path).instantiate()
 	_map_view.add_child(map)
@@ -243,9 +249,14 @@ func _on_start() -> void:
 	if not _map_paths.is_empty():
 		GameConfig.map_path = _map_paths[_map_index]
 	for player in 2:
+		if _panels[player].fixed_class:
+			continue # ennemi de campagne : classe imposée (GameConfig.class_for), nom par défaut
 		GameConfig.player_classes[player] = _panels[player].class_index
 		GameConfig.player_is_ai[player] = _panels[player].is_ai
 		GameConfig.player_names[player] = _panels[player].player_name
+	if GameConfig.campaign:
+		GameConfig.player_is_ai[0] = false
+		GameConfig.player_is_ai[1] = true
 	get_tree().change_scene_to_file("res://scenes/main.tscn")
 
 
@@ -327,6 +338,10 @@ class PlayerPanel extends PanelContainer:
 	var class_index := 0
 	var is_ai := false
 	var player_name := ""
+	## Ennemi imposé (campagne) : ni choix de personnage, ni Humain/IA, ni nom modifiable.
+	var fixed_class: ClassData
+	## Héros de campagne : toujours humain.
+	var force_human := false
 
 	var _stage: CharacterStage
 	var _name_label: Label
@@ -346,6 +361,13 @@ class PlayerPanel extends PanelContainer:
 		class_index = GameConfig.player_classes[player]
 		is_ai = GameConfig.player_is_ai[player]
 		player_name = GameConfig.player_name(player)
+		if GameConfig.campaign:
+			if player == 1:
+				fixed_class = GameConfig.class_for(1)
+				is_ai = true
+			else:
+				force_human = true
+				is_ai = false
 		var team: Color = W.TEAM_COLORS[player]
 		custom_minimum_size = Vector2(380, 540)
 		add_theme_stylebox_override("panel", _card_with_top(team))
@@ -358,6 +380,11 @@ class PlayerPanel extends PanelContainer:
 		v.add_child(head)
 		var title := _build_name_field()
 		var pill := _build_pill(team)
+		pill.visible = not (fixed_class or force_human)
+		if fixed_class:
+			_name_label.text = "Ennemi"
+			_name_button.hide()
+			_name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		if player == 0:
 			head.add_child(title)
 			head.add_child(pill)
@@ -378,6 +405,8 @@ class PlayerPanel extends PanelContainer:
 		next.position = Vector2(336 - 40, 95)
 		next.pressed.connect(func() -> void: _change_class(1))
 		_stage.add_child(next)
+		prev.visible = fixed_class == null
+		next.visible = fixed_class == null
 
 		_name = Label.new()
 		_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -543,7 +572,7 @@ class PlayerPanel extends PanelContainer:
 		Sound.play_voice(data.voice, "select", "menu%d" % player)
 
 	func _refresh() -> void:
-		var data: ClassData = menu._classes[class_index]
+		var data: ClassData = fixed_class if fixed_class else menu._classes[class_index]
 		_name.text = data.class_label
 		_tagline.text = data.description
 		_stage.show_class(data)
@@ -559,6 +588,7 @@ class PlayerPanel extends PanelContainer:
 		for spell in data.spells:
 			_spells.add_child(_spell_icon(spell))
 		MenuScript()._set_dots(_dots, GameConfig.CLASS_PATHS.size(), class_index)
+		_dots.visible = fixed_class == null
 		_style_pill()
 
 	static func _chip(text: String, fg: Color, bg: Color, border: Color) -> PanelContainer:

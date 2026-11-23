@@ -27,6 +27,12 @@ const CONFIG := {
 	],
 	"res://assets/tiles/village/village_tileset.tres": VILLAGE_WIND,
 	"res://assets/tiles/village/barricade_tileset.tres": VILLAGE_WIND,
+	"res://assets/tiles/foret/foret_tileset.tres": [
+		# Feuillus (Tree A1-A3), sapins (Tree D1-D3, plus raides), puis touffes (Flora A1, A5, B1, B2, B5).
+		{"coords": [Vector2i(0, 1), Vector2i(1, 1), Vector2i(2, 1)], "amplitude": 4.5, "snap": 0.0},
+		{"coords": [Vector2i(4, 1), Vector2i(5, 1), Vector2i(6, 1)], "amplitude": 2.5, "snap": 0.0},
+		{"coords": [Vector2i(3, 0), Vector2i(4, 0), Vector2i(5, 0), Vector2i(6, 0), Vector2i(7, 0)], "amplitude": 3.0, "snap": 0.0},
+	],
 	"res://assets/tiles/terrain_tileset.tres": [
 		# Fleurs et buisson de la prairie (pixel art : mouvement au pixel près).
 		{"coords": [Vector2i(0, 4), Vector2i(1, 4), Vector2i(2, 4), Vector2i(3, 4)], "amplitude": 1.6, "snap": 1.0},

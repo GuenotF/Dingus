@@ -1,0 +1,91 @@
+[gd_resource type="TileSet" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/tiles/foret/foret_tiles.png" id="1_260tg"]
+[ext_resource type="Texture2D" path="res://assets/tiles/foret/placement_markers.png" id="2_ncnsv"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_xyb1m"]
+resource_name = "Forêt"
+texture = ExtResource("1_260tg")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/texture_origin = Vector2i(0, 40)
+1:0/0 = 0
+1:0/0/texture_origin = Vector2i(0, 40)
+2:0/0 = 0
+2:0/0/texture_origin = Vector2i(0, 40)
+3:0/0 = 0
+3:0/0/texture_origin = Vector2i(0, 40)
+4:0/0 = 0
+4:0/0/texture_origin = Vector2i(0, 40)
+5:0/0 = 0
+5:0/0/texture_origin = Vector2i(0, 40)
+6:0/0 = 0
+6:0/0/texture_origin = Vector2i(0, 40)
+7:0/0 = 0
+7:0/0/texture_origin = Vector2i(0, 40)
+0:1/0 = 0
+0:1/0/texture_origin = Vector2i(0, 40)
+0:1/0/custom_data_0 = true
+0:1/0/custom_data_3 = 60
+1:1/0 = 0
+1:1/0/texture_origin = Vector2i(0, 40)
+1:1/0/custom_data_0 = true
+1:1/0/custom_data_3 = 60
+2:1/0 = 0
+2:1/0/texture_origin = Vector2i(0, 40)
+2:1/0/custom_data_0 = true
+2:1/0/custom_data_3 = 60
+3:1/0 = 0
+3:1/0/texture_origin = Vector2i(0, 40)
+4:1/0 = 0
+4:1/0/texture_origin = Vector2i(0, 40)
+4:1/0/custom_data_0 = true
+5:1/0 = 0
+5:1/0/texture_origin = Vector2i(0, 40)
+5:1/0/custom_data_0 = true
+6:1/0 = 0
+6:1/0/texture_origin = Vector2i(0, 40)
+6:1/0/custom_data_0 = true
+7:1/0 = 0
+7:1/0/texture_origin = Vector2i(0, 40)
+7:1/0/custom_data_0 = true
+7:1/0/custom_data_3 = 40
+0:2/0 = 0
+0:2/0/texture_origin = Vector2i(0, 40)
+0:2/0/custom_data_0 = true
+0:2/0/custom_data_3 = 80
+1:2/0 = 0
+1:2/0/texture_origin = Vector2i(0, 40)
+1:2/0/custom_data_0 = true
+2:2/0 = 0
+2:2/0/texture_origin = Vector2i(0, 40)
+2:2/0/custom_data_0 = true
+3:2/0 = 0
+3:2/0/texture_origin = Vector2i(0, 40)
+3:2/0/custom_data_0 = true
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_j8sdu"]
+resource_name = "Placement"
+texture = ExtResource("2_ncnsv")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/texture_origin = Vector2i(0, 40)
+0:0/0/custom_data_1 = 1
+1:0/0 = 0
+1:0/0/texture_origin = Vector2i(0, 40)
+1:0/0/custom_data_1 = 2
+
+[resource]
+tile_shape = 1
+tile_layout = 5
+tile_size = Vector2i(64, 32)
+custom_data_layer_0/name = "obstacle"
+custom_data_layer_0/type = 1
+custom_data_layer_1/name = "placement_team"
+custom_data_layer_1/type = 2
+custom_data_layer_2/name = "water"
+custom_data_layer_2/type = 1
+custom_data_layer_3/name = "destructible_hp"
+custom_data_layer_3/type = 2
+sources/0 = SubResource("TileSetAtlasSource_xyb1m")
+sources/1 = SubResource("TileSetAtlasSource_j8sdu")

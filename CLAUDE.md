@@ -19,6 +19,9 @@ Jeu tactique 1v1 au tour par tour en vue isométrique (style Dofus), Godot 4.7, 
   que l'utilisateur fusionne (`git merge --ff-only`).
 - Ne jamais faire `git add -A` : les fichiers audio et la police apparaissent à tort comme modifiés (attributs LFS).
   Ajouter les fichiers un par un. Les fichiers `.uid` de Godot sont versionnés (les ajouter avec leur script).
+- Sans Godot sur la machine de travail : la VM du PC (outil device_bash) peut télécharger Godot 4.7.2 Linux depuis GitHub et
+  lancer les tests sur une **copie** du projet hors du dossier (pour ne pas toucher au cache `.godot` de l'éditeur) ;
+  captures possibles avec `xvfb-run` et `--rendering-driver opengl3`. Rapatrier ensuite les fichiers générés (.import, .uid, scènes).
 - Sous Windows, Godot s'appelle par son chemin complet (exécutable `_console.exe` pour voir la sortie des tests).
 - Ne pas commiter les dossiers de packs bruts (`2D HD Character Knight`, `isometric tileset`) :
   le jeu utilise ses propres copies dans `assets/`.
@@ -47,13 +50,19 @@ code si besoin, captures, équilibrage (critères chiffrés), commit.
   L'IA en tient compte (`AiBrain._obstacle_value`). Affichage : `scripts/view/obstacle_view.gd` (barre de PV, secousse),
   animations d'effondrement du pack dans `assets/destruction/` associées aux tuiles par `scripts/view/destruction_anims.gd`
   (sans association : ancien effondrement dessiné par le code).
-- **Cartes** : prairie, lac, village, désert (destructibles : rochers, colonnes), « Le barrage » (proto autour des destructibles).
-  Les cartes désert et barrage sont générées par `tools/build_desert_map.gd` et `tools/build_barricade_map.gd` ;
+- **Cartes** : prairie, lac, village, désert (destructibles : rochers, colonnes), « Le barrage » (proto autour des destructibles),
+  forêt « Clairière des gobelins » (destructibles : feuillus, troncs ; animation `arbre_vert`).
+  Les cartes désert, barrage et forêt sont générées par `tools/build_desert_map.gd`, `tools/build_barricade_map.gd` et `tools/build_forest_map.gd` ;
   **relancer un générateur écrase la scène** (réglages faits à la main dans l'éditeur perdus).
 - **Fumée** (Fumigène du Gobelin) : `CombatState.smokes` (nuages, durée 1 tour, expiration au début du tour du lanceur), `has_view` / `smoke_blocks_view`
   (aveugle depuis une case de fumée, écran pour les cases intermédiaires), −2 PM au début du tour dans le nuage ; effets `SMOKE` et `STEAL_PA`,
   zone `SQUARE` ; affichage `scripts/view/smoke_view.gd`. L'IA l'évalue dans `score_cast` / `position_score`.
 - **Chiffres flottants** : `FloatingText` empile les chiffres proches (dégâts simultanés lisibles).
+- **Personnages et campagne** : listes dans `scripts/core/roster.gd` (`Roster`, sans autoload : utilisable dans les tests) :
+  `CLASS_PATHS` (jouables), `ENEMY_PATHS` (PNJ non jouables : hors menu 1v1, démo titre et matrice d'équilibrage),
+  `CAMPAIGN_FIGHTS` (titre, carte, ennemi). `GameConfig.start_campaign()` / `start_versus()` (écran titre) ; en campagne,
+  l'écran de préparation (`menu.gd`) impose la carte et l'ennemi (`PlayerPanel.fixed_class`), le joueur 1 est humain.
+  Pas encore de progression sauvegardée (un seul combat).
 - **Police** : Vinque Antique (`assets/fonts/`, licence détenue par l'utilisateur), appliquée partout via `GameConfig`.
 
 ## Pistes et état du projet

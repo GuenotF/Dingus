@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EffectAnimation" format=3]
+
+[ext_resource type="Script" path="res://scripts/view/effect_animation.gd" id="1_cail"]
+[ext_resource type="Texture2D" path="res://assets/effects/caillou/caillou.png" id="2_cail"]
+
+[resource]
+script = ExtResource("1_cail")
+texture = ExtResource("2_cail")
+fps = 40.0
+loop = true
+origin = Vector2(32, 32)
+scale = Vector2(0.8, 0.8)
+additive = false
+speed = 700.0

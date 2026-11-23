@@ -1,0 +1,53 @@
+[gd_resource type="Resource" script_class="CharacterSprites" format=3]
+
+[ext_resource type="Script" path="res://scripts/view/character_animation.gd" id="1_pgs"]
+[ext_resource type="Texture2D" path="res://assets/characters/pnj_gobelin/idle.png" id="2_idle"]
+[ext_resource type="Texture2D" path="res://assets/characters/pnj_gobelin/walk.png" id="3_walk"]
+[ext_resource type="Texture2D" path="res://assets/characters/pnj_gobelin/take_damage.png" id="4_hit"]
+[ext_resource type="Texture2D" path="res://assets/characters/pnj_gobelin/die.png" id="5_die"]
+[ext_resource type="Texture2D" path="res://assets/characters/pnj_gobelin/attack1.png" id="6_a1"]
+[ext_resource type="Texture2D" path="res://assets/characters/pnj_gobelin/attack2.png" id="7_a2"]
+[ext_resource type="Script" path="res://scripts/view/character_sprites.gd" id="8_pgs"]
+
+[sub_resource type="Resource" id="Resource_idle"]
+script = ExtResource("1_pgs")
+texture = ExtResource("2_idle")
+fps = 12.0
+loop = true
+
+[sub_resource type="Resource" id="Resource_walk"]
+script = ExtResource("1_pgs")
+name = "walk"
+texture = ExtResource("3_walk")
+fps = 20.0
+loop = true
+
+[sub_resource type="Resource" id="Resource_hit"]
+script = ExtResource("1_pgs")
+name = "hit"
+texture = ExtResource("4_hit")
+fps = 24.0
+
+[sub_resource type="Resource" id="Resource_die"]
+script = ExtResource("1_pgs")
+name = "die"
+texture = ExtResource("5_die")
+
+[sub_resource type="Resource" id="Resource_a1"]
+script = ExtResource("1_pgs")
+name = "attack1"
+texture = ExtResource("6_a1")
+fps = 26.0
+
+[sub_resource type="Resource" id="Resource_a2"]
+script = ExtResource("1_pgs")
+name = "attack2"
+texture = ExtResource("7_a2")
+fps = 26.0
+
+[resource]
+script = ExtResource("8_pgs")
+feet_position = Vector2(64, 88)
+height = 42.0
+scale = 1.4
+animations = Array[ExtResource("1_pgs")]([SubResource("Resource_idle"), SubResource("Resource_walk"), SubResource("Resource_hit"), SubResource("Resource_die"), SubResource("Resource_a1"), SubResource("Resource_a2")])

@@ -118,9 +118,12 @@ func _build_menu() -> void:
 	gap.custom_minimum_size = Vector2(0, 18)
 	column.add_child(gap)
 
-	_add_entry(column, ICON_MAP, "Campagne solo", Callable(), "Bientôt")
-	_add_entry(column, ICON_SWORDS, "Combat 1 contre 1",
-			func() -> void: _leave("res://scenes/menu.tscn"))
+	_add_entry(column, ICON_MAP, "Campagne solo", func() -> void:
+		GameConfig.start_campaign()
+		_leave("res://scenes/menu.tscn"))
+	_add_entry(column, ICON_SWORDS, "Combat 1 contre 1", func() -> void:
+		GameConfig.start_versus()
+		_leave("res://scenes/menu.tscn"))
 	_add_entry(column, ICON_GROUP, "Escarmouche", Callable(), "Plus tard")
 	var line := ColorRect.new()
 	line.color = W.PANEL_BORDER

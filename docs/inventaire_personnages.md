@@ -5,7 +5,7 @@ Dernière mise à jour : 2026-11-23.
 
 ## Personnages jouables (5)
 
-Liste dans `CLAUDE.md`/`scripts/game_config.gd` (`CLASS_PATHS`). PA 6 pour tous sauf mention ; PM 3 par défaut.
+Liste dans `scripts/core/roster.gd` (`CLASS_PATHS`). PA 6 pour tous sauf mention ; PM 3 par défaut.
 
 | Personnage | Skin (pack, dossier) | Rôle | PV | PM | Distance IA | Sorts | Voix | Fiche |
 |---|---|---|---|---|---|---|---|---|
@@ -17,6 +17,15 @@ Liste dans `CLAUDE.md`/`scripts/game_config.gd` (`CLASS_PATHS`). PA 6 pour tous 
 
 Équilibrage actuel (rapport du 23/11, 20 parties par côté et par carte) : le Chevalier maudit domine (≈ 62 % de victoires
 contre les autres), Archer 48 %, Mage de feu 47 %, Guerrier 44 %. Détails : `tests/balance_matrix.gd`.
+
+## Ennemis de campagne (non jouables)
+
+Listés dans `Roster.ENEMY_PATHS` (`scripts/core/roster.gd`) : absents du menu 1v1, de la démo de l'écran titre et de la matrice
+d'équilibrage. Combats de campagne dans `Roster.CAMPAIGN_FIGHTS`.
+
+| Ennemi | Skin (pack, dossier) | Rôle | PV | PA | PM | Sorts | Fiche |
+|---|---|---|---|---|---|---|---|
+| Gobelin chapardeur | *2D Orcs and Goblins* : `Goblin 13` (`assets/characters/pnj_gobelin/`) | premier ennemi, combat d'introduction (forêt) | 90 | 6 | 3 | Coup de gourdin, Jet de caillou | `docs/personnages/pnj_gobelin.md` |
 
 ## Skins disponibles non utilisés
 
@@ -45,6 +54,7 @@ Contenu : 17 gobelins (`Goblin 01` à `17`), 12 orcs (`Orc 01` à `12`), 2 anima
 | Dossier | Utilisation / animations (vérifiées sur les dossiers cités) |
 |---|---|
 | `Goblin 01` | **utilisé** (Gobelin). Gobelin vert à la hachette. Attack 1-4, Run Attack, Block, BackFlip 1, Roll 1, Slide 1, Strafe, Crouch, Taunt, Die 1-2, TakeDamage 1 |
+| `Goblin 13` | **utilisé** (Gobelin chapardeur, ennemi). Tunique brune, gourdin. Même jeu d'animations que le 01 |
 | `Goblin 14`, `Goblin 17` | même jeu que le 01 (le 17 a une 5e attaque) |
 | `Goblin 05` | 4 attaques, sans Block ni BackFlip |
 | `Goblin 02`, `Goblin 08` | 6 attaques + Attack Run ; fichiers lourds (effets ?), à regarder en jeu |

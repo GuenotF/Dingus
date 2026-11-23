@@ -246,7 +246,10 @@ func show_combat(state: CombatState, selected: SpellData, is_ai: bool) -> void:
 	_update_chips(state)
 	_update_slots(state, fighter, selected, is_ai)
 	if is_ai:
-		_hint.text = "%s (%s, IA) réfléchit…" % [fighter.display_name, _class_name(fighter)]
+		if fighter.display_name == _class_name(fighter): # ennemi de campagne, nommé d'après sa classe
+			_hint.text = "%s (IA) réfléchit…" % fighter.display_name
+		else:
+			_hint.text = "%s (%s, IA) réfléchit…" % [fighter.display_name, _class_name(fighter)]
 	elif selected and Settings.mobile:
 		_hint.text = "%s\nTouche deux fois une case pour lancer   ·   Retour : annuler" % spell_summary(selected)
 	elif Settings.mobile and _mobile_notice != "":

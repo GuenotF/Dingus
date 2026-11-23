@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ClassData" format=3]
+
+[ext_resource type="Script" path="res://scripts/core/class_data.gd" id="1_pgb"]
+[ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="2_pgb"]
+[ext_resource type="Resource" path="res://data/spells/pnj_gobelin_gourdin.tres" id="3_pgb"]
+[ext_resource type="Resource" path="res://data/spells/pnj_gobelin_caillou.tres" id="4_pgb"]
+[ext_resource type="Resource" path="res://data/sprites/pnj_gobelin.tres" id="5_pgb"]
+[ext_resource type="Texture2D" path="res://assets/ui/portraits/pnj_gobelin.png" id="99_portrait"]
+
+[resource]
+script = ExtResource("1_pgb")
+class_label = "Gobelin chapardeur"
+color = Color(0.55, 0.45, 0.2, 1)
+description = "Petit gobelin des bois : gourdin et cailloux"
+max_hp = 90
+max_pm = 3
+preferred_range = 1
+spells = Array[ExtResource("2_pgb")]([ExtResource("3_pgb"), ExtResource("4_pgb")])
+sprites = ExtResource("5_pgb")
+portrait = ExtResource("99_portrait")

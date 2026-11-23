@@ -43,6 +43,9 @@ func _init() -> void:
 	_test_square_area()
 	_test_smoke()
 	_test_goblin_ai_finishes()
+	_test_enemy_lists()
+	_test_forest_map()
+	_test_campaign_goblin_fights()
 	print("Tests terminés : %s" % ("OK" if _failures == 0 else "%d échec(s)" % _failures))
 	quit(1 if _failures > 0 else 0)
 
@@ -315,7 +318,11 @@ func _test_class_data_files() -> void:
 		if not path.ends_with(".tres"):
 			continue
 		var c: ClassData = load(path)
-		_check(c != null and c.spells.size() == 4, "%s : 4 sorts" % file)
+		# Personnages jouables : 4 sorts. Ennemis (PNJ de campagne) : au moins un.
+		if Roster.ENEMY_PATHS.has(path):
+			_check(c != null and c.spells.size() >= 1, "%s : au moins un sort" % file)
+		else:
+			_check(c != null and c.spells.size() == 4, "%s : 4 sorts" % file)
 		if c == null:
 			continue
 		_check(c.max_hp > 0 and c.max_pa > 0 and c.max_pm > 0, "%s : stats PV/PA/PM" % file)
@@ -849,3 +856,82 @@ func _test_goblin_ai_finishes() -> void:
 			smoked = smoked or not state.smokes.is_empty()
 		_check(state.is_over, "gobelin contre %s : combat terminé (tour %d)" % [opponent, state.turn_number])
 		print("  gobelin contre %s : gagnant %d au tour %d, fumée utilisée : %s" % [opponent, state.winner_team, state.turn_number, smoked])
+
+
+## Chaque classe est soit jouable (CLASS_PATHS), soit ennemie (ENEMY_PATHS), jamais les deux.
+func _test_enemy_lists() -> void:
+	for file in DirAccess.get_files_at("res://data/classes"):
+		var path := "res://data/classes/" + file.trim_suffix(".remap")
+		if not path.ends_with(".tres"):
+			continue
+		var playable: bool = Roster.CLASS_PATHS.has(path)
+		var enemy: bool = Roster.ENEMY_PATHS.has(path)
+		_check(playable != enemy, "%s : listé une seule fois (jouable ou ennemi)" % file)
+	_check(not Roster.CLASS_PATHS.has("res://data/classes/pnj_gobelin.tres"), "le Gobelin chapardeur n'est pas jouable")
+	for fight in Roster.CAMPAIGN_FIGHTS:
+		_check(Roster.ENEMY_PATHS.has(fight.enemy), "campagne : l'ennemi %s est un PNJ" % fight.enemy)
+		_check(ResourceLoader.exists(fight.map), "campagne : la carte %s existe" % fight.map)
+		_check(fight.map.begins_with("res://maps/"), "campagne : la carte %s est dans maps/ (donc jouable en 1v1)" % fight.map)
+
+
+func _test_forest_map() -> void:
+	var map: BattleMap = load("res://maps/foret.tscn").instantiate()
+	var grid := map.build_grid()
+	_check(grid.width == 15 and grid.height == 15, "forêt : 15 × 15")
+	var zones := map.placement_zones()
+	for team in 2:
+		_check(zones[team].size() == 9, "forêt : 9 cases de départ pour l'équipe %d" % (team + 1))
+		for cell in zones[team]:
+			_check(not grid.is_obstacle(cell), "forêt : case de départ %s libre" % cell)
+	var destructibles := map.destructibles()
+	for cell in destructibles:
+		_check(grid.is_obstacle(cell) and grid.is_destructible(cell), "forêt : destructible %s est aussi un obstacle" % cell)
+	_check(destructibles.size() == 11, "forêt : 11 destructibles (8 feuillus, 3 troncs), trouvé %d" % destructibles.size())
+	_check(destructibles.get(Vector2i(7, 7), 0) == 80, "forêt : le tronc du centre a 80 PV")
+	_check(not destructibles.has(Vector2i(0, 0)) and not destructibles.has(Vector2i(3, 5)), "forêt : sapins et rochers indestructibles")
+	# Carte symétrique par rapport au centre
+	for cell in grid.get_obstacles():
+		_check(grid.is_obstacle(Vector2i(14, 14) - cell), "forêt : obstacle %s symétrique" % cell)
+	# Les deux zones de départ se rejoignent
+	var path := grid.find_path(zones[0][0], zones[1][0])
+	_check(not path.is_empty(), "forêt : les deux camps sont reliés")
+	map.free()
+
+
+## Campagne : chaque héros, joué par l'IA, contre le Gobelin chapardeur dans la forêt.
+## Contrôle de cohérence seulement (combats qui se terminent, gobelin pas imbattable) ; l'équilibrage fin viendra plus tard.
+func _test_campaign_goblin_fights() -> void:
+	var map: BattleMap = load("res://maps/foret.tscn").instantiate()
+	var hero_wins := 0
+	var fights := 0
+	for hero in Roster.CLASS_PATHS:
+		for rng_seed in [1, 2]:
+			var grid := map.build_grid()
+			var state := CombatState.new(grid, rng_seed)
+			var zones := map.placement_zones()
+			state.add_fighter(Fighter.new(0, "H", 0, zones[0][4], load(hero)))
+			state.add_fighter(Fighter.new(1, "P", 1, zones[1][4], load("res://data/classes/pnj_gobelin.tres")))
+			state.start()
+			var actions := 0
+			while not state.is_over and state.turn_number <= 40 and actions < 2000:
+				var action := AiBrain.next_action(state)
+				actions += 1
+				var ok := true
+				match action.type:
+					"move":
+						ok = state.try_move(action.cell)
+					"cast":
+						ok = state.try_cast(action.spell, action.cell)
+					_:
+						state.end_turn()
+				if not ok:
+					_check(false, "campagne %s : action IA valide (%s)" % [hero.get_file(), action.type])
+					state.end_turn()
+			_check(state.is_over, "campagne %s (graine %d) : combat terminé" % [hero.get_file(), rng_seed])
+			fights += 1
+			if state.winner_team == 0:
+				hero_wins += 1
+	print("  campagne, forêt : le héros gagne %d combats sur %d contre le Gobelin chapardeur" % [hero_wins, fights])
+	_check(hero_wins >= fights / 2, "campagne : le Gobelin chapardeur reste un combat d'introduction")
+	map.free()
+
