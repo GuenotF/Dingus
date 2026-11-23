@@ -86,3 +86,7 @@ Dans la cible, sauf contre l'Archer (trop facile ; l'Archer est retouché, pas l
 
 **Quatrième jet** : Vol à la tire retrouve sa recharge de 2 tours (il volait 1 PA à l'Archer chaque tour : 4 PA contre 7 pour nous, 86 % de victoires).
 Mesure précédente : 57 % de moyenne. À mesurer.
+
+**Quatrième jet mesuré** (4000 combats, toutes cartes) : 54 % de victoires en moyenne. Archer 86 %, Chevalier maudit 67 %, Guerrier 28 %, Mage de feu 35 %.
+Recharge 2 sur le Vol à la tire : aucun effet contre l'Archer (14 % pour lui, comme avant). La domination vient donc du Fumigène ou de la vitesse (4 PM contre 3), pas du vol de PA.
+Le Guerrier à 155 PV le bat plus nettement (38 → 28 %). Écarts de cartes (lac : 3 % contre le Mage de feu) : voir les cartes avant de toucher aux chiffres.

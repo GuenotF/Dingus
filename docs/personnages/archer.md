@@ -72,3 +72,5 @@ Il domine les tireurs et les lourds mais ne retient pas les rapides.
 **Quatrième jet mesuré** (4000 combats) : 51 % de victoires en moyenne. Chevalier maudit 40 %, Gobelin 14 %, Guerrier 85 %, Mage de feu 65 %.
 Entravante à chaque tour aide contre le Chevalier (33 → 40 %) mais écrase le Guerrier (64 → 85 %) et ne change rien contre le Gobelin (12 → 14 %) :
 le problème avec le Gobelin vient de lui (vol de PA à chaque tour, fumigène), pas de l'Archer. Réglage laissé tel quel ; le Gobelin et le Guerrier sont retouchés.
+
+**Cinquième mesure** (Guerrier 155 PV, Vol à la tire recharge 2) : 51 % en moyenne. Chevalier maudit 40 %, Gobelin 14 %, Guerrier 83 %, Mage de feu 65 %.
