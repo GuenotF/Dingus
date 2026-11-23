@@ -42,7 +42,8 @@ func _init() -> void:
 	_status = _wrapped(_label(12, Color("8fd3a0")))
 	v.add_child(_status)
 	_hint = _wrapped(_label(12, HudWidgets.TEXT_DIM))
-	_hint.text = "Clic : lancer   ·   Clic droit / Échap : annuler"
+	_hint.text = "Touche une case pour viser, puis à nouveau pour lancer   ·   Retour : annuler" if Settings.mobile \
+		else "Clic : lancer   ·   Clic droit / Échap : annuler"
 	v.add_child(_hint)
 
 

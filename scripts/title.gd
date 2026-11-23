@@ -217,7 +217,7 @@ func _set_box(b: Button, box: StyleBox) -> void:
 
 
 func _build_footer() -> void:
-	var help := _label("Haut / Bas pour choisir  ·  Entrée pour valider  ·  F11 plein écran", 13, Color("8a8578"))
+	var help := _label("" if Settings.mobile else "Haut / Bas pour choisir  ·  Entrée pour valider  ·  F11 plein écran", 13, Color("8a8578"))
 	help.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	help.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	help.offset_left = 24

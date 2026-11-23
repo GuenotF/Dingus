@@ -1,6 +1,7 @@
 extends Node
-## Réglages du joueur (autoload « Settings ») : volumes, son coupé, plein écran, particules.
+## Réglages du joueur (autoload « Settings ») : volumes, son coupé, plein écran, particules, taille de l'interface.
 ## Sauvegardés dans user://settings.cfg et réappliqués à chaque lancement.
+## Indique aussi si le jeu tourne en mode mobile (écran tactile) : voir `mobile`.
 
 signal changed
 
@@ -20,11 +21,39 @@ var scenery_animation := true
 
 const PARTICLES_LABELS: Array[String] = ["Aucune", "Réduites", "Complètes"]
 
+## Mode mobile : jeu exporté pour Android / iOS, ou version Web ouverte sur un téléphone.
+## Pour tester sur PC : ajouter « --mobile » aux arguments de lancement
+## (Projet > Paramètres du projet > Éditeur > Exécution > Arguments de la scène principale : « --mobile »).
+## Sur PC, rien de ce qui dépend de ce mode ne change.
+var mobile := false
+
+## Taille de l'interface (mode mobile uniquement) : agrandit tout l'affichage.
+const UI_SCALES: Array[float] = [1.0, 1.2, 1.4, 1.6]
+const UI_SCALE_LABELS: Array[String] = ["Normale", "Grande", "Très grande", "Énorme"]
+const UI_SCALE_DEFAULT_MOBILE := 2
+var ui_scale_index := UI_SCALE_DEFAULT_MOBILE
+
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	mobile = OS.has_feature("mobile") or OS.has_feature("web_android") or OS.has_feature("web_ios") \
+		or "--mobile" in OS.get_cmdline_user_args() or "--mobile" in OS.get_cmdline_args()
+	if mobile:
+		# Le bouton (ou geste) Retour d'Android ne ferme plus le jeu : il agit comme Échap.
+		get_tree().quit_on_go_back = false
 	_load()
 	apply()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST and mobile:
+		# Retour = Échap : annule le sort, ouvre la pause, ferme une fenêtre, revient au titre...
+		for pressed in [true, false]:
+			var key := InputEventKey.new()
+			key.keycode = KEY_ESCAPE
+			key.physical_keycode = KEY_ESCAPE
+			key.pressed = pressed
+			Input.parse_input_event(key)
 
 
 func set_master_volume(value: float) -> void:
@@ -57,6 +86,11 @@ func set_scenery_animation(value: bool) -> void:
 	_commit()
 
 
+func set_ui_scale_index(value: int) -> void:
+	ui_scale_index = clampi(value, 0, UI_SCALES.size() - 1)
+	_commit()
+
+
 func toggle_fullscreen() -> void:
 	set_fullscreen(not fullscreen)
 
@@ -69,6 +103,10 @@ func apply() -> void:
 	var voice := AudioServer.get_bus_index(Sound.VOICE_BUS)
 	if voice != -1:
 		AudioServer.set_bus_volume_db(voice, VOICE_BASE_DB + _to_db(voice_volume))
+	if mobile:
+		# Sur téléphone : toujours plein écran (géré par le système), seule la taille de l'interface change.
+		get_tree().root.content_scale_factor = UI_SCALES[ui_scale_index]
+		return
 	var wanted := DisplayServer.WINDOW_MODE_FULLSCREEN if fullscreen else DisplayServer.WINDOW_MODE_MAXIMIZED
 	# Pas de changement de mode sans écran (tests, serveur) ni si la fenêtre est déjà dans le bon état.
 	if DisplayServer.get_name() != "headless" and (fullscreen != (DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN)):
@@ -93,6 +131,8 @@ func _save() -> void:
 	cfg.set_value("display", "fullscreen", fullscreen)
 	cfg.set_value("display", "particles", particles_level)
 	cfg.set_value("display", "scenery_animation", scenery_animation)
+	if mobile:
+		cfg.set_value("display", "ui_scale", ui_scale_index)
 	cfg.save(FILE)
 
 
@@ -106,3 +146,4 @@ func _load() -> void:
 	fullscreen = bool(cfg.get_value("display", "fullscreen", false))
 	scenery_animation = bool(cfg.get_value("display", "scenery_animation", true))
 	particles_level = clampi(int(cfg.get_value("display", "particles", 2)), 0, PARTICLES_LABELS.size() - 1)
+	ui_scale_index = clampi(int(cfg.get_value("display", "ui_scale", UI_SCALE_DEFAULT_MOBILE)), 0, UI_SCALES.size() - 1)

@@ -15,6 +15,7 @@ var _mute: Button
 var _fullscreen: Button
 var _particles: Button
 var _scenery: Button
+var _ui_scale: Button # mode mobile uniquement
 
 
 func _ready() -> void:
@@ -30,6 +31,7 @@ func _ready() -> void:
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", W.panel_style(W.GOLD, 16, 26))
 	center.add_child(panel)
+	UiFit.attach(center, panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 16)
 	panel.add_child(box)
@@ -52,7 +54,7 @@ func _ready() -> void:
 	_voice.value_changed.connect(func(v: float) -> void: Settings.set_voice_volume(v / 100.0))
 	box.add_child(voice_row[2])
 
-	var mute_row := _toggle_row("Couper le son (M)")
+	var mute_row := _toggle_row("Couper le son" if Settings.mobile else "Couper le son (M)")
 	_mute = mute_row[0]
 	_mute.toggled.connect(func(on: bool) -> void: Settings.set_muted(on))
 	box.add_child(mute_row[1])
@@ -60,6 +62,16 @@ func _ready() -> void:
 	_fullscreen = fullscreen_row[0]
 	_fullscreen.toggled.connect(func(on: bool) -> void: Settings.set_fullscreen(on))
 	box.add_child(fullscreen_row[1])
+	if Settings.mobile:
+		# Sur téléphone : toujours plein écran ; à la place, la taille de l'interface.
+		fullscreen_row[1].hide()
+		var scale_row := _toggle_row("Taille de l'interface")
+		_ui_scale = scale_row[0]
+		_ui_scale.toggle_mode = false
+		_ui_scale.custom_minimum_size = Vector2(130, 34)
+		_ui_scale.pressed.connect(func() -> void:
+			Settings.set_ui_scale_index((Settings.ui_scale_index + 1) % Settings.UI_SCALES.size()))
+		box.add_child(scale_row[1])
 
 	var particles_row := _toggle_row("Particules d'ambiance")
 	_particles = particles_row[0]
@@ -116,6 +128,8 @@ func _sync() -> void:
 	_particles.text = Settings.PARTICLES_LABELS[Settings.particles_level]
 	_scenery.set_pressed_no_signal(Settings.scenery_animation)
 	_scenery.text = "Oui" if Settings.scenery_animation else "Non"
+	if _ui_scale:
+		_ui_scale.text = Settings.UI_SCALE_LABELS[Settings.ui_scale_index]
 
 
 ## [slider, label de valeur, ligne complète]

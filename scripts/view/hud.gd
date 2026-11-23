@@ -3,6 +3,8 @@ extends CanvasLayer
 ## Interface de combat. En bas au centre : orbe de PV, PA / PM, cases de sorts, fin du tour.
 ## En haut à droite : numéro du tour et ordre de jeu. Infobulle au survol d'un sort.
 ## L'aperçu des dégâts au survol d'une cible est dessiné par FighterView.
+## Mode mobile : pas de survol ; toucher un sort affiche son infobulle (cachée au premier tap sur la carte),
+## textes d'aide adaptés au tactile.
 
 signal main_button_pressed # « Fin du tour » ou « Prêt » selon la phase
 signal spell_pressed(index: int)
@@ -212,10 +214,10 @@ func show_placement(fighter: Fighter, is_ai: bool) -> void:
 	for s in _separators:
 		s.hide()
 	_tooltip.hide()
-	_main_button.text = "Prêt\n(Espace)"
+	_main_button.text = "Prêt" if Settings.mobile else "Prêt\n(Espace)"
 	_main_button.disabled = is_ai
 	_turn_label.text = "Placement"
-	_hint.text = ("%s (%s) : clique sur une case de ta couleur pour t'y placer" % [fighter.display_name, _class_name(fighter)]) \
+	_hint.text = ("%s (%s) : %s sur une case de ta couleur pour t'y placer" % [fighter.display_name, _class_name(fighter), "touche" if Settings.mobile else "clique"]) \
 		if not is_ai else "L'IA se place…"
 
 
@@ -233,14 +235,18 @@ func show_combat(state: CombatState, selected: SpellData, is_ai: bool) -> void:
 	_orb.set_values(fighter.hp, fighter.max_hp)
 	_pa.set_value(fighter.pa)
 	_pm.set_value(fighter.pm)
-	_main_button.text = "Fin du tour\n(Espace)"
+	_main_button.text = "Fin du tour" if Settings.mobile else "Fin du tour\n(Espace)"
 	_turn_label.text = "Tour %d" % state.turn_number
 	_update_chips(state)
 	_update_slots(state, fighter, selected, is_ai)
 	if is_ai:
 		_hint.text = "%s (%s, IA) réfléchit…" % [fighter.display_name, _class_name(fighter)]
+	elif selected and Settings.mobile:
+		_hint.text = "Touche une case pour viser, puis à nouveau pour lancer   ·   Retour : annuler"
 	elif selected:
 		_hint.text = "Clic : lancer   ·   Clic droit / Échap : annuler"
+	elif Settings.mobile:
+		_hint.text = "%s (%s)   ·   Touche une case, puis à nouveau pour t'y déplacer" % [fighter.display_name, _class_name(fighter)]
 	else:
 		_hint.text = "%s (%s)   ·   Clic : se déplacer   ·   1-%d : sorts" % [fighter.display_name, _class_name(fighter), fighter.spells.size()]
 	_update_tooltip()
@@ -266,10 +272,16 @@ func _update_slots(state: CombatState, fighter: Fighter, selected: SpellData, is
 		var slot := HudWidgets.SpellSlot.new(_slots.size())
 		var index := _slots.size()
 		slot.pressed.connect(func() -> void:
-			_tooltip_dismissed = true
+			if Settings.mobile:
+				# Toucher un sort montre son infobulle (le sort reste choisi pour viser).
+				_hovered_slot = index
+				_tooltip_dismissed = false
+			else:
+				_tooltip_dismissed = true
 			spell_pressed.emit(index))
-		slot.mouse_entered.connect(func() -> void: _on_slot_hover(index, true))
-		slot.mouse_exited.connect(func() -> void: _on_slot_hover(index, false))
+		if not Settings.mobile:
+			slot.mouse_entered.connect(func() -> void: _on_slot_hover(index, true))
+			slot.mouse_exited.connect(func() -> void: _on_slot_hover(index, false))
 		_spell_box.add_child(slot)
 		_slots.append(slot)
 	for i in _slots.size():
@@ -311,6 +323,10 @@ func _update_tooltip() -> void:
 	var slot: HudWidgets.SpellSlot = null
 	if _hovered_slot >= 0 and _hovered_slot < _slots.size() and _slots[_hovered_slot].visible and not _tooltip_dismissed:
 		slot = _slots[_hovered_slot]
+	# Mobile : un sort utilisable qu'on vient de désélectionner n'affiche plus son infobulle ;
+	# un sort indisponible (recharge, PA...) l'affiche pour expliquer pourquoi.
+	if Settings.mobile and slot != null and slot.look == HudWidgets.SpellSlot.Look.READY:
+		slot = null
 	if fighter == null or slot == null or slot.spell == null or not _spell_box.visible:
 		_tooltip.hide()
 		_hint.modulate.a = 1.0
@@ -338,6 +354,12 @@ func _update_tooltip() -> void:
 	if spell.cooldown > 0 and slot.look != HudWidgets.SpellSlot.Look.COOLDOWN:
 		status += "  ·  recharge %d tours" % spell.cooldown
 	_tooltip.show_spell(spell, slot.get_global_rect(), status, color, spell == _selected)
+
+
+## Mode mobile : cache l'infobulle (premier tap sur la carte), jusqu'au prochain toucher d'un sort.
+func dismiss_tooltip() -> void:
+	_tooltip_dismissed = true
+	_update_tooltip()
 
 
 func set_input_enabled(enabled: bool) -> void:

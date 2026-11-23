@@ -48,6 +48,7 @@ func _ready() -> void:
 	var page := VBoxContainer.new()
 	page.add_theme_constant_override("separation", 22)
 	center.add_child(page)
+	UiFit.attach(center, page) # téléphone : réduit l'écran s'il ne tient pas
 
 	var head := VBoxContainer.new()
 	head.add_theme_constant_override("separation", 0)
@@ -184,7 +185,7 @@ func _build_center() -> Control:
 	start.pressed.connect(_on_start)
 	col.add_child(start)
 	var help := Label.new()
-	help.text = "Entrée pour lancer · F11 plein écran"
+	help.text = "" if Settings.mobile else "Entrée pour lancer · F11 plein écran"
 	help.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	help.add_theme_font_size_override("font_size", 12)
 	help.add_theme_color_override("font_color", Color("8a8578"))

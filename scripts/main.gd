@@ -3,6 +3,8 @@ extends Node2D
 ## (joueur humain ou IA), puis gère les entrées.
 ## Contrôles : survol = aperçu, clic gauche = se déplacer / lancer le sort choisi / se placer,
 ## 1-4 = choisir un sort, clic droit / Échap = annuler, Espace = fin du tour / prêt.
+## Mode mobile (Settings.mobile) : 1er tap sur une case = aperçu, 2e tap sur la même case = valider ;
+## un doigt glissé déplace la carte, deux doigts zooment (TouchCamera) ; Retour = Échap.
 
 const AI_STEP_DELAY := 0.35
 const AI_MAX_ACTIONS := 30
@@ -23,6 +25,9 @@ var smoke_view: SmokeView
 ## sont mises en attente et jouées à l'impact.
 var _deferring := false
 var _deferred: Array[Callable] = []
+## Mode mobile : case touchée une première fois (aperçu), à retoucher pour valider.
+const NO_CELL := Vector2i(-1, -1)
+var _touch_hover := NO_CELL
 
 ## Mode démo (fond animé de l'écran titre) : IA contre IA, sans HUD ni entrées.
 ## À régler avant d'ajouter la scène à l'arbre ; sinon la partie vient de GameConfig.
@@ -149,10 +154,20 @@ func _build_scene() -> void:
 		view.setup(f)
 		fighter_views[f.id] = view
 
-	var camera := Camera2D.new()
 	var last := Vector2i(state.grid.width - 1, state.grid.height - 1)
-	camera.position = Iso.cell_to_world(last) * 0.5 + Vector2(0, 20)
-	add_child(camera)
+	if Settings.mobile and not demo:
+		# Téléphone : carte déplaçable et zoomable au doigt, jeu au tap (voir _on_tap).
+		var touch_camera := TouchCamera.new()
+		add_child(touch_camera)
+		var bounds := Rect2(Iso.cell_to_world(Vector2i.ZERO), Vector2.ZERO)
+		for corner in [Vector2i(last.x, 0), Vector2i(0, last.y), last]:
+			bounds = bounds.expand(Iso.cell_to_world(corner))
+		touch_camera.setup(bounds.grow_individual(Iso.TILE_W * 0.5, Iso.TILE_H * 2.0, Iso.TILE_W * 0.5, Iso.TILE_H * 0.5))
+		touch_camera.tapped.connect(_on_tap)
+	else:
+		var camera := Camera2D.new()
+		camera.position = Iso.cell_to_world(last) * 0.5 + Vector2(0, 20)
+		add_child(camera)
 
 	hud = Hud.new()
 	add_child(hud)
@@ -222,6 +237,9 @@ func _input_locked() -> bool:
 func _unhandled_input(event: InputEvent) -> void:
 	if demo:
 		return
+	# Mode mobile : les touchers passent par TouchCamera (signal tapped) ; on ignore la souris simulée.
+	if Settings.mobile and (event is InputEventMouseMotion or event is InputEventMouseButton):
+		return
 	if event is InputEventMouseMotion:
 		_refresh_highlights()
 		return
@@ -261,6 +279,34 @@ func _on_left_click(cell: Vector2i) -> void:
 		state.try_move(cell)
 
 
+## Mode mobile : tap sur la carte. Placement direct ; sinon 1er tap = aperçu, 2e tap sur la même case = valider.
+## Avec un sort choisi, un tap hors de sa portée l'annule.
+func _on_tap(screen_pos: Vector2) -> void:
+	if _input_locked():
+		return
+	hud.dismiss_tooltip()
+	var cell := Iso.world_to_cell(board.make_canvas_position_local(screen_pos))
+	if state.phase == CombatState.Phase.PLACEMENT:
+		_touch_hover = cell
+		_on_left_click(cell)
+		return
+	if selected_spell:
+		if cell == _touch_hover and state.can_cast_at(selected_spell, cell):
+			_touch_hover = NO_CELL
+			_on_left_click(cell)
+			return
+		if not state.range_display(selected_spell).has(cell):
+			_touch_hover = NO_CELL
+			_cancel_spell()
+			return
+	elif cell == _touch_hover and state.reachable_for_active().has(cell):
+		_touch_hover = NO_CELL
+		_on_left_click(cell)
+		return
+	_touch_hover = cell
+	_refresh_highlights()
+
+
 func _on_main_button() -> void:
 	if _input_locked():
 		return
@@ -280,11 +326,13 @@ func _select_spell(index: int) -> void:
 		selected_spell = null
 	else:
 		selected_spell = spell
+	_touch_hover = NO_CELL
 	_refresh_ui()
 
 
 func _cancel_spell() -> void:
 	selected_spell = null
+	_touch_hover = NO_CELL
 	_refresh_ui()
 
 
@@ -334,7 +382,7 @@ func _refresh_ui(forced_hover: Vector2i = Vector2i(-1, -1)) -> void:
 
 func _refresh_highlights(forced_hover: Vector2i = Vector2i(-1, -1)) -> void:
 	var layers: Array[Dictionary] = []
-	var hover := forced_hover if forced_hover != Vector2i(-1, -1) else _mouse_cell()
+	var hover := forced_hover if forced_hover != Vector2i(-1, -1) else (_touch_hover if Settings.mobile else _mouse_cell())
 	for fighter in state.fighters:
 		fighter_views[fighter.id].set_hovered(fighter.cell == hover)
 	var obstacle_preview: Dictionary = {}
@@ -411,6 +459,7 @@ func _on_turn_started(fighter: Fighter, turn_number: int) -> void:
 	if turn_number == 1:
 		Sound.play_voice(_voice(fighter), "greet", fighter.id) # chacun se présente à son premier tour
 	selected_spell = null
+	_touch_hover = NO_CELL
 	for id in fighter_views:
 		fighter_views[id].is_active = (id == fighter.id)
 	hud.set_input_enabled(not is_ai(fighter))

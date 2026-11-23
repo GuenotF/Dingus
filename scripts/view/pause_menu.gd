@@ -31,6 +31,7 @@ func _ready() -> void:
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", W.panel_style(W.GOLD, 16, 26))
 	_center.add_child(panel)
+	UiFit.attach(_center, panel)
 	var stack := VBoxContainer.new()
 	panel.add_child(stack)
 
