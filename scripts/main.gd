@@ -46,6 +46,30 @@ func _ready() -> void:
 	_begin_placement_of(0)
 
 
+## Déplace les tuiles « obstacle » du calque de surcouches dans un calque trié par Y (comme le décor).
+## Renvoie ce calque, ou null s'il n'y en a pas.
+func _lift_detail_objects(detail: TileMapLayer, decor: TileMapLayer) -> TileMapLayer:
+	if detail == null:
+		return null
+	var objects := TileMapLayer.new()
+	objects.name = "ObjetsDeSurcouche"
+	objects.tile_set = detail.tile_set
+	objects.y_sort_enabled = true
+	entities.add_child(objects)
+	objects.scale = decor.scale
+	objects.position = decor.position
+	objects.texture_filter = decor.texture_filter
+	for cell in detail.get_used_cells():
+		var data := detail.get_cell_tile_data(cell)
+		if data != null and data.get_custom_data(BattleMap.OBSTACLE):
+			objects.set_cell(cell, detail.get_cell_source_id(cell), detail.get_cell_atlas_coords(cell), detail.get_cell_alternative_tile(cell))
+			detail.erase_cell(cell)
+	if objects.get_used_cells().is_empty():
+		objects.queue_free()
+		return null
+	return objects
+
+
 func _build_combat() -> void:
 	# La carte (dessinée dans l'éditeur) fournit la grille, les obstacles et les zones de placement.
 	map = load(GameConfig.map_path).instantiate()
@@ -94,10 +118,14 @@ func _build_scene() -> void:
 	decor.position = map.position
 	decor.texture_filter = map.texture_filter # pixel art net ou rendu lissé, selon la carte
 
+	# Objets posés dans le calque de surcouches (arbres, rochers d'un autre tileset...) : ils passent dans
+	# un calque trié par Y, sinon ils resteraient dessinés sous les personnages et sous le décor.
+	var objects := _lift_detail_objects(map.ground_detail(), decor)
+
 	# Obstacles destructibles : remplacés par des sprites animables (secousse, effondrement, barre de PV).
 	obstacle_view = ObstacleView.new()
 	add_child(obstacle_view)
-	obstacle_view.setup(state.grid, decor, map.ground_detail(), entities, self)
+	obstacle_view.setup(state.grid, decor, objects, entities, self)
 
 	# Nuages de fumée (Fumigène du Gobelin) : au-dessus des personnages.
 	smoke_view = SmokeView.new()
