@@ -184,22 +184,24 @@ func _build_victory() -> void:
 	var center := CenterContainer.new()
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_victory.add_child(center)
+	# Même habillage que le menu pause : panneau bordé d'or, titre doré, boutons de menu
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", HudWidgets.panel_style(HudWidgets.GOLD, 16, 26))
+	center.add_child(panel)
 	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 16)
-	center.add_child(vbox)
+	vbox.add_theme_constant_override("separation", 12)
+	panel.add_child(vbox)
 	_victory_label = Label.new()
 	_victory_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_victory_label.add_theme_font_size_override("font_size", 48)
+	_victory_label.add_theme_font_size_override("font_size", 40)
+	_victory_label.add_theme_color_override("font_color", HudWidgets.GOLD)
 	vbox.add_child(_victory_label)
-	for entry in [["Rejouer", restart_pressed], ["Menu", menu_pressed]]:
-		var b := Button.new()
-		b.text = entry[0]
-		b.custom_minimum_size = Vector2(220, 46)
-		b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		b.add_theme_font_size_override("font_size", 20)
-		var sig: Signal = entry[1]
-		b.pressed.connect(func() -> void: sig.emit())
-		vbox.add_child(b)
+	var replay := HudWidgets.menu_button("Rejouer", true)
+	replay.pressed.connect(func() -> void: restart_pressed.emit())
+	vbox.add_child(replay)
+	var menu := HudWidgets.menu_button("Menu principal")
+	menu.pressed.connect(func() -> void: menu_pressed.emit())
+	vbox.add_child(menu)
 
 
 # --- Mise à jour -----------------------------------------------------------------
