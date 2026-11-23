@@ -80,6 +80,15 @@ func _exit_tree() -> void:
 	Sound.silenced = false
 
 
+## Quitte l'écran titre. La démo est libérée tout de suite : sinon le combat, retiré de la scène
+## en plein tour de l'IA, reprendrait ses attentes sans arbre de scène (erreur sur `process_frame`).
+func _leave(scene_path: String) -> void:
+	if _demo != null:
+		_demo.free()
+		_demo = null
+	get_tree().change_scene_to_file(scene_path)
+
+
 # --- Menu ----------------------------------------------------------------------
 
 func _build_menu() -> void:
@@ -111,7 +120,7 @@ func _build_menu() -> void:
 
 	_add_entry(column, ICON_MAP, "Campagne solo", Callable(), "Bientôt")
 	_add_entry(column, ICON_SWORDS, "Combat 1 contre 1",
-			func() -> void: get_tree().change_scene_to_file("res://scenes/menu.tscn"))
+			func() -> void: _leave("res://scenes/menu.tscn"))
 	_add_entry(column, ICON_GROUP, "Escarmouche", Callable(), "Plus tard")
 	var line := ColorRect.new()
 	line.color = W.PANEL_BORDER
@@ -260,6 +269,8 @@ func _on_demo_finished() -> void:
 	var tween := create_tween()
 	tween.tween_property(_fade, "color:a", 1.0, FADE_TIME)
 	await tween.finished
+	if _demo == null or not is_inside_tree():
+		return
 	_demo.queue_free()
 	_demo = null
 	await get_tree().process_frame
