@@ -30,4 +30,4 @@ projectile = ExtResource("3_ebrgf")
 impact = ExtResource("2_lkdjj")
 cast_delay = 0.4
 casts_per_turn = 1
-cooldown = 2
+cooldown = 1

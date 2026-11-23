@@ -63,3 +63,8 @@ Il tient contre les tireurs et les lourds, mais les personnages rapides le rattr
 Chevalier maudit (30 % avant) et 78 % contre le Guerrier (45 % avant). Les 4 PM lui permettent de fuir sans fin les personnages à 3 PM.
 
 **Troisième jet** : retour à 3 PM, Flèche 14–16 conservée, PV 130 (au lieu de 125). À mesurer.
+
+**Troisième jet mesuré** (4000 combats, toutes cartes) : 43 % de victoires en moyenne. Chevalier maudit 33 %, Gobelin 12 %, Guerrier 64 %, Mage de feu 65 %.
+Il domine les tireurs et les lourds mais ne retient pas les rapides.
+
+**Quatrième jet** : Flèche entravante utilisable chaque tour (recharge 2 → 1) : −2 PM à répétition freine le Gobelin (4 PM) et le Chevalier. À mesurer.

@@ -80,3 +80,6 @@ Victoires du Gobelin : Archer 83 %, Chevalier maudit 50 %, Guerrier 19 %, Mage d
 Il bat les personnages qui ont du mal à fuir et perd contre les deux gros frappeurs. Cartes : Mage de feu 97 % de défaites sur le lac.
 
 **Troisième jet** (mesuré sur la prairie, 4000 combats : Guerrier 34 % au lieu de 20 %, Mage de feu 41 % au lieu de 17 %, Chevalier 62 %) : PV 135 (135 = Mage de feu). Les autres chiffres ne bougent pas, pour voir si les PV seuls rapprochent le duel du Guerrier et du Mage.
+
+**Troisième jet mesuré** (4000 combats, toutes cartes) : 57 % de victoires en moyenne. Archer 88 %, Chevalier maudit 61 %, Guerrier 38 %, Mage de feu 43 %.
+Dans la cible, sauf contre l'Archer (trop facile ; l'Archer est retouché, pas le Gobelin). Lac : défaite quasi sûre contre le Mage de feu (9 %).
