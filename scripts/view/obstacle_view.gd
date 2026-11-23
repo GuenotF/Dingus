@@ -49,6 +49,7 @@ func _convert(layer: TileMapLayer, cell: Vector2i, grid: BattleGrid, entities: N
 	sprite.texture_filter = layer.texture_filter
 	sprite.position = layer.position + layer.map_to_local(cell) * layer.scale
 	entities.add_child(sprite)
+	var anim := DestructionAnims.sheet_for(layer.tile_set.resource_path, layer.get_cell_atlas_coords(cell))
 	layer.erase_cell(cell)
 
 	var info := _measure(source.texture, region)
@@ -60,6 +61,7 @@ func _convert(layer: TileMapLayer, cell: Vector2i, grid: BattleGrid, entities: N
 		"max_hp": grid.destructible_max_hp(cell),
 		"color": info.color,
 		"shown_until": 0.0,
+		"anim": anim,
 	}
 	return true
 
@@ -111,6 +113,9 @@ func destroy(cell: Vector2i) -> void:
 	var prop: Dictionary = _props[cell]
 	_props.erase(cell)
 	var sprite: Sprite2D = prop.sprite
+	if prop.anim != "":
+		_play_destruction(prop.anim, sprite)
+		return
 	_burst(prop.anchor + Vector2(0, 30.0), prop.color, 30)
 	_add_rubble(sprite.position, prop.color)
 	var tween := sprite.create_tween().set_parallel(true)
@@ -118,6 +123,31 @@ func destroy(cell: Vector2i) -> void:
 	tween.tween_property(sprite, "scale:y", sprite.scale.y * 0.55, 0.35).set_ease(Tween.EASE_IN)
 	tween.tween_property(sprite, "modulate:a", 0.0, 0.35)
 	tween.chain().tween_callback(sprite.queue_free)
+	queue_redraw()
+
+
+## Effondrement animé (images du pack) : le sprite d'origine s'efface vite pendant que l'animation démarre,
+## puis les gravats passent au sol (ou disparaissent, pour la paille).
+func _play_destruction(sheet: String, sprite: Sprite2D) -> void:
+	var info: Dictionary = DestructionAnims.SHEETS[sheet]
+	var anim := AnimatedSprite2D.new()
+	anim.sprite_frames = DestructionAnims.frames_for(sheet)
+	anim.texture_filter = sprite.texture_filter
+	anim.scale = Vector2.ONE * float(info.scale) * sprite.scale.x
+	# Le point de contact au sol de l'image est placé sur le pied de l'obstacle.
+	anim.offset = Vector2(DestructionAnims.FRAME * 0.5, DestructionAnims.FRAME * 0.5) - DestructionAnims.GROUND
+	anim.position = sprite.position
+	var entities := sprite.get_parent()
+	entities.add_child(anim)
+	anim.play("default")
+	anim.animation_finished.connect(func() -> void:
+		if info.keep:
+			anim.reparent(_ground)
+		else:
+			anim.queue_free())
+	var tween := sprite.create_tween()
+	tween.tween_property(sprite, "modulate:a", 0.0, 0.12)
+	tween.tween_callback(sprite.queue_free)
 	queue_redraw()
 
 
