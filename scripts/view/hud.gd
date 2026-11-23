@@ -3,8 +3,8 @@ extends CanvasLayer
 ## Interface de combat. En bas au centre : orbe de PV, PA / PM, cases de sorts, fin du tour.
 ## En haut à droite : numéro du tour et ordre de jeu. Infobulle au survol d'un sort.
 ## L'aperçu des dégâts au survol d'une cible est dessiné par FighterView.
-## Mode mobile : pas de survol ; toucher un sort affiche son infobulle (cachée au premier tap sur la carte),
-## textes d'aide adaptés au tactile.
+## Mode mobile : pas de survol ; toucher un sort le choisit et affiche son résumé sur la ligne d'aide
+## (la carte reste visible) ; appui long sur un sort = infobulle complète tant que le doigt reste posé.
 
 signal main_button_pressed # « Fin du tour » ou « Prêt » selon la phase
 signal spell_pressed(index: int)
@@ -17,6 +17,12 @@ var _selected: SpellData
 var _hovered_slot := -1
 ## Vrai après un clic sur la case survolée : l'infobulle reste cachée jusqu'à ce que la souris en sorte.
 var _tooltip_dismissed := false
+## Mode mobile : durée d'appui pour afficher l'infobulle complète, sort tenu (-1 = aucun), message ponctuel.
+const LONG_PRESS := 0.35
+var _held_slot := -1
+var _long_press_done := false
+var _press_id := 0
+var _mobile_notice := ""
 
 # Barre du bas
 var _bar: PanelContainer
@@ -242,13 +248,16 @@ func show_combat(state: CombatState, selected: SpellData, is_ai: bool) -> void:
 	if is_ai:
 		_hint.text = "%s (%s, IA) réfléchit…" % [fighter.display_name, _class_name(fighter)]
 	elif selected and Settings.mobile:
-		_hint.text = "Touche une case pour viser, puis à nouveau pour lancer   ·   Retour : annuler"
+		_hint.text = "%s\nTouche deux fois une case pour lancer   ·   Retour : annuler" % spell_summary(selected)
+	elif Settings.mobile and _mobile_notice != "":
+		_hint.text = _mobile_notice
 	elif selected:
 		_hint.text = "Clic : lancer   ·   Clic droit / Échap : annuler"
 	elif Settings.mobile:
-		_hint.text = "%s (%s)   ·   Touche une case, puis à nouveau pour t'y déplacer" % [fighter.display_name, _class_name(fighter)]
+		_hint.text = "%s (%s)   ·   Touche deux fois une case pour t'y déplacer   ·   Appui long sur un sort : détails" % [fighter.display_name, _class_name(fighter)]
 	else:
 		_hint.text = "%s (%s)   ·   Clic : se déplacer   ·   1-%d : sorts" % [fighter.display_name, _class_name(fighter), fighter.spells.size()]
+	_mobile_notice = "" # message ponctuel : affiché une fois
 	_update_tooltip()
 
 
@@ -273,13 +282,16 @@ func _update_slots(state: CombatState, fighter: Fighter, selected: SpellData, is
 		var index := _slots.size()
 		slot.pressed.connect(func() -> void:
 			if Settings.mobile:
-				# Toucher un sort montre son infobulle (le sort reste choisi pour viser).
-				_hovered_slot = index
-				_tooltip_dismissed = false
+				if _long_press_done:
+					return # appui long : on a seulement consulté le sort
+				_mobile_notice = _unavailable_notice(slot)
 			else:
 				_tooltip_dismissed = true
 			spell_pressed.emit(index))
-		if not Settings.mobile:
+		if Settings.mobile:
+			slot.button_down.connect(func() -> void: _on_slot_down(index))
+			slot.button_up.connect(func() -> void: _on_slot_up(index))
+		else:
 			slot.mouse_entered.connect(func() -> void: _on_slot_hover(index, true))
 			slot.mouse_exited.connect(func() -> void: _on_slot_hover(index, false))
 		_spell_box.add_child(slot)
@@ -323,10 +335,9 @@ func _update_tooltip() -> void:
 	var slot: HudWidgets.SpellSlot = null
 	if _hovered_slot >= 0 and _hovered_slot < _slots.size() and _slots[_hovered_slot].visible and not _tooltip_dismissed:
 		slot = _slots[_hovered_slot]
-	# Mobile : un sort utilisable qu'on vient de désélectionner n'affiche plus son infobulle ;
-	# un sort indisponible (recharge, PA...) l'affiche pour expliquer pourquoi.
-	if Settings.mobile and slot != null and slot.look == HudWidgets.SpellSlot.Look.READY:
-		slot = null
+	# Mobile : seulement pendant un appui long sur le sort.
+	if Settings.mobile:
+		slot = _slots[_held_slot] if _long_press_done and _held_slot >= 0 and _held_slot < _slots.size() else null
 	if fighter == null or slot == null or slot.spell == null or not _spell_box.visible:
 		_tooltip.hide()
 		_hint.modulate.a = 1.0
@@ -354,6 +365,53 @@ func _update_tooltip() -> void:
 	if spell.cooldown > 0 and slot.look != HudWidgets.SpellSlot.Look.COOLDOWN:
 		status += "  ·  recharge %d tours" % spell.cooldown
 	_tooltip.show_spell(spell, slot.get_global_rect(), status, color, spell == _selected)
+
+
+## Ligne de résumé d'un sort (mode mobile) : nom, coût, portée, effets.
+static func spell_summary(spell: SpellData) -> String:
+	var parts: Array[String] = [spell.spell_name, "%d PA" % spell.pa_cost, SpellTooltip.range_text(spell)]
+	for e in spell.effects:
+		parts.append(e.describe())
+	return "   ·   ".join(parts)
+
+
+## Mode mobile : résumé + raison quand on touche un sort indisponible ; vide si le sort est utilisable.
+func _unavailable_notice(slot: HudWidgets.SpellSlot) -> String:
+	var fighter := _state.active_fighter() if _state else null
+	if fighter == null or slot.spell == null:
+		return ""
+	var why := ""
+	match slot.look:
+		HudWidgets.SpellSlot.Look.COOLDOWN:
+			why = "Recharge : encore %d tour%s" % [slot.cooldown_left, "s" if slot.cooldown_left > 1 else ""]
+		HudWidgets.SpellSlot.Look.NO_CASTS:
+			why = "Plus de lancers ce tour"
+		HudWidgets.SpellSlot.Look.NO_PA:
+			why = "PA insuffisants (%d / %d)" % [fighter.pa, slot.spell.pa_cost]
+		_:
+			return ""
+	return "%s\n%s" % [spell_summary(slot.spell), why]
+
+
+func _on_slot_down(index: int) -> void:
+	_held_slot = index
+	_long_press_done = false
+	_press_id += 1
+	var id := _press_id
+	await get_tree().create_timer(LONG_PRESS, false).timeout
+	if id == _press_id and _held_slot == index:
+		_long_press_done = true
+		_update_tooltip()
+
+
+func _on_slot_up(index: int) -> void:
+	if _held_slot != index:
+		return
+	_held_slot = -1
+	_update_tooltip()
+	# _long_press_done reste vrai jusqu'au signal « pressed » qui suit le relâchement.
+	await get_tree().process_frame
+	_long_press_done = false
 
 
 ## Mode mobile : cache l'infobulle (premier tap sur la carte), jusqu'au prochain toucher d'un sort.
