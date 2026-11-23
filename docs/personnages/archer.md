@@ -68,3 +68,7 @@ Chevalier maudit (30 % avant) et 78 % contre le Guerrier (45 % avant). Les 4 PM 
 Il domine les tireurs et les lourds mais ne retient pas les rapides.
 
 **Quatrième jet** : Flèche entravante utilisable chaque tour (recharge 2 → 1) : −2 PM à répétition freine le Gobelin (4 PM) et le Chevalier. À mesurer.
+
+**Quatrième jet mesuré** (4000 combats) : 51 % de victoires en moyenne. Chevalier maudit 40 %, Gobelin 14 %, Guerrier 85 %, Mage de feu 65 %.
+Entravante à chaque tour aide contre le Chevalier (33 → 40 %) mais écrase le Guerrier (64 → 85 %) et ne change rien contre le Gobelin (12 → 14 %) :
+le problème avec le Gobelin vient de lui (vol de PA à chaque tour, fumigène), pas de l'Archer. Réglage laissé tel quel ; le Gobelin et le Guerrier sont retouchés.

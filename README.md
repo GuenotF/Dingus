@@ -41,7 +41,7 @@ Au centre, l'aperçu de la carte (la vraie scène, flèches ‹ › pour changer
 
 | Classe | PV | PA | PM | Sorts |
 |---|---|---|---|---|
-| Guerrier | 150 | 6 | 3 | Coup d'épée, Charge (bond), Repousser (poussée 2), Cri (+1 PM) |
+| Guerrier | 155 | 6 | 3 | Coup d'épée, Charge (bond), Repousser (poussée 2), Cri (+1 PM) |
 | Mage de feu | 135 | 6 | 4 | Flammèche, Boule de feu, Pluie de feu (zone sans ligne de vue), Nova de flammes (autour de soi, repousse) |
 | Archer | 130 | 6 | 3 | Flèche (portée 8), Flèche entravante (−2 PM), Flèche de recul (repousse 2), Roulade (bond) |
 | Chevalier maudit | 120 | 6 | 3 | Lame sombre (vol de vie), Chaîne infernale (attire de 5, −2 PM), Malédiction (−2 PA), Pacte de sang (−12 PV, +3 PA) |

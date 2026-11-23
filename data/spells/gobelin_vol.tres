@@ -24,4 +24,4 @@ effects = Array[ExtResource("1_gob3")]([SubResource("Resource_gob3a"), SubResour
 icon = ExtResource("2_gob3")
 cast_delay = 0.4
 casts_per_turn = 1
-cooldown = 1
+cooldown = 2

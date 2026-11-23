@@ -9,7 +9,7 @@ Liste dans `CLAUDE.md`/`scripts/game_config.gd` (`CLASS_PATHS`). PA 6 pour tous 
 
 | Personnage | Skin (pack, dossier) | Rôle | PV | PM | Distance IA | Sorts | Voix | Fiche |
 |---|---|---|---|---|---|---|---|---|
-| Guerrier | *2D HD Character Knight* (`assets/characters/knight/`) | corps à corps, repousse | 150 | 3 | – | Coup d'épée, Charge, Repousser, Cri | oui (*Warrior Voice Pack*) | pas de fiche détaillée |
+| Guerrier | *2D HD Character Knight* (`assets/characters/knight/`) | corps à corps, repousse | 155 | 3 | – | Coup d'épée, Charge, Repousser, Cri | oui (*Warrior Voice Pack*) | pas de fiche détaillée |
 | Mage de feu | *2D HD Character pack 1* : `3Wizard` | distance, gros dégâts, fragile | 135 | 4 | 4 | Flammèche, Boule de feu, Pluie de feu, Nova de flammes | non | `docs/personnages/mage_de_feu.md` |
 | Archer | *2D HD Character pack 1* : `2Archer` | distance, ralentit et repousse | 125 | 3 | 5 | Flèche, Flèche entravante, Flèche de recul, Roulade | non | `docs/personnages/archer.md` |
 | Chevalier maudit | *2D HD Character pack 1* : `7DeathKnight` | corps à corps, attire, vole la vie | 120 | 3 | 1 | Lame sombre, Chaîne infernale, Malédiction, Pacte de sang | non | `docs/personnages/chevalier_maudit.md` |

@@ -83,3 +83,6 @@ Il bat les personnages qui ont du mal à fuir et perd contre les deux gros frapp
 
 **Troisième jet mesuré** (4000 combats, toutes cartes) : 57 % de victoires en moyenne. Archer 88 %, Chevalier maudit 61 %, Guerrier 38 %, Mage de feu 43 %.
 Dans la cible, sauf contre l'Archer (trop facile ; l'Archer est retouché, pas le Gobelin). Lac : défaite quasi sûre contre le Mage de feu (9 %).
+
+**Quatrième jet** : Vol à la tire retrouve sa recharge de 2 tours (il volait 1 PA à l'Archer chaque tour : 4 PA contre 7 pour nous, 86 % de victoires).
+Mesure précédente : 57 % de moyenne. À mesurer.
