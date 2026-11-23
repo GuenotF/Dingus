@@ -140,7 +140,7 @@ toutes les scènes de ce dossier : une carte ajoutée y apparaît sans toucher a
 
 Cartes actuelles :
 - **Prairie** (`demo.tscn`) : rochers et troncs au centre, jeu sur les lignes de vue.
-- **Le lac** (`lac.tscn`) : une rivière coupe le terrain, deux ponts, deux pierres dans l'eau.
+- **Le lac** (`lac.tscn`) : une rivière coupe le terrain, trois ponts (haut, milieu, bas), deux pierres dans l'eau.
 - **Place du village** (`village.tscn`) : place pavée autour d'un puits, étals, charrette, tonneaux,
   clôtures. Tuiles du pack *Fantasy tileset - 2D Isometric* (`assets/tiles/village/`), en rendu lissé.
 - **Ruines du désert** (`desert.tscn`) : allée pavée de 3 cases du nord-ouest au sud-est, sphinx central,
