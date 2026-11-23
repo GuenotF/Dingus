@@ -45,6 +45,7 @@ Au centre, l'aperçu de la carte (la vraie scène, flèches ‹ › pour changer
 | Mage de feu | 135 | 6 | 4 | Flammèche, Boule de feu, Pluie de feu (zone sans ligne de vue), Nova de flammes (autour de soi, repousse) |
 | Archer | 125 | 6 | 3 | Flèche (portée 8), Flèche entravante (−2 PM), Flèche de recul (repousse 2), Roulade (bond) |
 | Chevalier maudit | 120 | 6 | 3 | Lame sombre (vol de vie), Chaîne infernale (attire de 5, −2 PM), Malédiction (−2 PA), Pacte de sang (−12 PV, +3 PA) |
+| Gobelin | 110 | 6 | 4 | Estoc, Lancer de hache (portée 5), Vol à la tire (−1 PA), Backflip (bond) |
 
 Créer un nouveau personnage : voir [docs/creation_personnage.md](docs/creation_personnage.md)
 (checklist, étapes, critères d'équilibrage, modèle de fiche).
@@ -181,7 +182,8 @@ L'eau de l'oasis est animée par le nœud `WaterRipples` (`scripts/map/water_rip
 à ajouter comme enfant d'une carte avec une planche d'images en `sheet`.
 
 Actuellement : le **Guerrier** utilise le pack *2D HD Character Knight* (`assets/characters/knight/`),
-le **Mage de feu**, l'**Archer** et le **Chevalier maudit** le pack *2D HD Character pack 1* (`assets/characters/wizard/`, `assets/characters/archer/`, `assets/characters/chevalier/`).
+le **Mage de feu**, l'**Archer** et le **Chevalier maudit** le pack *2D HD Character pack 1* (`assets/characters/wizard/`, `assets/characters/archer/`, `assets/characters/chevalier/`),
+le **Gobelin** le pack *2D Orcs and Goblins - TopDown - V1.0* (`assets/characters/gobelin/`, skin Goblin 01).
 
 ### Ajouter un personnage animé
 
@@ -222,7 +224,7 @@ puis la mettre dans le champ `voice` de la classe.
 
 Actuellement : le **Guerrier** parle (*Warrior Voice Pack* de John Carroll,
 [johncarroll.itch.io](https://johncarroll.itch.io/) ; 52 répliques converties en OGG).
-L'Archer, le Mage de feu et le Chevalier maudit n'ont pas encore de voix.
+L'Archer, le Mage de feu, le Chevalier maudit et le Gobelin n'ont pas encore de voix.
 
 
 ## Police

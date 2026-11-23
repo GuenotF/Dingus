@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ClassData" format=3]
+
+[ext_resource type="Script" path="res://scripts/core/class_data.gd" id="1_gobc"]
+[ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="2_gobc"]
+[ext_resource type="Resource" path="res://data/spells/gobelin_estoc.tres" id="3_gobc"]
+[ext_resource type="Resource" path="res://data/spells/gobelin_hache.tres" id="4_gobc"]
+[ext_resource type="Resource" path="res://data/spells/gobelin_vol.tres" id="5_gobc"]
+[ext_resource type="Resource" path="res://data/spells/gobelin_backflip.tres" id="6_gobc"]
+[ext_resource type="Resource" path="res://data/sprites/gobelin.tres" id="7_gobc"]
+[ext_resource type="Texture2D" path="res://assets/ui/portraits/gobelin.png" id="99_portrait"]
+
+[resource]
+script = ExtResource("1_gobc")
+class_label = "Gobelin"
+color = Color(0.45, 0.65, 0.2, 1)
+description = "Harceleur vif et fragile : frappe, vole des PA, s'esquive"
+max_hp = 110
+max_pm = 4
+preferred_range = 2
+spells = Array[ExtResource("2_gobc")]([ExtResource("3_gobc"), ExtResource("4_gobc"), ExtResource("5_gobc"), ExtResource("6_gobc")])
+sprites = ExtResource("7_gobc")
+portrait = ExtResource("99_portrait")

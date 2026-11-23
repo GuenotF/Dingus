@@ -6,6 +6,7 @@ const CLASS_PATHS: Array[String] = [
 	"res://data/classes/mage_feu.tres",
 	"res://data/classes/archer.tres",
 	"res://data/classes/chevalier_maudit.tres",
+	"res://data/classes/gobelin.tres",
 ]
 
 ## Police de l'interface (assets/fonts/). Absente (non versionnée, voir .gitignore) : police par défaut de Godot.

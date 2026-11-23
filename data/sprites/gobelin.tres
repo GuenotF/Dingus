@@ -1,0 +1,71 @@
+[gd_resource type="Resource" script_class="CharacterSprites" format=3]
+
+[ext_resource type="Script" path="res://scripts/view/character_animation.gd" id="1_gobs"]
+[ext_resource type="Texture2D" path="res://assets/characters/gobelin/idle.png" id="2_idle"]
+[ext_resource type="Texture2D" path="res://assets/characters/gobelin/walk.png" id="3_walk"]
+[ext_resource type="Texture2D" path="res://assets/characters/gobelin/take_damage.png" id="4_hit"]
+[ext_resource type="Texture2D" path="res://assets/characters/gobelin/die.png" id="5_die"]
+[ext_resource type="Texture2D" path="res://assets/characters/gobelin/attack1.png" id="6_a1"]
+[ext_resource type="Texture2D" path="res://assets/characters/gobelin/attack2.png" id="7_a2"]
+[ext_resource type="Texture2D" path="res://assets/characters/gobelin/attack4.png" id="8_a4"]
+[ext_resource type="Texture2D" path="res://assets/characters/gobelin/backflip.png" id="9_bf"]
+[ext_resource type="Script" path="res://scripts/view/character_sprites.gd" id="10_gobs"]
+
+[sub_resource type="Resource" id="Resource_idle"]
+script = ExtResource("1_gobs")
+texture = ExtResource("2_idle")
+fps = 12.0
+loop = true
+
+[sub_resource type="Resource" id="Resource_walk"]
+script = ExtResource("1_gobs")
+name = "walk"
+texture = ExtResource("3_walk")
+fps = 20.0
+loop = true
+
+[sub_resource type="Resource" id="Resource_hit"]
+script = ExtResource("1_gobs")
+name = "hit"
+texture = ExtResource("4_hit")
+fps = 24.0
+
+[sub_resource type="Resource" id="Resource_die"]
+script = ExtResource("1_gobs")
+name = "die"
+texture = ExtResource("5_die")
+
+[sub_resource type="Resource" id="Resource_a1"]
+script = ExtResource("1_gobs")
+name = "attack1"
+texture = ExtResource("6_a1")
+fps = 26.0
+
+[sub_resource type="Resource" id="Resource_a2"]
+script = ExtResource("1_gobs")
+name = "attack2"
+texture = ExtResource("7_a2")
+fps = 26.0
+
+[sub_resource type="Resource" id="Resource_a4"]
+script = ExtResource("1_gobs")
+name = "attack4"
+texture = ExtResource("8_a4")
+fps = 26.0
+
+[sub_resource type="Resource" id="Resource_jump"]
+script = ExtResource("1_gobs")
+name = "jump"
+texture = ExtResource("9_bf")
+fps = 30.0
+
+[resource]
+script = ExtResource("10_gobs")
+feet_position = Vector2(64, 88)
+feet_down_right = Vector2(60, 88)
+feet_down_left = Vector2(68, 88)
+feet_up_left = Vector2(63, 89)
+feet_up_right = Vector2(64, 88)
+height = 42.0
+scale = 1.4
+animations = Array[ExtResource("1_gobs")]([SubResource("Resource_idle"), SubResource("Resource_walk"), SubResource("Resource_hit"), SubResource("Resource_die"), SubResource("Resource_a1"), SubResource("Resource_a2"), SubResource("Resource_a4"), SubResource("Resource_jump")])

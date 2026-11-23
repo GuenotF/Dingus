@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="SpellData" format=3]
+
+[ext_resource type="Script" path="res://scripts/core/effect_data.gd" id="1_gob4"]
+[ext_resource type="Texture2D" path="res://assets/ui/spells/gobelin_backflip.png" id="2_gob4"]
+[ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="3_gob4"]
+
+[sub_resource type="Resource" id="Resource_gob4"]
+script = ExtResource("1_gob4")
+kind = 4
+min_value = 0
+max_value = 0
+
+[resource]
+script = ExtResource("3_gob4")
+spell_name = "Backflip"
+pa_cost = 2
+animation = "jump"
+range_min = 2
+range_max = 3
+line_only = true
+target_rule = 1
+effects = Array[ExtResource("1_gob4")]([SubResource("Resource_gob4")])
+icon = ExtResource("2_gob4")
+casts_per_turn = 1
+cooldown = 2

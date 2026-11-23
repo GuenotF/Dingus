@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SpellData" format=3]
+
+[ext_resource type="Script" path="res://scripts/core/effect_data.gd" id="1_gob1"]
+[ext_resource type="Texture2D" path="res://assets/ui/spells/gobelin_estoc.png" id="2_gob1"]
+[ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="3_gob1"]
+
+[sub_resource type="Resource" id="Resource_gob1"]
+script = ExtResource("1_gob1")
+min_value = 13
+max_value = 15
+
+[resource]
+script = ExtResource("3_gob1")
+spell_name = "Estoc"
+animation = "attack2"
+effects = Array[ExtResource("1_gob1")]([SubResource("Resource_gob1")])
+icon = ExtResource("2_gob1")
+cast_delay = 0.3
