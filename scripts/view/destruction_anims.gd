@@ -35,7 +35,19 @@ const ASSIGNMENTS := {
 	},
 }
 
+## Matière de chaque planche : choisit le bruitage (assets/audio/sfx/hit_<matière>, destroy_<matière>).
+const MATERIALS := {
+	"pierre_grand": "pierre", "mur_pierre": "pierre",
+	"mur_bois": "bois", "bois_petit": "bois", "bois_grand": "bois",
+	"paille": "paille",
+}
+
 static var _cache := {}
+
+
+## Matière de l'obstacle dont l'animation est `sheet` (pierre quand il n'y a pas d'animation).
+static func material_for(sheet: String) -> String:
+	return MATERIALS.get(sheet, "pierre")
 
 
 ## Nom de la planche associée à cette tuile, ou "" (alors l'effondrement est dessiné par le code).

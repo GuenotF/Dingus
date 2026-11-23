@@ -226,6 +226,13 @@ Actuellement : le **Guerrier** parle (*Warrior Voice Pack* de John Carroll,
 [johncarroll.itch.io](https://johncarroll.itch.io/) ; 52 répliques converties en OGG).
 L'Archer, le Mage de feu, le Chevalier maudit et le Gobelin n'ont pas encore de voix.
 
+**Bruitages** : `Sound.play_sfx("nom")` joue un son de `assets/audio/sfx/` (variantes `nom_1.ogg`, `nom_2.ogg`...
+tirées au hasard, bus « Effets », 8 sons simultanés au plus ; fichier absent = silence). Actuellement les obstacles
+destructibles : `hit_<matière>` à chaque coup, `destroy_<matière>` à l'effondrement, pour la pierre, le bois et la paille
+(`DestructionAnims.MATERIALS` associe chaque planche à sa matière). Ces sons sont **synthétisés** (bruit filtré, enveloppes) :
+`python tools/synth_sfx.py <dossier>` écrit les `.wav`, à convertir en `.ogg`. Ce sont des sons provisoires, à remplacer
+par de vrais enregistrements en gardant les mêmes noms de fichiers. Pas encore de réglage de volume dédié aux effets.
+
 
 ## Police
 

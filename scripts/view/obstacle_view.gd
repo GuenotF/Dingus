@@ -92,6 +92,8 @@ func hit(cell: Vector2i, amount: int, hp_left: int) -> void:
 		return
 	var prop: Dictionary = _props[cell]
 	prop.hp = hp_left
+	if hp_left > 0: # à zéro, c'est le bruit de l'effondrement qui prend le relais
+		Sound.play_sfx("hit_" + DestructionAnims.material_for(prop.anim))
 	prop.shown_until = _now() + SHOW_AFTER_HIT
 	var sprite: Sprite2D = prop.sprite
 	# Plus l'obstacle est abîmé, plus il s'assombrit.
@@ -112,6 +114,7 @@ func destroy(cell: Vector2i) -> void:
 		return
 	var prop: Dictionary = _props[cell]
 	_props.erase(cell)
+	Sound.play_sfx("destroy_" + DestructionAnims.material_for(prop.anim))
 	var sprite: Sprite2D = prop.sprite
 	if prop.anim != "":
 		_play_destruction(prop.anim, sprite)
