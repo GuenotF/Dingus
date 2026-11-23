@@ -3,15 +3,15 @@
 **Identité** : pillard fourbe et fragile. Il n'écrase pas l'adversaire, il l'épuise : lui vole des PA, le ralentit, l'aveugle dans la fumée,
 le repousse à coups de pétard. Servira plus tard d'ennemi de campagne / PVE (et se marie bien avec les coffres à bonus).
 **Skin** : Goblin 01 (pack *2D Orcs and Goblins - TopDown - V1.0*). **Distance préférée (IA)** : 1 (à réviser à l'équilibrage).
-**Stats** (provisoires) : PV 110 / PA 6 / PM 4
+**Stats** (provisoires) : PV 120 / PA 6 / PM 4
 
 **Animations de base** : idle = Idle, walk = Walk, hit = TakeDamage 1, die = Die 1
 
 | # | Sort | PA | Portée | Effets | Limites | Animation | Projectile / impact |
 |---|------|----|--------|--------|---------|-----------|---------------------|
-| 1 | Vol à la tire | 3 | 1 | 6–8 dégâts ; la cible perd 1 PA (1 tour) **et le gobelin gagne 1 PA tout de suite** | 1/tour, recharge 2 | Attack 4 (bond d'attaque) | — |
-| 2 | Coup bas | 3 | 1 | 8–10 dégâts, −2 PM (1 tour) | 1/tour | Attack 3 (à confirmer en jeu) | — |
-| 3 | Pétard | 2 | 1–4, ligne de vue | 5–7 dégâts, repousse de 2 (collision = dégâts de poussée habituels) | 2/tour | Attack 1 (lancer) | pétard qui tourne (dessiné) / petite explosion (feu du pack, réduite) |
+| 1 | Vol à la tire | 3 | 1 | 8–10 dégâts ; la cible perd 1 PA (1 tour) **et le gobelin gagne 1 PA tout de suite** | 1/tour, recharge 1 (chaque tour) | Attack 4 (bond d'attaque) | — |
+| 2 | Coup bas | 3 | 1 | 10–12 dégâts, −2 PM (1 tour) | 1/tour | Attack 3 (à confirmer en jeu) | — |
+| 3 | Pétard | 2 | 1–4, ligne de vue | 6–8 dégâts, repousse de 2 (collision = dégâts de poussée habituels) | 2/tour | Attack 1 (lancer) | pétard qui tourne (dessiné) / petite explosion (feu du pack, réduite) |
 | 4 | Fumigène | 3 | 2–5, sans ligne de vue | nuage 3×3 centré sur la case visée, 1 tour (règles ci-dessous) | 1/tour, recharge 3 | Attack 1 (lancer) | bouffées grises dessinées par le code (`SmokeView`) |
 
 Retirés du premier jet : Estoc, Lancer de hache, Backflip. Leurs données (`data/spells/gobelin_estoc|hache|backflip.tres`), la hache
@@ -61,3 +61,15 @@ Cause (lecture de `ai_brain.gd`, non mesurée) : avec `preferred_range = 2`, l'I
 **Correction** : `preferred_range = 1` (joué comme un combattant de mêlée). Effet de bord à surveiller : pour une classe de mêlée l'IA
 note le Backflip comme un bond *vers* l'ennemi (comme la Charge), pas comme une retraite.
 Les chiffres des sorts n'ont pas été modifiés. À refaire : `tests/balance_matrix.gd -- personnage=Gobelin`.
+
+### Pillard, premier jet (23/11, 1600 combats, victoires du Gobelin)
+
+Chiffres : PV 110, Vol 6–8 (recharge 2), Coup bas 8–10, Pétard 5–7.
+Archer 62 % (Prairie 70, désert 65, barrage 65, village 75, **lac 35**), Chevalier maudit 29 % (lac 49, village 56, désert 25, prairie 14,
+barrage 4), Mage de feu 9 %, Guerrier 1 % ; moyenne 25 %, combats de 5,5 à 6,6 tours, aucun combat sans fin.
+Lecture : déficit de puissance brute. Le Guerrier fait ≈ 40 par tour (Coup d'épée 18–22 ×2, 150 PV), le Gobelin ≈ 20 ; ses effets de contrôle
+(vol de PA, −2 PM, nuage) n'y suffisent pas. Archer trop faible sur le lac (l'eau gêne le gobelin, pas les flèches).
+
+**Deuxième jet** : PV 120, Vol à la tire 8–10 et recharge 1 (utilisable chaque tour : −1 PA permanent pour l'ennemi, coût net de 2 PA pour
+nous), Coup bas 10–12, Pétard 6–8. Le Fumigène (recharge 3, décidée avec l'utilisateur) et les règles du nuage ne changent pas.
+À mesurer. Si Guerrier et Mage restent très bas : regarder l'IA (garder la distance avec 4 PM, enchaîner Fumigène puis Pétards) avant les chiffres.

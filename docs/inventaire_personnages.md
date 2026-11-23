@@ -13,7 +13,7 @@ Liste dans `CLAUDE.md`/`scripts/game_config.gd` (`CLASS_PATHS`). PA 6 pour tous 
 | Mage de feu | *2D HD Character pack 1* : `3Wizard` | distance, gros dégâts, fragile | 135 | 4 | 4 | Flammèche, Boule de feu, Pluie de feu, Nova de flammes | non | `docs/personnages/mage_de_feu.md` |
 | Archer | *2D HD Character pack 1* : `2Archer` | distance, ralentit et repousse | 125 | 3 | 5 | Flèche, Flèche entravante, Flèche de recul, Roulade | non | `docs/personnages/archer.md` |
 | Chevalier maudit | *2D HD Character pack 1* : `7DeathKnight` | corps à corps, attire, vole la vie | 120 | 3 | 1 | Lame sombre, Chaîne infernale, Malédiction, Pacte de sang | non | `docs/personnages/chevalier_maudit.md` |
-| Gobelin | *2D Orcs and Goblins - TopDown - V1.0* : `Goblin 01` (`assets/characters/gobelin/`) | pillard : vole des PA, enfume, repousse | 110 | 4 | 1 | Vol à la tire, Coup bas, Pétard, Fumigène | non | `docs/personnages/gobelin.md` |
+| Gobelin | *2D Orcs and Goblins - TopDown - V1.0* : `Goblin 01` (`assets/characters/gobelin/`) | pillard : vole des PA, enfume, repousse | 120 | 4 | 1 | Vol à la tire, Coup bas, Pétard, Fumigène | non | `docs/personnages/gobelin.md` |
 
 Équilibrage actuel (rapport du 23/11, 20 parties par côté et par carte) : le Chevalier maudit domine (≈ 62 % de victoires
 contre les autres), Archer 48 %, Mage de feu 47 %, Guerrier 44 %. Détails : `tests/balance_matrix.gd`.

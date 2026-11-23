@@ -8,8 +8,8 @@
 
 [sub_resource type="Resource" id="Resource_gpe1"]
 script = ExtResource("1_gpe")
-min_value = 5
-max_value = 7
+min_value = 6
+max_value = 8
 
 [sub_resource type="Resource" id="Resource_gpe2"]
 script = ExtResource("1_gpe")

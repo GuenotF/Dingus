@@ -45,7 +45,7 @@ Au centre, l'aperçu de la carte (la vraie scène, flèches ‹ › pour changer
 | Mage de feu | 135 | 6 | 4 | Flammèche, Boule de feu, Pluie de feu (zone sans ligne de vue), Nova de flammes (autour de soi, repousse) |
 | Archer | 125 | 6 | 3 | Flèche (portée 8), Flèche entravante (−2 PM), Flèche de recul (repousse 2), Roulade (bond) |
 | Chevalier maudit | 120 | 6 | 3 | Lame sombre (vol de vie), Chaîne infernale (attire de 5, −2 PM), Malédiction (−2 PA), Pacte de sang (−12 PV, +3 PA) |
-| Gobelin | 110 | 6 | 4 | Vol à la tire (vole 1 PA), Coup bas (−2 PM), Pétard (repousse 2), Fumigène (nuage 3×3 : −2 PM, aveugle, fait écran) |
+| Gobelin | 120 | 6 | 4 | Vol à la tire (vole 1 PA), Coup bas (−2 PM), Pétard (repousse 2), Fumigène (nuage 3×3 : −2 PM, aveugle, fait écran) |
 
 Créer un nouveau personnage : voir [docs/creation_personnage.md](docs/creation_personnage.md)
 (checklist, étapes, critères d'équilibrage, modèle de fiche).
