@@ -93,6 +93,8 @@ static func range_text(spell: SpellData) -> String:
 		parts.append("en ligne")
 	if spell.area == SpellData.AreaShape.CROSS:
 		parts.append("zone en croix" if spell.range_max > 0 else "autour de soi")
+	elif spell.area == SpellData.AreaShape.SQUARE:
+		parts.append("zone carrée %d×%d" % [spell.area_size * 2 + 1, spell.area_size * 2 + 1])
 	if spell.target_rule == SpellData.TargetRule.EMPTY:
 		parts.append("case libre")
 	elif spell.target_rule == SpellData.TargetRule.FIGHTER:

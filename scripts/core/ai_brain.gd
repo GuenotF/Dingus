@@ -14,6 +14,9 @@ const MOVE_MARGIN := 0.5
 const OPEN_SHOT_VALUE := 12.0
 const OPEN_PATH_VALUE := 10.0
 const SHORTCUT_VALUE := 6.0
+## Un ennemi pris dans la fumée ne voit plus rien et avance à peine ; se placer dans la sienne coûte autant.
+const SMOKE_ENEMY_VALUE := 12.0
+const SMOKE_STANDING_PENALTY := 10.0
 
 
 static func next_action(state: CombatState) -> Dictionary:
@@ -120,6 +123,14 @@ static func score_cast(state: CombatState, me: Fighter, origin: Vector2i, spell:
 						score += (6.0 if kiting else 3.0) * -avg
 					elif v.team == me.team and avg > 0:
 						score += 5.0 * avg if _nearest_enemy_distance(state, me, origin) > 1 else 0.5
+			EffectData.Kind.STEAL_PA:
+				for v in victims:
+					if v.team != me.team and v != me:
+						# Un PA volé : un de moins pour lui, un de plus pour nous.
+						score += 8.0 * avg
+			EffectData.Kind.SMOKE:
+				for v in victims:
+					score += SMOKE_ENEMY_VALUE if v.team != me.team else -SMOKE_ENEMY_VALUE
 			EffectData.Kind.DASH:
 				var d := _nearest_enemy_distance(state, me, target)
 				if me.preferred_range() <= 1:
@@ -212,6 +223,8 @@ static func position_score(state: CombatState, me: Fighter, cell: Vector2i) -> f
 		# ne doit pas donner l'impression d'être déjà au contact (sinon l'IA reste plantée).
 		d = maxi(d, _nearest_enemy_walk(state, me, cell))
 	var score := -absf(d - pref) * 1.5
+	if state.is_smoked(cell):
+		score -= SMOKE_STANDING_PENALTY # aveugle et ralenti : on n'y reste pas
 	if pref > 1:
 		if d <= 1:
 			score -= 6.0 # un personnage à distance fuit le corps à corps

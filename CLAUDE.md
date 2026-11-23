@@ -50,6 +50,9 @@ code si besoin, captures, équilibrage (critères chiffrés), commit.
 - **Cartes** : prairie, lac, village, désert (destructibles : rochers, colonnes), « Le barrage » (proto autour des destructibles).
   Les cartes désert et barrage sont générées par `tools/build_desert_map.gd` et `tools/build_barricade_map.gd` ;
   **relancer un générateur écrase la scène** (réglages faits à la main dans l'éditeur perdus).
+- **Fumée** (Fumigène du Gobelin) : `CombatState.smokes` (nuages, durée 1 tour, expiration au début du tour du lanceur), `has_view` / `smoke_blocks_view`
+  (aveugle depuis une case de fumée, écran pour les cases intermédiaires), −2 PM au début du tour dans le nuage ; effets `SMOKE` et `STEAL_PA`,
+  zone `SQUARE` ; affichage `scripts/view/smoke_view.gd`. L'IA l'évalue dans `score_cast` / `position_score`.
 - **Chiffres flottants** : `FloatingText` empile les chiffres proches (dégâts simultanés lisibles).
 - **Police** : Vinque Antique (`assets/fonts/`, licence détenue par l'utilisateur), appliquée partout via `GameConfig`.
 

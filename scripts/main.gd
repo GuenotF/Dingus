@@ -18,6 +18,7 @@ var selected_spell: SpellData = null
 var busy := false # vrai pendant une animation : on ignore les entrées
 var placing_index := 0 # combattant en cours de placement
 var obstacle_view: ObstacleView
+var smoke_view: SmokeView
 ## Pendant qu'un projectile vole, les conséquences du sort (dégâts, poussées, mort...)
 ## sont mises en attente et jouées à l'impact.
 var _deferring := false
@@ -38,6 +39,8 @@ func _ready() -> void:
 	state.fighter_died.connect(_on_fighter_died)
 	state.obstacle_damaged.connect(_on_obstacle_damaged)
 	state.obstacle_destroyed.connect(_on_obstacle_destroyed)
+	state.smoke_added.connect(_on_smoke_added)
+	state.smoke_removed.connect(_on_smoke_removed)
 	state.combat_ended.connect(_on_combat_ended)
 	state.begin_placement()
 	_begin_placement_of(0)
@@ -95,6 +98,10 @@ func _build_scene() -> void:
 	obstacle_view = ObstacleView.new()
 	add_child(obstacle_view)
 	obstacle_view.setup(state.grid, decor, map.ground_detail(), entities, self)
+
+	# Nuages de fumée (Fumigène du Gobelin) : au-dessus des personnages.
+	smoke_view = SmokeView.new()
+	add_child(smoke_view)
 
 	for f in state.fighters:
 		var view := FighterView.new()
@@ -395,6 +402,16 @@ func _on_spell_cast(caster: Fighter, spell: SpellData, target: Vector2i, cells: 
 		board.flash(cells)
 		await get_tree().create_timer(0.5, false).timeout
 	_set_busy(false)
+
+
+func _on_smoke_added(cells: Array[Vector2i]) -> void:
+	if _defer(func() -> void: smoke_view.add_cells(cells)):
+		return
+	smoke_view.add_cells(cells)
+
+
+func _on_smoke_removed(cells: Array[Vector2i]) -> void:
+	smoke_view.remove_cells(cells)
 
 
 ## Voix du combattant (CharacterVoice de sa classe), ou null.

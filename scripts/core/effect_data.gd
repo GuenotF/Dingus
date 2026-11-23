@@ -12,6 +12,8 @@ enum Kind {
 	MOD_PM, ## Ajoute min..max PM (négatif = retrait) pendant `duration` tours.
 	MOD_PA, ## Ajoute min..max PA (négatif = retrait) pendant `duration` tours.
 	DRAIN, ## Comme DAMAGE, et le lanceur récupère la moitié des PV réellement retirés (vol de vie).
+	STEAL_PA, ## Vol de PA : la cible perd min..max PA pendant `duration` tours, le lanceur les gagne tout de suite.
+	SMOKE, ## Pose un nuage de fumée sur la zone du sort pendant un tour (voir CombatState : ralentit, aveugle, fait écran).
 }
 
 @export var kind: Kind = Kind.DAMAGE
@@ -58,4 +60,8 @@ func describe() -> String:
 			return "%+d PA (%d t.)" % [min_value, duration]
 		Kind.DRAIN:
 			return "%s dégâts, vol de vie %d %%" % [amount, roundi(CombatState.DRAIN_RATIO * 100.0)]
+		Kind.STEAL_PA:
+			return "vole %s PA (%d t.)" % [amount, duration]
+		Kind.SMOKE:
+			return "fumée 1 tour : −%d PM, aveugle" % CombatState.SMOKE_PM_MALUS
 	return ""

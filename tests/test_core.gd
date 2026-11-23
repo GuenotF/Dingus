@@ -38,6 +38,10 @@ func _init() -> void:
 	_test_desert_destructibles()
 	_test_ai_destructibles()
 	_test_barricade_map()
+	_test_steal_pa()
+	_test_square_area()
+	_test_smoke()
+	_test_goblin_ai_finishes()
 	print("Tests terminés : %s" % ("OK" if _failures == 0 else "%d échec(s)" % _failures))
 	quit(1 if _failures > 0 else 0)
 
@@ -731,3 +735,96 @@ func _first_ai_cast(state: CombatState) -> Dictionary:
 			_:
 				return {}
 	return {}
+
+
+# --- Gobelin : vol de PA, zone carrée, fumée -------------------------------------
+
+func _test_steal_pa() -> void:
+	var fx: Array[EffectData] = [EffectData.make(K.STEAL_PA, 1, EffectData.SAME_AS_MIN, 1)]
+	var steal := _effect_spell(3, 1, 1, fx)
+	var state := _duel([steal], Vector2i(0, 0), Vector2i(1, 0))
+	var a := state.fighters[0]
+	var b := state.fighters[1]
+	_check(state.try_cast(steal, b.cell), "vol de PA lancé")
+	_check(a.pa == 6 - 3 + 1, "le lanceur gagne le PA volé tout de suite")
+	_check(b.statuses.size() == 1, "malus de PA posé sur la victime")
+	state.end_turn()
+	_check(b.pa == 5, "la victime a 1 PA de moins à son tour")
+	state.end_turn()
+	_check(b.statuses.is_empty(), "le malus expire après le tour de la victime")
+	state.end_turn()
+	_check(b.pa == 6, "PA rendus au tour suivant")
+
+
+func _test_square_area() -> void:
+	var s := SpellData.new()
+	s.area = SpellData.AreaShape.SQUARE
+	s.area_size = 1
+	var cells := s.affected_cells(Vector2i(4, 4))
+	_check(cells.size() == 9 and cells.has(Vector2i(3, 3)) and cells.has(Vector2i(5, 5)) and cells.has(Vector2i(4, 4)), "zone carrée 3×3 centrée sur la case visée")
+	_check(not cells.has(Vector2i(6, 4)) and not cells.has(Vector2i(4, 2)), "zone carrée : rien au-delà du rayon")
+
+
+func _test_smoke() -> void:
+	var fx: Array[EffectData] = [EffectData.make(K.SMOKE, 0)]
+	var smoke := _effect_spell(3, 2, 6, fx)
+	smoke.area = SpellData.AreaShape.SQUARE
+	smoke.area_size = 1
+	smoke.cooldown = 3
+	var arrow := _spell(1, 1, 8, true, 10, 5)
+	var state := _duel([smoke, arrow], Vector2i(0, 1), Vector2i(5, 1))
+	var a := state.fighters[0]
+	var b := state.fighters[1]
+	_check(state.try_cast(smoke, Vector2i(4, 1)), "fumigène lancé")
+	_check(state.is_smoked(Vector2i(3, 0)) and state.is_smoked(Vector2i(5, 2)) and not state.is_smoked(Vector2i(2, 1)), "nuage 3×3 centré sur la case visée")
+	_check(state.is_smoked(b.cell), "B est dans la fumée")
+	_check(a.cooldown_left(smoke) == 3, "recharge du fumigène : 3 tours")
+	# Depuis l'extérieur : on voit jusqu'au bord du nuage, pas à travers.
+	var zone := state.cells_in_range(arrow)
+	_check(zone[Vector2i(2, 1)] and zone[Vector2i(3, 1)], "hors du nuage : on voit la case d'avant et le bord du nuage")
+	_check(not zone[Vector2i(5, 1)], "le nuage fait écran derrière lui")
+	_check(not state.smoke_blocks_view(Vector2i(5, 1), Vector2i(5, 1)), "on peut toujours viser sa propre case")
+	# Dedans : ralenti et aveugle.
+	state.end_turn()
+	_check(b.pm == 1 and b.statuses.size() == 1, "commencer son tour dans la fumée : −2 PM")
+	var blind := state.cells_in_range(arrow)
+	var any_visible := false
+	for cell in blind:
+		if blind[cell]:
+			any_visible = true
+	_check(not any_visible, "dans la fumée : aucune case visible")
+	_check(not state.can_cast_at(arrow, Vector2i(4, 1)), "dans la fumée : même une case voisine est refusée")
+	# Le nuage dure un tour : il disparaît au début du tour de son lanceur.
+	state.end_turn()
+	_check(state.smokes.is_empty() and not state.is_smoked(b.cell), "la fumée disparaît au début du tour du lanceur")
+	_check(a.pm == 3, "le lanceur n'est pas ralenti par sa propre fumée")
+	state.end_turn()
+	_check(b.pm == 3 and b.statuses.is_empty(), "le ralentissement ne dure qu'un tour")
+
+
+func _test_goblin_ai_finishes() -> void:
+	for opponent in ["guerrier", "archer", "mage_feu", "chevalier_maudit"]:
+		var grid := BattleGrid.new(MapLayouts.TEST_SIZE.x, MapLayouts.TEST_SIZE.y, MapLayouts.TEST_OBSTACLES)
+		var state := CombatState.new(grid, 5)
+		state.add_fighter(Fighter.new(0, "G", 0, MapLayouts.TEST_SPAWNS[0], load("res://data/classes/gobelin.tres")))
+		state.add_fighter(Fighter.new(1, "O", 1, MapLayouts.TEST_SPAWNS[1], load("res://data/classes/%s.tres" % opponent)))
+		state.start()
+		var actions := 0
+		var smoked := false
+		while not state.is_over and state.turn_number <= 40 and actions < 2000:
+			var action := AiBrain.next_action(state)
+			actions += 1
+			var ok := true
+			match action.type:
+				"move":
+					ok = state.try_move(action.cell)
+				"cast":
+					ok = state.try_cast(action.spell, action.cell)
+				_:
+					state.end_turn()
+			_check(ok, "gobelin contre %s : action IA valide (%s)" % [opponent, action.type])
+			if not ok:
+				state.end_turn()
+			smoked = smoked or not state.smokes.is_empty()
+		_check(state.is_over, "gobelin contre %s : combat terminé (tour %d)" % [opponent, state.turn_number])
+		print("  gobelin contre %s : gagnant %d au tour %d, fumée utilisée : %s" % [opponent, state.winner_team, state.turn_number, smoked])

@@ -3,7 +3,7 @@ extends Resource
 ## Définition d'un sort (data/spells/*.tres), modifiable dans l'inspecteur de Godot.
 ## Le comportement vient de la liste `effects` : on combine des effets sans écrire de code.
 
-enum AreaShape { SINGLE, CROSS }
+enum AreaShape { SINGLE, CROSS, SQUARE }
 enum TargetRule {
 	ANY, ## N'importe quelle case.
 	EMPTY, ## Case libre uniquement (ex. bond).
@@ -59,6 +59,12 @@ func affected_cells(center: Vector2i) -> Array[Vector2i]:
 		for dist in range(1, area_size + 1):
 			for dir in BattleGrid.DIRECTIONS:
 				cells.append(center + dir * dist)
+	elif area == AreaShape.SQUARE:
+		# Carré centré sur la case visée : `area_size` = nombre de cases autour du centre (1 → 3×3).
+		cells.clear()
+		for dy in range(-area_size, area_size + 1):
+			for dx in range(-area_size, area_size + 1):
+				cells.append(center + Vector2i(dx, dy))
 	return cells
 
 
@@ -74,6 +80,8 @@ func describe() -> String:
 		parts.append(e.describe())
 	if area == AreaShape.CROSS:
 		parts.append("zone en croix" if affects_caster or range_max > 0 else "autour de soi")
+	elif area == AreaShape.SQUARE:
+		parts.append("zone carrée %d×%d" % [area_size * 2 + 1, area_size * 2 + 1])
 	if line_only:
 		parts.append("en ligne")
 	if not needs_line_of_sight and range_max > 0:

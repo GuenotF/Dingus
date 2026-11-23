@@ -10,6 +10,8 @@ enum Phase { SETUP, PLACEMENT, FIGHT, OVER }
 const PUSH_DAMAGE_PER_CELL := 8
 ## Part des dégâts d'un effet DRAIN que le lanceur récupère en PV.
 const DRAIN_RATIO := 0.5
+## PM perdus par un combattant qui commence son tour dans un nuage de fumée.
+const SMOKE_PM_MALUS := 2
 
 signal fighter_placed(fighter: Fighter)
 signal turn_started(fighter: Fighter, turn_number: int)
@@ -24,6 +26,9 @@ signal fighter_died(fighter: Fighter)
 signal obstacle_damaged(cell: Vector2i, amount: int, hp_left: int)
 signal obstacle_destroyed(cell: Vector2i)
 signal combat_ended(winner_team: int)
+## Un nuage de fumée apparaît / disparaît (cases concernées).
+signal smoke_added(cells: Array[Vector2i])
+signal smoke_removed(cells: Array[Vector2i])
 
 var grid: BattleGrid
 var fighters: Array[Fighter] = []
@@ -35,6 +40,9 @@ var placement_zones: Array = []
 ## Générateur à graine : le serveur et les clients tireront les mêmes valeurs.
 var rng := RandomNumberGenerator.new()
 var _active_index: int = -1
+## Nuages de fumée en cours : { "cells": Array[Vector2i], "owner": Fighter }.
+## Un nuage dure un tour : il disparaît au début du tour de son lanceur.
+var smokes: Array[Dictionary] = []
 
 var is_over: bool:
 	get:
@@ -213,8 +221,8 @@ func cells_in_range_from(spell: SpellData, caster: Fighter, origin: Vector2i, ap
 					continue
 				if spell.target_rule == SpellData.TargetRule.FIGHTER and occupant == null:
 					continue
-			var has_view := not spell.needs_line_of_sight or grid.has_line_of_sight(origin, cell, blockers)
-			result[cell] = has_view
+			var visible := not spell.needs_line_of_sight or has_view(origin, cell, blockers)
+			result[cell] = visible
 	return result
 
 
@@ -315,6 +323,9 @@ func try_cast(spell: SpellData, target: Vector2i) -> bool:
 		if effect.kind == EffectData.Kind.DASH:
 			_apply_dash(caster, target)
 			continue
+		if effect.kind == EffectData.Kind.SMOKE:
+			_add_smoke(caster, cells)
+			continue
 		if effect.kind == EffectData.Kind.DAMAGE or effect.kind == EffectData.Kind.DRAIN:
 			for cell in obstacle_cells:
 				_damage_obstacle(cell, rng.randi_range(effect.min_value, effect.max_value))
@@ -354,6 +365,16 @@ func _apply_effect(effect: EffectData, caster: Fighter, victim: Fighter, spell: 
 				_damage(victim, preview.blocked * PUSH_DAMAGE_PER_CELL)
 				# Le choc abîme aussi l'obstacle destructible contre lequel on a été projeté.
 				_damage_obstacle(victim.cell + dir, preview.blocked * PUSH_DAMAGE_PER_CELL)
+		EffectData.Kind.STEAL_PA:
+			if victim == caster:
+				return
+			var stolen := maxi(1, rng.randi_range(effect.min_value, effect.max_value))
+			# La victime est forcément inactive (le lanceur joue) : le malus pèse sur son prochain tour.
+			victim.statuses.append(StatusEffect.new(EffectData.Kind.MOD_PA, -stolen, maxi(1, effect.duration), spell.spell_name, false))
+			status_changed.emit(victim)
+			if caster.is_alive():
+				caster.pa += stolen
+				status_changed.emit(caster)
 		EffectData.Kind.MOD_PM, EffectData.Kind.MOD_PA:
 			var amount := rng.randi_range(effect.min_value, effect.max_value)
 			var on_active := victim == active_fighter()
@@ -365,6 +386,69 @@ func _apply_effect(effect: EffectData, caster: Fighter, victim: Fighter, spell: 
 				else:
 					victim.pa = maxi(0, victim.pa + amount)
 			status_changed.emit(victim)
+
+
+# --- Fumée ------------------------------------------------------------------------
+
+## Pose un nuage sur ces cases (les obstacles pleins n'en gardent pas).
+func _add_smoke(owner: Fighter, cells: Array[Vector2i]) -> void:
+	var covered: Array[Vector2i] = []
+	for cell in cells:
+		if not grid.is_obstacle(cell):
+			covered.append(cell)
+	if covered.is_empty():
+		return
+	smokes.append({"cells": covered, "owner": owner})
+	smoke_added.emit(covered)
+
+
+func is_smoked(cell: Vector2i) -> bool:
+	for s in smokes:
+		if s.cells.has(cell):
+			return true
+	return false
+
+
+## Toutes les cases actuellement sous la fumée.
+func smoke_cells() -> Array[Vector2i]:
+	var result: Array[Vector2i] = []
+	for s in smokes:
+		for cell in s.cells:
+			if not result.has(cell):
+				result.append(cell)
+	return result
+
+
+## La fumée coupe-t-elle la vue de `from` vers `to` ? Aveugle depuis une case de fumée
+## (sauf pour viser sa propre case) ; une case de fumée entre les deux fait écran
+## (les extrémités ne comptent pas : une cible dans la fumée reste visible depuis une case voisine).
+func smoke_blocks_view(from: Vector2i, to: Vector2i) -> bool:
+	if smokes.is_empty() or from == to:
+		return false
+	if is_smoked(from):
+		return true
+	for cell in BattleGrid.line_cells(from, to):
+		if cell != from and cell != to and is_smoked(cell):
+			return true
+	return false
+
+
+## Ligne de vue complète : la grille (obstacles, combattants) et la fumée.
+func has_view(from: Vector2i, to: Vector2i, blockers: Array[Vector2i] = []) -> bool:
+	return grid.has_line_of_sight(from, to, blockers) and not smoke_blocks_view(from, to)
+
+
+## Les nuages du lanceur qui commence son tour disparaissent (et ceux dont le lanceur est mort).
+func _expire_smokes(starting: Fighter) -> void:
+	if smokes.is_empty():
+		return
+	var kept: Array[Dictionary] = []
+	for s in smokes:
+		if s.owner == starting or not s.owner.is_alive():
+			smoke_removed.emit(s.cells)
+		else:
+			kept.append(s)
+	smokes = kept
 
 
 func _apply_dash(caster: Fighter, target: Vector2i) -> void:
@@ -465,6 +549,11 @@ func end_turn() -> void:
 	if _active_index == 0 or turn_number == 0:
 		turn_number += 1
 	var f := active_fighter()
+	_expire_smokes(f)
 	f.start_turn()
+	if is_smoked(f.cell):
+		# Commencer son tour dans la fumée ralentit, pour ce tour seulement.
+		f.statuses.append(StatusEffect.new(EffectData.Kind.MOD_PM, -SMOKE_PM_MALUS, 1, "Fumigène"))
+		f.pm = maxi(0, f.pm - SMOKE_PM_MALUS)
 	status_changed.emit(f)
 	turn_started.emit(f, turn_number)

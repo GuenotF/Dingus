@@ -2,10 +2,10 @@
 
 [ext_resource type="Script" path="res://scripts/core/class_data.gd" id="1_gobc"]
 [ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="2_gobc"]
-[ext_resource type="Resource" path="res://data/spells/gobelin_estoc.tres" id="3_gobc"]
-[ext_resource type="Resource" path="res://data/spells/gobelin_hache.tres" id="4_gobc"]
-[ext_resource type="Resource" path="res://data/spells/gobelin_vol.tres" id="5_gobc"]
-[ext_resource type="Resource" path="res://data/spells/gobelin_backflip.tres" id="6_gobc"]
+[ext_resource type="Resource" path="res://data/spells/gobelin_vol.tres" id="3_gobc"]
+[ext_resource type="Resource" path="res://data/spells/gobelin_coup_bas.tres" id="4_gobc"]
+[ext_resource type="Resource" path="res://data/spells/gobelin_petard.tres" id="5_gobc"]
+[ext_resource type="Resource" path="res://data/spells/gobelin_fumigene.tres" id="6_gobc"]
 [ext_resource type="Resource" path="res://data/sprites/gobelin.tres" id="7_gobc"]
 [ext_resource type="Texture2D" path="res://assets/ui/portraits/gobelin.png" id="99_portrait"]
 
@@ -13,7 +13,7 @@
 script = ExtResource("1_gobc")
 class_label = "Gobelin"
 color = Color(0.45, 0.65, 0.2, 1)
-description = "Harceleur vif et fragile : frappe, vole des PA, s'esquive"
+description = "Pillard fourbe : vole des PA, enfume, repousse au pétard"
 max_hp = 110
 max_pm = 4
 preferred_range = 1

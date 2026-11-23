@@ -1,11 +1,8 @@
-# Gobelin — le Pillard (refonte en attente de validation)
-
-> État du code : le jeu contient encore le premier jet (Estoc, Lancer de hache, Vol à la tire, Backflip). Cette fiche décrit la refonte
-> « Pillard » décidée le 23/11 ; rien n'est codé tant que l'utilisateur n'a pas validé les règles ci-dessous.
+# Gobelin — le Pillard
 
 **Identité** : pillard fourbe et fragile. Il n'écrase pas l'adversaire, il l'épuise : lui vole des PA, le ralentit, l'aveugle dans la fumée,
 le repousse à coups de pétard. Servira plus tard d'ennemi de campagne / PVE (et se marie bien avec les coffres à bonus).
-**Skin** : Goblin 01 (pack *2D Orcs and Goblins - TopDown - V1.0*). **Distance préférée (IA)** : 1 (à réviser après la refonte).
+**Skin** : Goblin 01 (pack *2D Orcs and Goblins - TopDown - V1.0*). **Distance préférée (IA)** : 1 (à réviser à l'équilibrage).
 **Stats** (provisoires) : PV 110 / PA 6 / PM 4
 
 **Animations de base** : idle = Idle, walk = Walk, hit = TakeDamage 1, die = Die 1
@@ -14,42 +11,37 @@ le repousse à coups de pétard. Servira plus tard d'ennemi de campagne / PVE (e
 |---|------|----|--------|--------|---------|-----------|---------------------|
 | 1 | Vol à la tire | 3 | 1 | 6–8 dégâts ; la cible perd 1 PA (1 tour) **et le gobelin gagne 1 PA tout de suite** | 1/tour, recharge 2 | Attack 4 (bond d'attaque) | — |
 | 2 | Coup bas | 3 | 1 | 8–10 dégâts, −2 PM (1 tour) | 1/tour | Attack 3 (à confirmer en jeu) | — |
-| 3 | Pétard | 2 | 1–4, ligne de vue | 5–7 dégâts, repousse de 2 (collision = dégâts de poussée habituels) | 2/tour | Attack 1 (lancer) | pétard lancé (à dessiner) / explosion (effet de feu existant) |
-| 4 | Fumigène | 3 | 2–5, sans ligne de vue | nuage 2×2 cases pendant 1 tour : ralentit, aveugle (dedans), fait écran (voir règles) | 1/tour, recharge 2 | Attack 1 (lancer) | nuage gris (à dessiner) |
+| 3 | Pétard | 2 | 1–4, ligne de vue | 5–7 dégâts, repousse de 2 (collision = dégâts de poussée habituels) | 2/tour | Attack 1 (lancer) | pétard qui tourne (dessiné) / petite explosion (feu du pack, réduite) |
+| 4 | Fumigène | 3 | 2–5, sans ligne de vue | nuage 3×3 centré sur la case visée, 1 tour (règles ci-dessous) | 1/tour, recharge 3 | Attack 1 (lancer) | bouffées grises dessinées par le code (`SmokeView`) |
 
-Retirés par rapport au premier jet : Estoc, Lancer de hache, Backflip (le pétard et le Coup bas donnent la distance ; plus de retraite).
-Assets déjà créés mais inutilisés après la refonte : planches `attack2` et `backflip`, projectile `hache`, icônes Estoc / hache / Backflip.
+Retirés du premier jet : Estoc, Lancer de hache, Backflip. Leurs données (`data/spells/gobelin_estoc|hache|backflip.tres`), la hache
+(`assets/effects/axes/`) et les icônes restent dans le dépôt, inutilisées, pour d'autres personnages (orcs, gobelins ennemis).
 
-## Règles du fumigène (à valider)
+## Règles du fumigène (validées le 23/11)
 
-Demandé : ralentit ; bloque la ligne de vue ; aveugle totalement un combattant qui est dedans ; fait écran pour un combattant qui est
-dehors ; 1 tour ; carré de 2 cases de côté ; recharge 2. Interprétation retenue, à corriger si besoin :
-1. **Zone** : carré 2×2 dont la case visée est le coin haut-gauche (cases x..x+1, y..y+1). Il peut empiéter sur obstacles et combattants.
-2. **Durée** : posé pendant le tour du gobelin, il dure jusqu'au début du tour suivant du gobelin, donc il couvre tout le tour de l'ennemi.
-3. **Ralentissement** : un combattant dans le nuage au début de son tour a −2 PM ce tour-là (le gobelin aussi s'il y reste).
-4. **Aveugle (dedans)** : depuis une case du nuage, on ne peut lancer aucun sort qui demande une ligne de vue (même au contact). Restent
-   permis : les sorts sans ligne de vue (ex. Pluie de feu, Fumigène) et les sorts sur soi. Vaut pour tout le monde, gobelin compris.
-5. **Écran (dehors)** : une case du nuage située entre le lanceur et la cible coupe la ligne de vue (comme un obstacle). Une cible *dans*
-   le nuage reste visible depuis une case voisine hors du nuage (on ne compte que les cases intermédiaires).
-6. **Cumul** : un nouveau nuage pendant que l'ancien dure ne s'empile pas (la recharge de 2 l'empêche de toute façon).
+1. **Zone** : carré 3×3 centré sur la case visée (portée 2 à 5, pas de ligne de vue nécessaire). Les obstacles pleins n'en gardent pas.
+2. **Durée** : 1 tour. Posé pendant le tour du gobelin, il disparaît au début de son tour suivant : il couvre tout le tour de l'ennemi.
+3. **Ralentissement** : un combattant qui **commence son tour** dans le nuage a −2 PM pour ce tour (`CombatState.SMOKE_PM_MALUS`).
+4. **Aveugle (dedans)** : depuis une case du nuage, aucun sort qui demande une ligne de vue (même au contact). Restent permis : les sorts
+   sans ligne de vue (Fumigène...) et ceux sur sa propre case. Vaut pour tout le monde, gobelin compris.
+5. **Écran (dehors)** : une case du nuage entre le lanceur et la cible coupe la ligne de vue (on ne compte pas les extrémités : une cible
+   *dans* le nuage reste visible depuis une case voisine hors du nuage).
+6. Recharge de 3 tours : un nuage tous les trois tours au mieux (un tour sur trois, l'ennemi joue dans la fumée).
 
-Conséquences à surveiller à l'équilibrage : un ennemi de mêlée pris dans le nuage ne peut plus frapper tant qu'il n'en est pas sorti, avec
-−2 PM pour en sortir : le sort peut neutraliser presque tout un tour. Si c'est trop fort : réduire la durée, le ralentissement, ou
-laisser frapper au contact.
+**Risque d'équilibrage** : un ennemi de mêlée pris dans le nuage ne peut plus frapper tant qu'il n'en est pas sorti, avec −2 PM pour en
+sortir. Leviers si c'est trop fort : ralentissement, recharge, ou permettre de frapper au contact.
 
-## Ce que ça demande en code (estimation)
+## Mise en œuvre (code)
 
-- **Nouvel effet « vol de PA »** (cible −1 PA, lanceur +1 PA immédiat) + évaluation par l'IA. Petit.
-- **Nouvelle forme de zone** carré 2×2 (`SpellData.AreaShape`). Petit.
-- **Nuages de fumée** dans `CombatState` (cases + durée), branchés sur la ligne de vue (`cells_in_range_from`) et sur le ralentissement
-  de début de tour, sans toucher à `view/`. Moyen.
-- **IA** : valoriser le fumigène (enfermer un ennemi de mêlée, se cacher d'un tireur), éviter d'y entrer soi-même ; le Pétard comme
-  outil de dégagement. Moyen.
-- **Affichage** : nuage (sprites dessinés par script, comme la hache), pétard, explosion ; indicateur sur un combattant aveuglé. Moyen.
-- **Tests** : nuage et ligne de vue, aveuglement, durée, ralentissement, vol de PA, zone 2×2.
+- `EffectData.Kind.STEAL_PA` (vol de PA) et `SMOKE` ; `SpellData.AreaShape.SQUARE` (`area_size` = rayon, 1 → 3×3).
+- `CombatState` : `smokes`, signaux `smoke_added` / `smoke_removed`, `is_smoked`, `smoke_blocks_view`, `has_view` (grille + fumée), expiration au
+  début du tour du lanceur, ralentissement au début du tour.
+- IA : vol de PA et fumigène notés dans `score_cast`, se tenir dans la fumée pénalisé dans `position_score` (l'ennemi aveuglé cherche à en sortir).
+- Affichage : `scripts/view/smoke_view.gd` (sprites générés par le code), branché dans `main.gd`.
+- Tests : `_test_steal_pa`, `_test_square_area`, `_test_smoke`, `_test_goblin_ai_finishes` dans `tests/test_core.gd`.
 
-**Intentions** : 6 PA = Vol (3, +1 PA rendu) puis Coup bas (3) puis un Pétard (2) ≈ 3 sorts par tour au contact ; un tour sur deux Fumigène sur
-l'ennemi puis Pétards pour le garder à distance pendant qu'il est aveugle.
+**Intentions** : Vol à la tire (3 PA, +1 PA rendu) puis Coup bas (3 PA) puis un Pétard (2 PA) au contact, ou un Fumigène sur l'ennemi puis des
+Pétards pour le garder à distance pendant qu'il est aveugle et ralenti.
 
 ## Mise en place (23/11)
 

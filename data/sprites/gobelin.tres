@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" path="res://assets/characters/gobelin/attack4.png" id="8_a4"]
 [ext_resource type="Texture2D" path="res://assets/characters/gobelin/backflip.png" id="9_bf"]
 [ext_resource type="Script" path="res://scripts/view/character_sprites.gd" id="10_gobs"]
+[ext_resource type="Texture2D" path="res://assets/characters/gobelin/attack3.png" id="11_a3"]
 
 [sub_resource type="Resource" id="Resource_idle"]
 script = ExtResource("1_gobs")
@@ -47,6 +48,12 @@ name = "attack2"
 texture = ExtResource("7_a2")
 fps = 26.0
 
+[sub_resource type="Resource" id="Resource_a3"]
+script = ExtResource("1_gobs")
+name = "attack3"
+texture = ExtResource("11_a3")
+fps = 26.0
+
 [sub_resource type="Resource" id="Resource_a4"]
 script = ExtResource("1_gobs")
 name = "attack4"
@@ -68,4 +75,4 @@ feet_up_left = Vector2(63, 89)
 feet_up_right = Vector2(64, 88)
 height = 42.0
 scale = 1.4
-animations = Array[ExtResource("1_gobs")]([SubResource("Resource_idle"), SubResource("Resource_walk"), SubResource("Resource_hit"), SubResource("Resource_die"), SubResource("Resource_a1"), SubResource("Resource_a2"), SubResource("Resource_a4"), SubResource("Resource_jump")])
+animations = Array[ExtResource("1_gobs")]([SubResource("Resource_idle"), SubResource("Resource_walk"), SubResource("Resource_hit"), SubResource("Resource_die"), SubResource("Resource_a1"), SubResource("Resource_a2"), SubResource("Resource_a3"), SubResource("Resource_a4"), SubResource("Resource_jump")])
