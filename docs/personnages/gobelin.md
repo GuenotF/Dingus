@@ -4,7 +4,7 @@
 (lui vole des PA) et se dégage d'un salto arrière. Servira plus tard d'ennemi de campagne / PVE.
 **Skin** : Goblin 01 (pack *2D Orcs and Goblins - TopDown - V1.0*, dossier `Combined/Goblin 01`, version sans ombre dans
 `Seperate shadows and effects/Goblin 01`). Gobelin vert armé d'une hachette.
-**Distance préférée (IA)** : 2 (à confirmer à l'équilibrage).
+**Distance préférée (IA)** : 1 (corps à corps ; était 2 au premier jet, voir Équilibrage).
 
 **Stats** (provisoires) : PV 110 / PA 6 / PM 4
 
@@ -43,4 +43,11 @@ Créé : assets (`assets/characters/gobelin/`, `assets/effects/axes/`, icônes, 
 
 ## Équilibrage
 
-À faire (critères dans `docs/creation_personnage.md`) : `tests/balance_matrix.gd`.
+**Premier jet (23/11, 1600 combats)** : le Gobelin perd 100 % de ses duels (0 % contre le Guerrier, l'Archer, le Mage de feu et
+le Chevalier maudit), combats de 4,6 à 6,5 tours. Un 0 % partout vient du rôle, pas des chiffres.
+Cause (lecture de `ai_brain.gd`, non mesurée) : avec `preferred_range = 2`, l'IA le joue en tireur : elle pénalise le corps à corps
+(−6 sous 2 cases, −4 s'il est à portée de déplacement d'un ennemi) et le fait fuir, alors que son meilleur sort est l'Estoc (portée 1,
+13–15). Il se rabat donc sur le Lancer de hache (9–11, plus faible que la Flèche) et inflige presque rien.
+**Correction** : `preferred_range = 1` (joué comme un combattant de mêlée). Effet de bord à surveiller : pour une classe de mêlée l'IA
+note le Backflip comme un bond *vers* l'ennemi (comme la Charge), pas comme une retraite.
+Les chiffres des sorts n'ont pas été modifiés. À refaire : `tests/balance_matrix.gd -- personnage=Gobelin`.
