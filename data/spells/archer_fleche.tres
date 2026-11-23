@@ -7,8 +7,8 @@
 
 [sub_resource type="Resource" id="Resource_crgk3"]
 script = ExtResource("1_0foqw")
-min_value = 13
-max_value = 15
+min_value = 14
+max_value = 16
 
 [resource]
 script = ExtResource("3_uhv76")

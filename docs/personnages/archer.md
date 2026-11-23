@@ -53,3 +53,10 @@ Les écarts sont très sensibles aux seuils de mise à mort (±1 dégât ou ±5 
 de 20 à 80 %), d'où des réglages fins.
 
 **Mise à jour** (IA de corps à corps révisée avec le Chevalier maudit) : Archer / Guerrier = 46 / 53 ur la Prairie, 85 / 15 ur le lac, 49 / 50 ur la Place du village.
+
+### Équilibrage (23/11, 20 000 combats, matrice complète)
+
+Victoires de l'Archer : Chevalier maudit 28 %, Gobelin 17 %, Guerrier 54 %, Mage de feu 51 % ; moyenne 38 %.
+Il tient contre les tireurs et les lourds, mais les personnages rapides le rattrapent. Cartes : très fort sur le lac contre le Guerrier (90 %).
+
+**Deuxième jet** : 4 PM (au lieu de 3) pour mieux fuir, Flèche 14–16 (au lieu de 13–15). À mesurer.

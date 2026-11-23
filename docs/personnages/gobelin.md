@@ -73,3 +73,10 @@ Lecture : déficit de puissance brute. Le Guerrier fait ≈ 40 par tour (Coup d'
 **Deuxième jet** : PV 120, Vol à la tire 8–10 et recharge 1 (utilisable chaque tour : −1 PA permanent pour l'ennemi, coût net de 2 PA pour
 nous), Coup bas 10–12, Pétard 6–8. Le Fumigène (recharge 3, décidée avec l'utilisateur) et les règles du nuage ne changent pas.
 À mesurer. Si Guerrier et Mage restent très bas : regarder l'IA (garder la distance avec 4 PM, enchaîner Fumigène puis Pétards) avant les chiffres.
+
+### Pillard, deuxième jet mesuré (23/11, 20 000 combats, matrice complète)
+
+Victoires du Gobelin : Archer 83 %, Chevalier maudit 50 %, Guerrier 19 %, Mage de feu 20 % ; moyenne 43 %.
+Il bat les personnages qui ont du mal à fuir et perd contre les deux gros frappeurs. Cartes : Mage de feu 97 % de défaites sur le lac.
+
+**Troisième jet** : PV 135 (135 = Mage de feu). Les autres chiffres ne bougent pas, pour voir si les PV seuls rapprochent le duel du Guerrier et du Mage.
