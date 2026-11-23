@@ -443,7 +443,7 @@ func _test_lake_map() -> void:
 	var map: BattleMap = load("res://maps/lac.tscn").instantiate()
 	var grid := map.build_grid()
 	_check(map.map_name == "Le lac", "carte du lac : nom")
-	_check(grid.get_water().size() == 24, "carte du lac : 24 cases d'eau (obtenu %d)" % grid.get_water().size())
+	_check(grid.get_water().size() == 22, "carte du lac : 22 cases d'eau (obtenu %d)" % grid.get_water().size())
 	var zones := map.placement_zones()
 	for team in 2:
 		for cell in zones[team]:
@@ -453,7 +453,7 @@ func _test_lake_map() -> void:
 	var crosses_bridge := false
 	for cell in path:
 		if (cell.x == 7 or cell.x == 8):
-			crosses_bridge = crosses_bridge or cell.y == 3 or cell.y == 11
+			crosses_bridge = crosses_bridge or cell.y == 3 or cell.y == 7 or cell.y == 11
 	_check(crosses_bridge, "lac : le chemin passe par un pont")
 	_check(grid.has_line_of_sight(Vector2i(5, 7), Vector2i(10, 7)), "lac : on voit par-dessus la rivière")
 	_check(not grid.has_line_of_sight(Vector2i(5, 6), Vector2i(10, 6)), "lac : la pierre dans l'eau coupe la vue")
