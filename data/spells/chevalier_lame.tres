@@ -14,5 +14,7 @@ max_value = 17
 script = ExtResource("2_spl")
 spell_name = "Lame sombre"
 animation = "melee"
+cast_sound = "epee_attaque"
+impact_sound = "epee_impact"
 effects = Array[ExtResource("1_eff")]([SubResource("e0")])
 icon = ExtResource("3_ico")

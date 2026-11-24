@@ -6,12 +6,12 @@ extends Node
 signal changed
 
 const FILE := "user://settings.cfg"
-## Niveau de base du bus « Voix » (voir Sound), auquel s'ajoute le réglage du joueur.
-const VOICE_BASE_DB := -3.0
 
 ## Volumes de 0.0 à 1.0.
 var master_volume := 1.0
 var voice_volume := 1.0
+var music_volume := 1.0
+var sfx_volume := 1.0
 var muted := false
 var fullscreen := false
 ## Particules d'ambiance du fond : 0 aucune, 1 réduites, 2 complètes.
@@ -66,6 +66,16 @@ func set_voice_volume(value: float) -> void:
 	_commit()
 
 
+func set_music_volume(value: float) -> void:
+	music_volume = clampf(value, 0.0, 1.0)
+	_commit()
+
+
+func set_sfx_volume(value: float) -> void:
+	sfx_volume = clampf(value, 0.0, 1.0)
+	_commit()
+
+
 func set_muted(value: bool) -> void:
 	muted = value
 	_commit()
@@ -100,9 +110,11 @@ func apply() -> void:
 	var master := AudioServer.get_bus_index("Master")
 	AudioServer.set_bus_volume_db(master, _to_db(master_volume))
 	AudioServer.set_bus_mute(master, muted)
-	var voice := AudioServer.get_bus_index(Sound.VOICE_BUS)
-	if voice != -1:
-		AudioServer.set_bus_volume_db(voice, VOICE_BASE_DB + _to_db(voice_volume))
+	# Niveau de base de chaque bus (Sound.BUS_BASE_DB) + réglage du joueur.
+	for pair in [[Sound.VOICE_BUS, voice_volume], [Sound.MUSIC_BUS, music_volume], [Sound.SFX_BUS, sfx_volume]]:
+		var bus := AudioServer.get_bus_index(pair[0])
+		if bus != -1:
+			AudioServer.set_bus_volume_db(bus, Sound.BUS_BASE_DB[pair[0]] + _to_db(pair[1]))
 	if mobile:
 		# Sur téléphone : toujours plein écran (géré par le système), seule la taille de l'interface change.
 		get_tree().root.content_scale_factor = UI_SCALES[ui_scale_index]
@@ -127,6 +139,8 @@ func _save() -> void:
 	var cfg := ConfigFile.new()
 	cfg.set_value("audio", "master", master_volume)
 	cfg.set_value("audio", "voice", voice_volume)
+	cfg.set_value("audio", "music", music_volume)
+	cfg.set_value("audio", "sfx", sfx_volume)
 	cfg.set_value("audio", "muted", muted)
 	cfg.set_value("display", "fullscreen", fullscreen)
 	cfg.set_value("display", "particles", particles_level)
@@ -142,6 +156,8 @@ func _load() -> void:
 		return
 	master_volume = clampf(float(cfg.get_value("audio", "master", 1.0)), 0.0, 1.0)
 	voice_volume = clampf(float(cfg.get_value("audio", "voice", 1.0)), 0.0, 1.0)
+	music_volume = clampf(float(cfg.get_value("audio", "music", 1.0)), 0.0, 1.0)
+	sfx_volume = clampf(float(cfg.get_value("audio", "sfx", 1.0)), 0.0, 1.0)
 	muted = bool(cfg.get_value("audio", "muted", false))
 	fullscreen = bool(cfg.get_value("display", "fullscreen", false))
 	scenery_animation = bool(cfg.get_value("display", "scenery_animation", true))

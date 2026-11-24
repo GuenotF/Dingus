@@ -23,6 +23,7 @@ spell_name = "Malédiction"
 pa_cost = 2
 animation = "curse"
 range_max = 4
+cast_sound = "malediction"
 effects = Array[ExtResource("1_eff")]([SubResource("e0"), SubResource("e1")])
 icon = ExtResource("3_ico")
 impact = ExtResource("5_imp")

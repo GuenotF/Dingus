@@ -13,5 +13,7 @@ max_value = 22
 script = ExtResource("2_jiojc")
 spell_name = "Coup d'épée"
 animation = "melee"
+cast_sound = "epee_attaque"
+impact_sound = "epee_impact"
 effects = Array[ExtResource("1_jvyc3")]([SubResource("Resource_s7mkm")])
 icon = ExtResource("2_s7mkm")

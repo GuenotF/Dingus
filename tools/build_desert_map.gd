@@ -190,6 +190,8 @@ func _init() -> void:
 	root.name = "DesertMap"
 	root.set_script(load("res://scripts/map/battle_map.gd"))
 	root.set("map_name", "Ruines du désert")
+	root.set("ambience_sound", "vent")
+	root.set("footstep_sound", "pas_terre")
 	root.set("description", "Une allée pavée mène au sphinx, bordée de colonnes ; une oasis à l'est, quelques rochers : des abris au centre, des tirs dégagés ailleurs.")
 
 	var ground := _layer(root, "Sol", tileset)

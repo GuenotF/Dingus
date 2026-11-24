@@ -32,6 +32,7 @@ var _touch_hover := NO_CELL
 ## Mode démo (fond animé de l'écran titre) : IA contre IA, sans HUD ni entrées.
 ## À régler avant d'ajouter la scène à l'arbre ; sinon la partie vient de GameConfig.
 var demo := false
+var _combat_started := false # premier tour joué (son de début de combat)
 ## Partie de démo : « map_path » (String) et « classes » (Array de ClassData, un par joueur).
 var demo_setup: Dictionary = {}
 ## Au-delà, la démo s'arrête (combat qui s'éternise).
@@ -57,6 +58,9 @@ func _ready() -> void:
 	state.smoke_added.connect(_on_smoke_added)
 	state.smoke_removed.connect(_on_smoke_removed)
 	state.combat_ended.connect(_on_combat_ended)
+	if not demo:
+		Sound.play_music("combat")
+		Sound.play_ambience(map.ambience_sound)
 	state.begin_placement()
 	_begin_placement_of(0)
 
@@ -456,6 +460,11 @@ func _on_turn_started(fighter: Fighter, turn_number: int) -> void:
 	if demo and turn_number > DEMO_MAX_TURNS:
 		demo_finished.emit()
 		return
+	if not _combat_started:
+		_combat_started = true
+		Sound.play_sfx("debut_combat")
+	elif not is_ai(fighter):
+		Sound.play_sfx("debut_tour") # c'est à un joueur humain de jouer
 	if turn_number == 1:
 		Sound.play_voice(_voice(fighter), "greet", fighter.id) # chacun se présente à son premier tour
 	selected_spell = null
@@ -472,13 +481,25 @@ func _on_fighter_moved(fighter: Fighter, path: Array[Vector2i]) -> void:
 	_set_busy(true)
 	var view: FighterView = fighter_views[fighter.id]
 	view.play_move(path)
+	_play_footsteps(path.size())
 	await view.move_finished
 	_set_busy(false)
+
+
+## Un bruit de pas par case parcourue, au rythme de l'animation de marche.
+func _play_footsteps(steps: int) -> void:
+	if steps <= 0:
+		return
+	var tween := create_tween()
+	for i in steps:
+		tween.tween_callback(Sound.play_sfx.bind(map.footstep_sound))
+		tween.tween_interval(FighterView.STEP_DURATION)
 
 
 func _on_spell_cast(caster: Fighter, spell: SpellData, target: Vector2i, cells: Array[Vector2i]) -> void:
 	var caster_view: FighterView = fighter_views[caster.id]
 	caster_view.play_cast(spell.animation, target)
+	Sound.play_sfx(spell.cast_sound)
 	Sound.play_voice(_voice(caster), CharacterVoice.moment_for_animation(spell.animation), caster.id)
 	_set_busy(true)
 	if spell.projectile is EffectAnimation or spell.impact is EffectAnimation:
@@ -491,11 +512,13 @@ func _on_spell_cast(caster: Fighter, spell: SpellData, target: Vector2i, cells: 
 			await fx.arrived
 		if spell.impact is EffectAnimation:
 			EffectView.impact(self, spell.impact, Iso.cell_to_world(target))
+		Sound.play_sfx(spell.impact_sound)
 		board.flash(cells)
 		_flush_deferred()
 		await get_tree().create_timer(0.45, false).timeout
 	else:
 		board.flash(cells)
+		get_tree().create_timer(0.12, false).timeout.connect(Sound.play_sfx.bind(spell.impact_sound)) # le coup porte
 		await get_tree().create_timer(0.5, false).timeout
 	_set_busy(false)
 
@@ -548,6 +571,7 @@ func _on_fighter_healed(fighter: Fighter, amount: int) -> void:
 		return
 	var view: FighterView = fighter_views[fighter.id]
 	view.play_heal()
+	Sound.play_sfx("soin")
 	FloatingText.spawn(self, view.text_anchor(), "+%d" % amount, Color("6be07a"))
 
 
@@ -578,6 +602,7 @@ func _on_fighter_died(fighter: Fighter) -> void:
 	if _defer(_on_fighter_died.bind(fighter)):
 		return
 	fighter_views[fighter.id].play_death()
+	Sound.play_sfx("chute")
 	Sound.play_voice(_voice(fighter), "death", fighter.id)
 
 
@@ -597,6 +622,13 @@ func _on_combat_ended(winner_team: int) -> void:
 		demo_finished.emit()
 		return
 	hud.show_victory(winner_name)
+	# Jingle : victoire si un joueur humain gagne, défaite si l'IA l'emporte sur un humain.
+	var human_won := false
+	for f in state.fighters:
+		if f.team == winner_team and not is_ai(f):
+			human_won = true
+	Sound.stop_music()
+	Sound.play_sfx("victoire" if human_won else "defaite")
 	for f in state.fighters:
 		if f.team == winner_team and f.is_alive():
 			Sound.play_voice(_voice(f), "victory", f.id)

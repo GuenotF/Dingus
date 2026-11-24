@@ -57,6 +57,8 @@ func _init() -> void:
 	root.set("description", "Une barricade coupe le terrain : pierre aux extrémités, palissades et caisses au milieu. On peut les détruire pour ouvrir des lignes de tir, ou forcer le passage central.")
 	root.set("background_color", Color(0.3, 0.26, 0.2))
 	root.set("ambiance", "pollen")
+	root.set("ambience_sound", "vent")
+	root.set("footstep_sound", "pas_terre")
 
 	var ground := _layer(root, "Sol", tileset)
 	var detail := _layer(root, "SolDetail", tileset)

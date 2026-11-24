@@ -36,6 +36,11 @@ enum TargetRule {
 @export var impact: Resource
 ## Délai (s) entre le début de l'animation du lanceur et le départ du projectile / l'impact.
 @export var cast_delay: float = 0.3
+@export_group("Son")
+## Bruitage au lancement (nom dans assets/audio/sfx/, sans _1.ogg ; vide = aucun).
+@export var cast_sound: String = ""
+## Bruitage à l'impact : à l'arrivée du projectile, sinon juste après le lancement.
+@export var impact_sound: String = ""
 @export_group("Limites")
 @export_range(1, 10) var casts_per_turn: int = 2
 ## Nombre de tours avant de pouvoir relancer (0 = pas de recharge).

@@ -81,6 +81,8 @@ func _init() -> void:
 	root.set("description", "Une clairière bordée de sapins. Bosquets et troncs couchés font des abris qu'on peut abattre ; des rochers solides restent en place.")
 	root.set("background_color", Color(0.2, 0.29, 0.21, 1))
 	root.set("ambiance", "lucioles")
+	root.set("ambience_sound", "foret_nuit")
+	root.set("footstep_sound", "pas_herbe")
 
 	var ground := _layer(root, "Sol", tileset)
 	var detail := _layer(root, "SolDetail", tileset)

@@ -32,6 +32,8 @@ var _map_dots: HBoxContainer
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	Sound.play_music("exploration")
+	Sound.stop_ambience()
 	for path in GameConfig.CLASS_PATHS:
 		_classes.append(load(path))
 	if GameConfig.campaign:

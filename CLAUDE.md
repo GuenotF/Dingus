@@ -63,6 +63,11 @@ code si besoin, captures, équilibrage (critères chiffrés), commit.
   `CAMPAIGN_FIGHTS` (titre, carte, ennemi). `GameConfig.start_campaign()` / `start_versus()` (écran titre) ; en campagne,
   l'écran de préparation (`menu.gd`) impose la carte et l'ennemi (`PlayerPanel.fixed_class`), le joueur 1 est humain.
   Pas encore de progression sauvegardée (un seul combat).
+- **Sons** : autoload `Sound` (`scripts/audio/sound.gd`), bus Voix / Effets / Musique (volumes dans `Settings`).
+  Bruitages `assets/audio/sfx/<nom>_1.ogg, _2...` (variantes tirées au hasard, volume corrigé dans `SFX_TRIM`) ;
+  sorts : `cast_sound` / `impact_sound` de `SpellData` ; cartes : `ambience_sound` et `footstep_sound` de `BattleMap` ;
+  musiques `music/` (exploration, combat), ambiances `ambience/`. Boutons : clic et survol automatiques.
+  Banque de sons brute triée par usage : `C:\ClaudeProjects\Dingus\Sounds` (convertir en OGG avec ffmpeg avant d'importer).
 - **Police** : Vinque Antique (`assets/fonts/`, licence détenue par l'utilisateur), appliquée partout via `GameConfig`.
 
 ## Pistes et état du projet

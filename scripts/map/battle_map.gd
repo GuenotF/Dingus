@@ -33,6 +33,10 @@ const DESTRUCTIBLE_HP := "destructible_hp"
 @export var background_color: Color = Color("232830")
 ## ... et particules qui dérivent derrière la carte.
 @export_enum("aucune", "sable", "pollen", "lucioles") var ambiance: String = "aucune"
+## Boucle sonore de fond (assets/audio/ambience/).
+@export_enum("aucune", "foret_jour", "foret_nuit", "riviere", "vent") var ambience_sound: String = "aucune"
+## Bruit de pas des combattants (assets/audio/sfx/).
+@export_enum("pas_herbe", "pas_terre", "pas_pierre", "pas_bois") var footstep_sound: String = "pas_herbe"
 
 
 func ground() -> TileMapLayer:

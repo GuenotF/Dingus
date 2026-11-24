@@ -1,6 +1,6 @@
 class_name SettingsPanel
 extends ColorRect
-## Fenêtre « Paramètres » : volumes, son coupé, plein écran, particules. Réutilisée par le menu principal
+## Fenêtre « Paramètres » : volumes (général, voix, musique, bruitages), son coupé, plein écran, particules. Réutilisée par le menu principal
 ## et le menu pause. Les réglages sont ceux de l'autoload Settings (appliqués et mémorisés tout de suite).
 
 const W := preload("res://scripts/view/hud_widgets.gd")
@@ -9,8 +9,12 @@ signal closed
 
 var _master: HSlider
 var _voice: HSlider
+var _music: HSlider
+var _sfx: HSlider
 var _master_value: Label
 var _voice_value: Label
+var _music_value: Label
+var _sfx_value: Label
 var _mute: Button
 var _fullscreen: Button
 var _particles: Button
@@ -53,6 +57,16 @@ func _ready() -> void:
 	_voice_value = voice_row[1]
 	_voice.value_changed.connect(func(v: float) -> void: Settings.set_voice_volume(v / 100.0))
 	box.add_child(voice_row[2])
+	var music_row := _slider_row("Musique")
+	_music = music_row[0]
+	_music_value = music_row[1]
+	_music.value_changed.connect(func(v: float) -> void: Settings.set_music_volume(v / 100.0))
+	box.add_child(music_row[2])
+	var sfx_row := _slider_row("Bruitages et ambiance")
+	_sfx = sfx_row[0]
+	_sfx_value = sfx_row[1]
+	_sfx.value_changed.connect(func(v: float) -> void: Settings.set_sfx_volume(v / 100.0))
+	box.add_child(sfx_row[2])
 
 	var mute_row := _toggle_row("Couper le son" if Settings.mobile else "Couper le son (M)")
 	_mute = mute_row[0]
@@ -121,6 +135,10 @@ func _sync() -> void:
 	_voice.set_value_no_signal(roundf(Settings.voice_volume * 100.0))
 	_master_value.text = "%d %%" % int(_master.value)
 	_voice_value.text = "%d %%" % int(_voice.value)
+	_music.set_value_no_signal(roundf(Settings.music_volume * 100.0))
+	_sfx.set_value_no_signal(roundf(Settings.sfx_volume * 100.0))
+	_music_value.text = "%d %%" % int(_music.value)
+	_sfx_value.text = "%d %%" % int(_sfx.value)
 	_mute.set_pressed_no_signal(Settings.muted)
 	_mute.text = "Oui" if Settings.muted else "Non"
 	_fullscreen.set_pressed_no_signal(Settings.fullscreen)

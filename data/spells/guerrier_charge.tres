@@ -19,6 +19,7 @@ range_min = 2
 range_max = 3
 line_only = true
 target_rule = 1
+cast_sound = "charge"
 effects = Array[ExtResource("1_86r4d")]([SubResource("Resource_5xna7")])
 icon = ExtResource("2_5xna7")
 casts_per_turn = 1

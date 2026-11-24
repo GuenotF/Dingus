@@ -19,6 +19,7 @@ range_min = 2
 range_max = 3
 line_only = true
 target_rule = 1
+cast_sound = "esquive"
 effects = Array[ExtResource("1_0y07n")]([SubResource("Resource_l04ik")])
 icon = ExtResource("2_l04ik")
 casts_per_turn = 1

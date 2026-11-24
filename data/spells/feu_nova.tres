@@ -26,6 +26,7 @@ range_max = 0
 needs_line_of_sight = false
 area = 1
 affects_caster = false
+cast_sound = "feu_souffle"
 effects = Array[ExtResource("1_i3452")]([SubResource("Resource_oii1h"), SubResource("Resource_7uu8w")])
 icon = ExtResource("2_vv1uv")
 impact = ExtResource("2_wun8c")

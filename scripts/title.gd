@@ -26,7 +26,9 @@ var _entries: Array[Button] = []
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	Sound.silenced = true # la démo joue en silence
+	Sound.silenced = true # la démo joue en silence (voix et bruitages), mais avec la musique
+	Sound.play_music("exploration")
+	Sound.stop_ambience()
 
 	var bg := ColorRect.new()
 	bg.color = BG
