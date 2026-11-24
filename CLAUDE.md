@@ -66,7 +66,7 @@ code si besoin, captures, équilibrage (critères chiffrés), commit.
 - **Sons** : autoload `Sound` (`scripts/audio/sound.gd`), bus Voix / Effets / Musique (volumes dans `Settings`).
   Bruitages `assets/audio/sfx/<nom>_1.ogg, _2...` (variantes tirées au hasard, volume corrigé dans `SFX_TRIM`) ;
   sorts : `cast_sound` / `impact_sound` de `SpellData` ; cartes : `ambience_sound` et `footstep_sound` de `BattleMap` ;
-  musiques `music/` (exploration, combat), ambiances `ambience/`. Boutons : clic et survol automatiques.
+  musiques `music/` (exploration, combat), ambiances `ambience/`. Boutons : son de survol automatique (pas de son au clic, jugé désagréable).
   Banque de sons brute triée par usage : `C:\ClaudeProjects\Dingus\Sounds` (convertir en OGG avec ffmpeg avant d'importer).
 - **Police** : Vinque Antique (`assets/fonts/`, licence détenue par l'utilisateur), appliquée partout via `GameConfig`.
 

@@ -18,7 +18,7 @@ const AMBIENCE_DB := -14.0
 ## Correction de volume par bruitage (dB) : les packs n'ont pas tous le même niveau.
 const SFX_TRIM := {
 	"pas_herbe": -9.0, "pas_terre": -2.0, "pas_pierre": -11.0, "pas_bois": -8.0, "pas_eau": -8.0,
-	"ui_clic": 2.0, "ui_survol": -18.0, "debut_tour": -2.0, "debut_combat": -4.0,
+	"ui_survol": -18.0, "debut_tour": -2.0, "debut_combat": -4.0,
 	"coup_pied": -4.0, "coup_poing": -4.0, "gourdin_impact": -4.0, "caillou_impact": -5.0,
 	"chaine_impact": -6.0, "vol": -6.0, "chute": -6.0, "whoosh": -6.0, "hache_impact": -3.0,
 }
@@ -186,13 +186,12 @@ func play_voice(voice: Resource, moment: String, key: Variant = "menu") -> void:
 	player.play()
 
 
-## Boutons : clic à l'appui, petit son au survol (souris seulement).
+## Boutons : petit son au survol (souris seulement), pas de son au clic.
 ## Un bouton peut s'en passer avec set_meta("no_sound", true) avant d'entrer dans l'arbre.
 func _on_node_added(node: Node) -> void:
 	var button := node as BaseButton
 	if button == null or button.has_meta("no_sound"):
 		return
-	button.pressed.connect(func() -> void: play_ui("ui_clic"))
 	if not Settings.mobile:
 		button.mouse_entered.connect(func() -> void:
 			var now := Time.get_ticks_msec()
