@@ -17,6 +17,17 @@ const SHORTCUT_VALUE := 6.0
 ## Un ennemi pris dans la fumée ne voit plus rien et avance à peine ; se placer dans la sienne coûte autant.
 const SMOKE_ENEMY_VALUE := 12.0
 const SMOKE_STANDING_PENALTY := 10.0
+## Part de la valeur d'un bouclier comptée quand un ennemi peut nous frapper à son tour.
+const SHIELD_VALUE := 0.9
+## Entailler un bouclier adverse sans passer à travers vaut moins que retirer des PV.
+const SHIELD_HIT_VALUE := 0.3
+## Entrave : empêcher un tireur de fuir ; clouer un combattant de mêlée à 2 cases (il ne peut plus frapper,
+## alors qu'un sort de portée 2 l'atteint) ; gagner du temps quand on est blessé.
+const IMMOBILIZE_RANGED_VALUE := 22.0
+const IMMOBILIZE_OUT_OF_REACH_VALUE := 20.0
+const IMMOBILIZE_DELAY_VALUE := 6.0
+## Rester hors de portée d'un ennemi de mêlée entravé qu'on peut, nous, frapper à 2 cases.
+const SAFE_FROM_BOUND_VALUE := 8.0
 
 
 static func next_action(state: CombatState) -> Dictionary:
@@ -91,9 +102,21 @@ static func score_cast(state: CombatState, me: Fighter, origin: Vector2i, spell:
 			EffectData.Kind.DAMAGE:
 				for v in victims:
 					if v.team != me.team:
-						score += minf(avg, v.hp) + (40.0 if avg >= v.hp else 0.0)
+						var total := avg + CombatState.damage_bonus(effect, v)
+						var through := maxf(0.0, total - v.shield)
+						score += minf(through, v.hp) + (40.0 if through >= v.hp else 0.0)
+						score += minf(total, v.shield) * SHIELD_HIT_VALUE
 					else:
 						score -= avg * 1.5
+			EffectData.Kind.SHIELD:
+				for v in victims:
+					if v.team == me.team:
+						# Utile seulement si un ennemi peut nous frapper à son prochain tour.
+						score += avg * SHIELD_VALUE if v.shield == 0 and _is_threatened(state, me, origin) else -5.0
+			EffectData.Kind.IMMOBILIZE:
+				for v in victims:
+					if v.team != me.team:
+						score += _immobilize_value(me, origin, v)
 			EffectData.Kind.HEAL:
 				for v in victims:
 					var missing := float(v.max_hp - v.hp)
@@ -140,6 +163,30 @@ static func score_cast(state: CombatState, me: Fighter, origin: Vector2i, spell:
 					var before := _nearest_enemy_distance(state, me, origin)
 					score += 3.0 * (d - before) if before < me.preferred_range() and d > before else -3.0
 	return score - spell.pa_cost * 0.1
+
+
+## Un ennemi peut-il, à son prochain tour, venir à portée de `cell` et frapper ?
+static func _is_threatened(state: CombatState, me: Fighter, cell: Vector2i) -> bool:
+	for e in state.enemies_of(me):
+		var steps := 0 if e.is_immobilized() else e.max_pm
+		if BattleGrid.distance(cell, e.cell) <= steps + _longest_attack_range(e):
+			return true
+	return false
+
+
+## Intérêt d'entraver `v` depuis `origin`. Inutile s'il l'est déjà, ou sur un combattant de mêlée
+## déjà au contact : il n'a pas besoin de bouger pour frapper.
+static func _immobilize_value(me: Fighter, origin: Vector2i, v: Fighter) -> float:
+	if v.is_immobilized():
+		return 0.0
+	if v.preferred_range() > 1:
+		return IMMOBILIZE_RANGED_VALUE
+	var d := BattleGrid.distance(origin, v.cell)
+	if d <= 1:
+		return 0.0
+	if d == 2 and _longest_attack_range(v) < 2:
+		return IMMOBILIZE_OUT_OF_REACH_VALUE
+	return IMMOBILIZE_DELAY_VALUE if me.hp < me.max_hp * 0.5 else 0.5
 
 
 ## Intérêt de casser un obstacle destructible : il nous masque un ennemi à portée de tir,
@@ -223,6 +270,10 @@ static func position_score(state: CombatState, me: Fighter, cell: Vector2i) -> f
 		# ne doit pas donner l'impression d'être déjà au contact (sinon l'IA reste plantée).
 		d = maxi(d, _nearest_enemy_walk(state, me, cell))
 	var score := -absf(d - pref) * 1.5
+	if pref <= 1 and _longest_attack_range(me) >= 2:
+		for e in state.enemies_of(me):
+			if e.is_immobilized() and _longest_attack_range(e) < 2 and BattleGrid.distance(cell, e.cell) == 2:
+				score += SAFE_FROM_BOUND_VALUE
 	if state.is_smoked(cell):
 		score -= SMOKE_STANDING_PENALTY # aveugle et ralenti : on n'y reste pas
 	if pref > 1:

@@ -86,6 +86,8 @@ code si besoin, captures, équilibrage (critères chiffrés), commit.
   (aveugle depuis une case de fumée, écran pour les cases intermédiaires), −2 PM au début du tour dans le nuage ; effets `SMOKE` et `STEAL_PA`,
   zone `SQUARE` ; affichage `scripts/view/smoke_view.gd`. L'IA l'évalue dans `score_cast` / `position_score`.
 - **Chiffres flottants** : `FloatingText` empile les chiffres proches (dégâts simultanés lisibles).
+- **Bouclier et entrave** (Kael) : effets `SHIELD` (PV temporaires `Fighter.shield`, jusqu'au début du tour du porteur) et
+  `IMMOBILIZE` (0 PM, bonds permis) ; `bonus_vs_immobilized` sur les dégâts. Images de Kael : `tools/build_kael_assets.gd`.
 - **Personnages et campagne** : listes dans `scripts/core/roster.gd` (`Roster`, sans autoload : utilisable dans les tests) :
   `CLASS_PATHS` (jouables), `ENEMY_PATHS` (PNJ non jouables : hors menu 1v1, démo titre et matrice d'équilibrage),
   `CAMPAIGN_FIGHTS` (titre, carte, ennemi). `GameConfig.start_campaign()` / `start_versus()` (écran titre) ; en campagne,

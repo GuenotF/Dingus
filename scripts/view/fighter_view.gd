@@ -10,6 +10,8 @@ const FALLBACK_COLORS: Array[Color] = [Color("e0574f"), Color("4f8fe0")]
 const STEP_DURATION := 0.18
 const BAR_SIZE := Vector2(44, 6)
 const PAWN_HEIGHT := 51.0
+const SHIELD_COLOR := Color("ffd966")
+const HOLY_BIND_COLOR := Color(1.0, 0.86, 0.35, 0.95)
 
 var fighter: Fighter
 var is_active := false:
@@ -62,6 +64,7 @@ func setup(p_fighter: Fighter) -> void:
 
 func refresh() -> void:
 	queue_redraw()
+	_ground_marker.queue_redraw()
 	_body.queue_redraw()
 	if _sprite:
 		_body.get_node("Labels").queue_redraw()
@@ -90,7 +93,8 @@ func has_sprite() -> bool:
 ## Point de départ des chiffres de dégâts / soins : au-dessus du nom et des statuts.
 func text_anchor() -> Vector2:
 	var top := _sprites.height * _sprites.scale if _sprites else PAWN_HEIGHT
-	return position + Vector2(0, -top - 40 - 18 * fighter.statuses.size())
+	var lines := fighter.statuses.size() + (1 if fighter.shield > 0 else 0)
+	return position + Vector2(0, -top - 40 - 18 * lines)
 
 
 func body_color() -> Color:
@@ -222,6 +226,12 @@ func _draw_ground_marker() -> void:
 	# Cercle jaune autour : c'est à ce personnage de jouer.
 	if is_active:
 		m.draw_arc(Vector2.ZERO, 26.0, 0.0, TAU, 40, Color(1, 0.9, 0.3), 3.0, true)
+	# Entrave sacrée : une chaîne de maillons dorés autour des pieds.
+	if fighter.is_immobilized() and fighter.is_alive():
+		for k in 12:
+			var link := Vector2.from_angle(k * TAU / 12.0) * 31.0
+			m.draw_arc(link, 7.0, 0.0, TAU, 16, Color(0, 0, 0, 0.6), 4.5, true)
+			m.draw_arc(link, 7.0, 0.0, TAU, 16, HOLY_BIND_COLOR, 2.5, true)
 	m.draw_set_transform(Vector2.ZERO)
 
 
@@ -267,6 +277,8 @@ func _draw_labels(canvas: CanvasItem) -> void:
 		canvas.draw_rect(Rect2(bar_pos, Vector2(BAR_SIZE.x * ratio, BAR_SIZE.y)), bar_color)
 	if _sprite:
 		canvas.draw_rect(Rect2(bar_pos + Vector2(0, BAR_SIZE.y + 1), Vector2(BAR_SIZE.x, 2)), team_color)
+	if fighter.shield > 0:
+		canvas.draw_rect(Rect2(bar_pos - Vector2(2, 2), BAR_SIZE + Vector2(4, 4)), SHIELD_COLOR, false, 2.0)
 
 	# Pastille de PV (au survol seulement) : entre le nom et la barre de vie
 	var shift := 0.0
@@ -283,13 +295,12 @@ func _draw_labels(canvas: CanvasItem) -> void:
 
 	# Statuts (bonus en vert, malus en orange) au-dessus du nom
 	var y := top - 35 - shift
+	if fighter.shield > 0:
+		_draw_tag(canvas, font, y, "Bouclier %d" % fighter.shield, SHIELD_COLOR)
+		y -= 18.0
 	for s in fighter.statuses:
 		var text := s.label()
-		var tsize := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12)
-		var col := Color("7be08a") if s.amount > 0 else Color("ffab5c")
-		var rect := Rect2(Vector2(-tsize.x * 0.5 - 4, y - 12), Vector2(tsize.x + 8, 16))
-		canvas.draw_rect(rect, Color(0, 0, 0, 0.7))
-		canvas.draw_string(font, Vector2(-tsize.x * 0.5, y), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, col)
+		_draw_tag(canvas, font, y, text, Color("7be08a") if s.amount > 0 else Color("ffab5c"))
 		y -= 18.0
 
 	# Aperçu du sort visé : dégâts possibles (ou K.O.), soin
@@ -303,15 +314,30 @@ func _draw_labels(canvas: CanvasItem) -> void:
 			preview_text = ("−%d" % dmg_min if dmg_min == dmg_max else "−%d à −%d" % [dmg_min, dmg_max])
 			if dmg_max >= fighter.hp:
 				preview_text += "  (K.O. possible)"
+		if _preview.has("absorbed"):
+			preview_text += "  (bouclier −%d)" % _preview.absorbed
+	elif _preview.has("absorbed"):
+		preview_text = "Absorbé par le bouclier"
+		preview_color = SHIELD_COLOR
 	elif heal_max > 0:
 		var heal_min: int = _preview.get("heal_min", 0)
 		preview_text = "+%d" % heal_min if heal_min == heal_max else "+%d à +%d" % [heal_min, heal_max]
 		preview_color = Color("7be08a")
+	elif _preview.has("shield"):
+		preview_text = "Bouclier %d" % _preview.shield
+		preview_color = SHIELD_COLOR
 	if preview_text != "":
 		var psize := font.get_string_size(preview_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16)
 		var ppos := Vector2(-psize.x * 0.5, y - 2)
 		canvas.draw_string_outline(font, ppos, preview_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, 4, Color(0, 0, 0, 0.85))
 		canvas.draw_string(font, ppos, preview_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, preview_color)
+
+
+## Étiquette sombre centrée au-dessus du nom (statut, bouclier).
+func _draw_tag(canvas: CanvasItem, font: Font, y: float, text: String, color: Color) -> void:
+	var tsize := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12)
+	canvas.draw_rect(Rect2(Vector2(-tsize.x * 0.5 - 4, y - 12), Vector2(tsize.x + 8, 16)), Color(0, 0, 0, 0.7))
+	canvas.draw_string(font, Vector2(-tsize.x * 0.5, y), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, color)
 
 
 ## Pastille « ♥ PV / PV max » : fond sombre arrondi, liseré de la couleur de la barre.

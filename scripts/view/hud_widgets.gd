@@ -119,13 +119,15 @@ static func icon_button(icon: Texture2D, tip: String, size: int = 44) -> Button:
 class HpOrb extends Control:
 	var hp := 0
 	var max_hp := 1
+	var shield := 0
 
 	func _init() -> void:
 		custom_minimum_size = Vector2(92, 92)
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-	func set_values(p_hp: int, p_max: int) -> void:
+	func set_values(p_hp: int, p_max: int, p_shield: int = 0) -> void:
 		hp = p_hp
+		shield = p_shield
 		max_hp = maxi(1, p_max)
 		queue_redraw()
 
@@ -149,6 +151,9 @@ class HpOrb extends Control:
 			draw_colored_polygon(pts, HudWidgets.HP)
 		HudWidgets.draw_text_centered(self, c + Vector2(0, -6), str(hp), 24, Color.WHITE, 4)
 		HudWidgets.draw_text_centered(self, c + Vector2(0, 16), "/ %d PV" % max_hp, 11, Color("f3d6d2"), 3)
+		if shield > 0:
+			draw_arc(c, r + 1.5, 0.0, TAU, 64, FighterView.SHIELD_COLOR, 3.0, true)
+			HudWidgets.draw_text_centered(self, c + Vector2(0, -27), "+%d" % shield, 13, FighterView.SHIELD_COLOR, 4)
 
 
 # --- Compteur PA / PM --------------------------------------------------------------
@@ -303,6 +308,10 @@ class FighterChip extends Control:
 		draw_rect(bar, Color("2a2e37"))
 		var ratio := clampf(float(fighter.hp) / float(fighter.max_hp), 0.0, 1.0)
 		draw_rect(Rect2(bar.position, Vector2(bar.size.x * ratio, bar.size.y)), HudWidgets.TEAM_COLORS[0].lerp(HudWidgets.HP, 0.3))
-		HudWidgets.draw_text_centered(self, Vector2(size.x * 0.5, 72), "%d/%d" % [fighter.hp, fighter.max_hp] if alive else "K.O.", 11, HudWidgets.TEXT_DIM)
+		var hp_text := "%d/%d" % [fighter.hp, fighter.max_hp] if alive else "K.O."
+		if alive and fighter.shield > 0:
+			draw_rect(bar.grow(1.5), FighterView.SHIELD_COLOR, false, 1.5)
+			hp_text = "%d +%d" % [fighter.hp, fighter.shield]
+		HudWidgets.draw_text_centered(self, Vector2(size.x * 0.5, 72), hp_text, 11, FighterView.SHIELD_COLOR if alive and fighter.shield > 0 else HudWidgets.TEXT_DIM)
 		if not alive:
 			draw_rect(Rect2(Vector2.ZERO, size), Color(0, 0, 0, 0.45))

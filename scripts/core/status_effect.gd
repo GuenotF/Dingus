@@ -19,5 +19,7 @@ func _init(p_kind: EffectData.Kind, p_amount: int, p_turns: int, p_source: Strin
 
 
 func label() -> String:
+	if kind == EffectData.Kind.IMMOBILIZE:
+		return "Entravé (%d)" % turns_left
 	var stat := "PM" if kind == EffectData.Kind.MOD_PM else "PA"
 	return "%s%+d (%d)" % [stat, amount, turns_left]

@@ -14,6 +14,8 @@ enum Kind {
 	DRAIN, ## Comme DAMAGE, et le lanceur récupère la moitié des PV réellement retirés (vol de vie).
 	STEAL_PA, ## Vol de PA : la cible perd min..max PA pendant `duration` tours, le lanceur les gagne tout de suite.
 	SMOKE, ## Pose un nuage de fumée sur la zone du sort pendant un tour (voir CombatState : ralentit, aveugle, fait écran).
+	SHIELD, ## Bouclier de `min_value` PV temporaires, jusqu'au début du prochain tour de la cible. Non cumulable.
+	IMMOBILIZE, ## Entrave : la cible perd tous ses PM pendant `duration` tours (les bonds restent permis).
 }
 
 @export var kind: Kind = Kind.DAMAGE
@@ -22,6 +24,8 @@ enum Kind {
 ## Pour MOD_PM / MOD_PA : nombre de débuts de tour de la cible affectés.
 ## Si la cible est le combattant actif, l'effet s'applique aussi tout de suite.
 @export_range(0, 10) var duration: int = 0
+## Pour DAMAGE : dégâts ajoutés si la cible est entravée (voir IMMOBILIZE).
+@export var bonus_vs_immobilized: int = 0
 
 
 const SAME_AS_MIN := -9999
@@ -45,7 +49,13 @@ func describe() -> String:
 	var amount := str(min_value) if min_value == max_value else "%d-%d" % [min_value, max_value]
 	match kind:
 		Kind.DAMAGE:
+			if bonus_vs_immobilized > 0:
+				return "%s dégâts (+%d sur une cible entravée)" % [amount, bonus_vs_immobilized]
 			return "%s dégâts" % amount
+		Kind.SHIELD:
+			return "bouclier %s jusqu'au prochain tour" % amount
+		Kind.IMMOBILIZE:
+			return "entrave : plus de PM (%d t.)" % duration
 		Kind.HEAL:
 			return "soin %s" % amount
 		Kind.PUSH:

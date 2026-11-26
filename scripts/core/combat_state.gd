@@ -19,6 +19,8 @@ signal fighter_moved(fighter: Fighter, path: Array[Vector2i])
 signal spell_cast(caster: Fighter, spell: SpellData, target: Vector2i, cells: Array[Vector2i])
 signal fighter_damaged(fighter: Fighter, amount: int)
 signal fighter_healed(fighter: Fighter, amount: int)
+## Un bouclier a absorbé tout ou partie d'un coup.
+signal shield_absorbed(fighter: Fighter, amount: int)
 signal fighter_displaced(fighter: Fighter, from: Vector2i, to: Vector2i)
 signal status_changed(fighter: Fighter)
 signal fighter_died(fighter: Fighter)
@@ -244,7 +246,8 @@ func can_cast_at(spell: SpellData, target: Vector2i) -> bool:
 ## Lance un sort du combattant actif. Renvoie false si l'action est refusée.
 ## Aperçu d'un lancer, sans rien modifier : pour chaque combattant touché,
 ## { "fighter": Fighter, "damage_min", "damage_max", "heal_min", "heal_max" }.
-## Les dégâts de collision d'une poussée bloquée sont comptés.
+## Les dégâts de collision d'une poussée bloquée sont comptés. Les dégâts annoncés sont les PV perdus :
+## le bouclier est déduit ("absorbed" = part maximale absorbée ; "shield" = bouclier que le sort donne).
 func preview_cast(spell: SpellData, target: Vector2i) -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	var caster := active_fighter()
@@ -260,14 +263,17 @@ func preview_cast(spell: SpellData, target: Vector2i) -> Array[Dictionary]:
 		for effect in spell.effects:
 			match effect.kind:
 				EffectData.Kind.DAMAGE:
-					p.damage_min += effect.min_value
-					p.damage_max += effect.max_value
+					var bonus := damage_bonus(effect, v)
+					p.damage_min += effect.min_value + bonus
+					p.damage_max += effect.max_value + bonus
+				EffectData.Kind.SHIELD:
+					p["shield"] = effect.min_value
 				EffectData.Kind.DRAIN:
 					p.damage_min += effect.min_value
 					p.damage_max += effect.max_value
 					if v != caster:
-						drain_min += int(minf(effect.min_value, v.hp) * DRAIN_RATIO)
-						drain_max += int(minf(effect.max_value, v.hp) * DRAIN_RATIO)
+						drain_min += int(clampi(effect.min_value - v.shield, 0, v.hp) * DRAIN_RATIO)
+						drain_max += int(clampi(effect.max_value - v.shield, 0, v.hp) * DRAIN_RATIO)
 				EffectData.Kind.HEAL:
 					p.heal_min += effect.min_value
 					p.heal_max += effect.max_value
@@ -276,7 +282,11 @@ func preview_cast(spell: SpellData, target: Vector2i) -> Array[Dictionary]:
 						var push := preview_push(v, push_direction(caster.cell, v.cell), effect.min_value)
 						p.damage_min += push.blocked * PUSH_DAMAGE_PER_CELL
 						p.damage_max += push.blocked * PUSH_DAMAGE_PER_CELL
-		if p.damage_max > 0 or p.heal_max > 0:
+		if v.shield > 0 and p.damage_max > 0:
+			p["absorbed"] = mini(v.shield, p.damage_max)
+			p.damage_min = maxi(0, p.damage_min - v.shield)
+			p.damage_max = maxi(0, p.damage_max - v.shield)
+		if p.damage_max > 0 or p.heal_max > 0 or p.has("absorbed") or p.has("shield"):
 			result.append(p)
 	# Vol de vie : le soin du lanceur (sans dépasser ses PV maximum).
 	var missing := caster.max_hp - caster.hp
@@ -339,7 +349,16 @@ func try_cast(spell: SpellData, target: Vector2i) -> bool:
 func _apply_effect(effect: EffectData, caster: Fighter, victim: Fighter, spell: SpellData) -> void:
 	match effect.kind:
 		EffectData.Kind.DAMAGE:
-			_damage(victim, rng.randi_range(effect.min_value, effect.max_value))
+			_damage(victim, rng.randi_range(effect.min_value, effect.max_value) + damage_bonus(effect, victim))
+		EffectData.Kind.SHIELD:
+			victim.shield = maxi(victim.shield, effect.min_value)
+			status_changed.emit(victim)
+		EffectData.Kind.IMMOBILIZE:
+			var on_self := victim == active_fighter()
+			victim.statuses.append(StatusEffect.new(effect.kind, 0, maxi(1, effect.duration), spell.spell_name, on_self))
+			if on_self:
+				victim.pm = 0
+			status_changed.emit(victim)
 		EffectData.Kind.DRAIN:
 			var dealt := _damage(victim, rng.randi_range(effect.min_value, effect.max_value))
 			if victim != caster and caster.is_alive():
@@ -487,10 +506,20 @@ func preview_obstacles(spell: SpellData, target: Vector2i) -> Array[Dictionary]:
 	return result
 
 
-## Retire des PV et renvoie les PV réellement perdus.
+## Dégâts ajoutés par un effet contre cette cible (bonus contre une cible entravée).
+static func damage_bonus(effect: EffectData, victim: Fighter) -> int:
+	return effect.bonus_vs_immobilized if victim.is_immobilized() else 0
+
+
+## Retire des PV (bouclier d'abord) et renvoie les PV réellement perdus.
 func _damage(victim: Fighter, amount: int) -> int:
+	var shield_before := victim.shield
 	var dealt := victim.take_damage(amount)
-	fighter_damaged.emit(victim, dealt)
+	var absorbed := shield_before - victim.shield
+	if absorbed > 0:
+		shield_absorbed.emit(victim, absorbed)
+	if dealt > 0 or absorbed == 0:
+		fighter_damaged.emit(victim, dealt)
 	if not victim.is_alive():
 		fighter_died.emit(victim)
 	return dealt

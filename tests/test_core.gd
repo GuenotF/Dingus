@@ -46,6 +46,9 @@ func _init() -> void:
 	_test_enemy_lists()
 	_test_forest_map()
 	_test_campaign_goblin_fights()
+	_test_shield()
+	_test_immobilize()
+	_test_kael_ai()
 	print("Tests terminés : %s" % ("OK" if _failures == 0 else "%d échec(s)" % _failures))
 	quit(1 if _failures > 0 else 0)
 
@@ -935,3 +938,122 @@ func _test_campaign_goblin_fights() -> void:
 	_check(hero_wins >= fights / 2, "campagne : le Gobelin chapardeur reste un combat d'introduction")
 	map.free()
 
+
+
+# --- Kael : bouclier et entrave -------------------------------------------------
+
+func _test_shield() -> void:
+	var shield := _effect_spell(1, 0, 0, [EffectData.make(K.SHIELD, 20)] as Array[EffectData])
+	var hit := _effect_spell(1, 1, 5, [EffectData.make(K.DAMAGE, 15)] as Array[EffectData])
+	var drain := _effect_spell(1, 1, 5, [EffectData.make(K.DRAIN, 12)] as Array[EffectData])
+	var state := _duel([shield, hit, drain], Vector2i(0, 0), Vector2i(3, 0))
+	var a := state.fighters[0]
+	var b := state.fighters[1]
+	_check(state.try_cast(shield, a.cell) and a.shield == 20, "bouclier posé")
+	a.pa = 6
+	state.try_cast(shield, a.cell)
+	_check(a.shield == 20, "les boucliers ne se cumulent pas")
+	state.end_turn()
+	b.hp = 50
+	var preview := state.preview_cast(hit, a.cell)
+	_check(preview.size() == 1 and preview[0].damage_max == 0 and preview[0].absorbed == 15, "aperçu : coup absorbé")
+	state.try_cast(hit, a.cell)
+	_check(a.hp == a.max_hp and a.shield == 5, "le bouclier absorbe avant les PV")
+	preview = state.preview_cast(drain, a.cell)
+	_check(preview[0].damage_max == 7 and preview.size() == 2 and preview[1].heal_max == 3, "aperçu : vol de vie sur la part non absorbée")
+	state.try_cast(drain, a.cell)
+	_check(a.hp == a.max_hp - 7 and b.hp == 53, "vol de vie : rien sur la part absorbée")
+	state.end_turn()
+	_check(a.shield == 0, "le bouclier disparaît au début du tour de son porteur")
+	# Un bouclier intact disparaît aussi.
+	state.end_turn()
+	state.end_turn()
+	state.try_cast(shield, a.cell)
+	state.end_turn()
+	_check(a.shield == 20, "le bouclier tient pendant le tour adverse")
+	state.end_turn()
+	_check(a.shield == 0, "bouclier intact retiré au tour suivant")
+	# Collision de poussée absorbée aussi.
+	var push := _effect_spell(1, 1, 5, [EffectData.make(K.PUSH, 2)] as Array[EffectData])
+	var wall := _duel([shield, push], Vector2i(2, 0), Vector2i(1, 0))
+	wall.try_cast(shield, Vector2i(2, 0))
+	wall.end_turn()
+	wall.fighters[0].cell = Vector2i(9, 0)
+	wall.fighters[1].cell = Vector2i(8, 0)
+	wall.try_cast(push, Vector2i(9, 0))
+	_check(wall.fighters[0].hp == 100 and wall.fighters[0].shield == 4, "le bouclier absorbe la collision")
+
+
+func _test_immobilize() -> void:
+	var bind_fx := EffectData.make(K.IMMOBILIZE, 0, 0, 1)
+	var bind := _effect_spell(3, 1, 5, [bind_fx] as Array[EffectData])
+	var smite_fx := EffectData.make(K.DAMAGE, 16)
+	smite_fx.bonus_vs_immobilized = 6
+	var smite := _effect_spell(3, 1, 5, [smite_fx] as Array[EffectData])
+	var state := _duel([bind, smite], Vector2i(0, 0), Vector2i(2, 0))
+	var b := state.fighters[1]
+	_check(state.preview_cast(smite, b.cell)[0].damage_max == 16, "pas de bonus sans entrave")
+	state.try_cast(bind, b.cell)
+	_check(b.is_immobilized() and b.statuses[0].label().begins_with("Entravé"), "cible entravée")
+	_check(state.preview_cast(smite, b.cell)[0].damage_max == 22, "aperçu : +6 sur cible entravée")
+	state.try_cast(smite, b.cell)
+	_check(b.hp == 78, "+6 dégâts sur une cible entravée")
+	state.end_turn()
+	_check(b.pm == 0 and state.reachable_for_active().is_empty(), "entravé : aucun PM, aucun déplacement")
+	state.end_turn()
+	_check(not b.is_immobilized(), "l'entrave expire à la fin du tour de la cible")
+	state.end_turn()
+	_check(b.pm == b.max_pm, "PM retrouvés ensuite")
+	# Un autre retrait de PM ne déclenche pas le bonus.
+	b.statuses.append(StatusEffect.new(K.MOD_PM, -3, 1, "Chaîne"))
+	_check(CombatState.damage_bonus(smite_fx, b) == 0, "le bonus ne vaut que contre l'entrave")
+
+
+func _test_kael_ai() -> void:
+	var kael: ClassData = load("res://data/classes/kael.tres")
+	var archer: ClassData = load("res://data/classes/archer.tres")
+	var warrior: ClassData = load("res://data/classes/guerrier.tres")
+	# Tireur à portée de Châtiment : entraver d'abord, puis châtier.
+	var state := CombatState.new(BattleGrid.new(10, 10), 3)
+	state.add_fighter(Fighter.new(0, "K", 0, Vector2i(4, 4), kael))
+	state.add_fighter(Fighter.new(1, "A", 1, Vector2i(5, 4), archer))
+	state.start()
+	var action := AiBrain.next_action(state)
+	_check(action.type == "cast" and action.spell.spell_name == "Entrave sacrée", "IA : entrave le tireur avant de frapper (%s)" % [action.get("spell")])
+	state.try_cast(action.spell, action.cell)
+	action = AiBrain.next_action(state)
+	_check(action.type == "cast" and action.spell.spell_name == "Châtiment divin", "IA : châtie la cible entravée")
+	# Mêlée déjà au contact : l'entrave serait gaspillée.
+	var me := Fighter.new(0, "K", 0, Vector2i(4, 4), kael)
+	var melee := Fighter.new(1, "G", 1, Vector2i(5, 4), warrior)
+	_check(AiBrain._immobilize_value(me, me.cell, melee) == 0.0, "IA : pas d'entrave sur un ennemi de mêlée au contact")
+	# Combats complets contre chaque adversaire : actions valides, combat terminé, les 4 sorts servent.
+	var used := {}
+	for path in Roster.CLASS_PATHS:
+		if path.ends_with("kael.tres"):
+			continue
+		var grid := BattleGrid.new(MapLayouts.TEST_SIZE.x, MapLayouts.TEST_SIZE.y, MapLayouts.TEST_OBSTACLES)
+		var duel := CombatState.new(grid, 5)
+		duel.add_fighter(Fighter.new(0, "K", 0, MapLayouts.TEST_SPAWNS[0], kael))
+		duel.add_fighter(Fighter.new(1, "O", 1, MapLayouts.TEST_SPAWNS[1], load(path)))
+		duel.start()
+		var actions := 0
+		while not duel.is_over and duel.turn_number <= 40 and actions < 2000:
+			var next := AiBrain.next_action(duel)
+			actions += 1
+			var ok := true
+			match next.type:
+				"move":
+					ok = duel.try_move(next.cell)
+				"cast":
+					if duel.active_fighter().class_data == kael:
+						used[next.spell.spell_name] = true
+					ok = duel.try_cast(next.spell, next.cell)
+				_:
+					duel.end_turn()
+			_check(ok, "Kael contre %s : action IA valide (%s)" % [path.get_file(), next.type])
+			if not ok:
+				duel.end_turn()
+		_check(duel.is_over, "Kael contre %s : combat terminé (tour %d)" % [path.get_file(), duel.turn_number])
+		print("  kael contre %s : gagnant %d au tour %d" % [path.get_file().trim_suffix(".tres"), duel.winner_team, duel.turn_number])
+	_check(used.size() == 4, "IA : Kael utilise ses 4 sorts (%s)" % [used.keys()])

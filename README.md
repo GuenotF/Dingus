@@ -53,6 +53,7 @@ Au centre, l'aperçu de la carte (la vraie scène, flèches ‹ › pour changer
 | Archer | 130 | 6 | 3 | Flèche (portée 8), Flèche entravante (−2 PM), Flèche de recul (repousse 2), Roulade (bond) |
 | Chevalier maudit | 120 | 6 | 3 | Lame sombre (vol de vie), Chaîne infernale (attire de 5, −2 PM), Malédiction (−2 PA), Pacte de sang (−12 PV, +3 PA) |
 | Gobelin | 135 | 6 | 4 | Vol à la tire (vole 1 PA), Coup bas (−2 PM), Pétard (repousse 2), Fumigène (nuage 3×3 : −2 PM, aveugle, fait écran) |
+| Kael (paladin) | 136 | 6 | 3 | Châtiment divin (portée 2, +6 sur cible entravée), Entrave sacrée (plus de PM), Imposition des mains (soin sur soi), Bouclier de la foi (24 PV temporaires) |
 
 Ennemis de campagne (non jouables, joués par l'IA, listés dans `Roster.ENEMY_PATHS`) :
 

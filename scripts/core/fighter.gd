@@ -10,6 +10,8 @@ var class_data: ClassData
 
 var max_hp: int = 100
 var hp: int = 100
+## PV temporaires du bouclier, consommés avant les PV. Disparaissent au début du tour du porteur.
+var shield: int = 0
 var max_pa: int = 6
 var pa: int = 6
 var max_pm: int = 3
@@ -46,6 +48,9 @@ func preferred_range() -> int:
 func start_turn() -> void:
 	pa = maxi(0, max_pa + status_total(EffectData.Kind.MOD_PA))
 	pm = maxi(0, max_pm + status_total(EffectData.Kind.MOD_PM))
+	if is_immobilized():
+		pm = 0
+	shield = 0
 	_casts_this_turn.clear()
 	for spell in _cooldowns.keys():
 		_cooldowns[spell] -= 1
@@ -91,9 +96,18 @@ func register_cast(spell: SpellData) -> void:
 		_cooldowns[spell] = spell.cooldown
 
 
-## Applique des dégâts et renvoie les dégâts réellement subis.
+func is_immobilized() -> bool:
+	for s in statuses:
+		if s.kind == EffectData.Kind.IMMOBILIZE:
+			return true
+	return false
+
+
+## Applique des dégâts (le bouclier absorbe d'abord) et renvoie les PV réellement perdus.
 func take_damage(amount: int) -> int:
-	var dealt := clampi(amount, 0, hp)
+	var absorbed := clampi(amount, 0, shield)
+	shield -= absorbed
+	var dealt := clampi(amount - absorbed, 0, hp)
 	hp -= dealt
 	return dealt
 

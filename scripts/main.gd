@@ -50,6 +50,7 @@ func _ready() -> void:
 	state.spell_cast.connect(_on_spell_cast)
 	state.fighter_damaged.connect(_on_fighter_damaged)
 	state.fighter_healed.connect(_on_fighter_healed)
+	state.shield_absorbed.connect(_on_shield_absorbed)
 	state.fighter_displaced.connect(_on_fighter_displaced)
 	state.status_changed.connect(_on_status_changed)
 	state.fighter_died.connect(_on_fighter_died)
@@ -564,6 +565,15 @@ func _on_fighter_damaged(fighter: Fighter, amount: int) -> void:
 	if voice and fighter.is_alive():
 		var big := amount >= fighter.max_hp * voice.big_hurt_ratio
 		Sound.play_voice(voice, "big_hurt" if big else "hurt", fighter.id)
+
+
+func _on_shield_absorbed(fighter: Fighter, amount: int) -> void:
+	if _defer(_on_shield_absorbed.bind(fighter, amount)):
+		return
+	var view: FighterView = fighter_views[fighter.id]
+	view.refresh()
+	# Décalé sur le côté pour ne pas recouvrir le chiffre des PV perdus.
+	FloatingText.spawn(self, view.text_anchor() + Vector2(34, 8), "bouclier -%d" % amount, FighterView.SHIELD_COLOR)
 
 
 func _on_fighter_healed(fighter: Fighter, amount: int) -> void:

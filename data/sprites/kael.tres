@@ -1,0 +1,78 @@
+[gd_resource type="Resource" script_class="CharacterSprites" format=3]
+
+[ext_resource type="Script" path="res://scripts/view/character_animation.gd" id="1_anim"]
+[ext_resource type="Texture2D" path="res://assets/characters/kael/idle.png" id="t0"]
+[ext_resource type="Texture2D" path="res://assets/characters/kael/walk.png" id="t1"]
+[ext_resource type="Texture2D" path="res://assets/characters/kael/take_damage.png" id="t2"]
+[ext_resource type="Texture2D" path="res://assets/characters/kael/die.png" id="t3"]
+[ext_resource type="Texture2D" path="res://assets/characters/kael/melee.png" id="t4"]
+[ext_resource type="Texture2D" path="res://assets/characters/kael/special2.png" id="t5"]
+[ext_resource type="Texture2D" path="res://assets/characters/kael/shield_block_start.png" id="t6"]
+[ext_resource type="Texture2D" path="res://assets/characters/kael/cast_spell.png" id="t7"]
+[ext_resource type="Script" path="res://scripts/view/character_sprites.gd" id="2_spr"]
+
+[sub_resource type="Resource" id="a0"]
+script = ExtResource("1_anim")
+name = "idle"
+texture = ExtResource("t0")
+fps = 12.0
+loop = true
+
+[sub_resource type="Resource" id="a1"]
+script = ExtResource("1_anim")
+name = "walk"
+texture = ExtResource("t1")
+fps = 20.0
+loop = true
+
+[sub_resource type="Resource" id="a2"]
+script = ExtResource("1_anim")
+name = "hit"
+texture = ExtResource("t2")
+fps = 24.0
+loop = false
+
+[sub_resource type="Resource" id="a3"]
+script = ExtResource("1_anim")
+name = "die"
+texture = ExtResource("t3")
+fps = 15.0
+loop = false
+
+[sub_resource type="Resource" id="a4"]
+script = ExtResource("1_anim")
+name = "melee"
+texture = ExtResource("t4")
+fps = 30.0
+loop = false
+
+[sub_resource type="Resource" id="a5"]
+script = ExtResource("1_anim")
+name = "consecrate"
+texture = ExtResource("t5")
+fps = 22.0
+loop = false
+
+[sub_resource type="Resource" id="a6"]
+script = ExtResource("1_anim")
+name = "pray"
+texture = ExtResource("t6")
+fps = 18.0
+loop = false
+
+[sub_resource type="Resource" id="a7"]
+script = ExtResource("1_anim")
+name = "guard"
+texture = ExtResource("t7")
+fps = 24.0
+loop = false
+
+[resource]
+script = ExtResource("2_spr")
+feet_position = Vector2(64, 90)
+feet_down_right = Vector2(63, 92)
+feet_down_left = Vector2(62, 89)
+feet_up_left = Vector2(64, 89)
+feet_up_right = Vector2(66, 90)
+height = 66.0
+animations = Array[ExtResource("1_anim")]([SubResource("a0"), SubResource("a1"), SubResource("a2"), SubResource("a3"), SubResource("a4"), SubResource("a5"), SubResource("a6"), SubResource("a7")])

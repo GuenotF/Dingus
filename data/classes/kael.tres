@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ClassData" format=3]
+
+[ext_resource type="Script" path="res://scripts/core/class_data.gd" id="1_cls"]
+[ext_resource type="Script" path="res://scripts/core/spell_data.gd" id="2_spl"]
+[ext_resource type="Resource" path="res://data/spells/kael_chatiment.tres" id="3_a"]
+[ext_resource type="Resource" path="res://data/spells/kael_entrave.tres" id="4_b"]
+[ext_resource type="Resource" path="res://data/spells/kael_imposition.tres" id="5_c"]
+[ext_resource type="Resource" path="res://data/spells/kael_bouclier.tres" id="6_d"]
+[ext_resource type="Resource" path="res://data/sprites/kael.tres" id="7_spr"]
+[ext_resource type="Texture2D" path="res://assets/ui/portraits/kael.png" id="99_portrait"]
+
+[resource]
+script = ExtResource("1_cls")
+class_label = "Kael"
+color = Color(0.95, 0.82, 0.42, 1)
+description = "Corps à corps : se protège, entrave et châtie"
+max_hp = 136
+max_pm = 3
+spells = Array[ExtResource("2_spl")]([ExtResource("3_a"), ExtResource("4_b"), ExtResource("5_c"), ExtResource("6_d")])
+sprites = ExtResource("7_spr")
+portrait = ExtResource("99_portrait")

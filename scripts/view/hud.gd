@@ -238,7 +238,7 @@ func show_combat(state: CombatState, selected: SpellData, is_ai: bool) -> void:
 	_spell_box.show()
 	for s in _separators:
 		s.show()
-	_orb.set_values(fighter.hp, fighter.max_hp)
+	_orb.set_values(fighter.hp, fighter.max_hp, fighter.shield)
 	_pa.set_value(fighter.pa)
 	_pm.set_value(fighter.pm)
 	_main_button.text = "Fin du tour" if Settings.mobile else "Fin du tour\n(Espace)"

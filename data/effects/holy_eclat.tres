@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EffectAnimation" format=3]
+
+[ext_resource type="Script" path="res://scripts/view/effect_animation.gd" id="1_a"]
+[ext_resource type="Texture2D" path="res://assets/effects/holy/eclat.png" id="2_b"]
+
+[resource]
+script = ExtResource("1_a")
+texture = ExtResource("2_b")
+fps = 24.0
+origin = Vector2(64, 100)
+scale = Vector2(0.8, 0.8)
+on_ground = false
+additive = false
