@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Dingus — consignes pour Claude
 
 Jeu tactique 1v1 au tour par tour en vue isométrique (style Dofus), Godot 4.7, GDScript.
@@ -17,7 +21,9 @@ Jeu tactique 1v1 au tour par tour en vue isométrique (style Dofus), Godot 4.7, 
 - **Claude commite** (message clair en français), **l'utilisateur pousse** (`git push origin main`).
   Quand le PC de l'utilisateur est éteint, Claude travaille dans un clone de son espace cloud et pousse une branche
   que l'utilisateur fusionne (`git merge --ff-only`).
-- Ne jamais faire `git add -A` : les fichiers audio et la police apparaissent à tort comme modifiés (attributs LFS).
+- Ne jamais faire `git add -A` : les fichiers audio et la police apparaissent comme modifiés. `.gitattributes` les
+  destine à Git LFS, mais le diff montre des fichiers complets que Git remplacerait par des pointeurs LFS : les commiter
+  les convertirait.
   Ajouter les fichiers un par un. Les fichiers `.uid` de Godot sont versionnés (les ajouter avec leur script).
 - Sans Godot sur la machine de travail : la VM du PC (outil device_bash) peut télécharger Godot 4.7.2 Linux depuis GitHub et
   lancer les tests sur une **copie** du projet hors du dossier (pour ne pas toucher au cache `.godot` de l'éditeur) ;
@@ -26,6 +32,18 @@ Jeu tactique 1v1 au tour par tour en vue isométrique (style Dofus), Godot 4.7, 
 - Ne pas commiter les dossiers de packs bruts (`2D HD Character Knight`, `isometric tileset`) :
   le jeu utilise ses propres copies dans `assets/`.
 - Images en Git classique (pas de Git LFS).
+
+## Commandes
+Godot (PowerShell, depuis la racine du projet) :
+`$godot = "C:\Users\fab-s\Downloads\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-stable_win64_console.exe"`
+
+- Tests : `& $godot --headless --path . -s res://tests/test_core.gd` (code de sortie 1 si échec).
+  Pas de filtre pour lancer un seul test : les fonctions `_test_*` sont appelées une à une dans `_init()`.
+  Un nouveau test doit y être ajouté, sinon il ne s'exécute pas.
+- Équilibrage ciblé :
+  `& $godot --headless --path . -s res://tests/balance_matrix.gd -- personnage=Archer carte=Prairie parties=60`
+- Mode mobile sur PC : argument de lancement `--mobile`.
+- Exports : préréglages « Windows Desktop » et « Android » (`export_presets.cfg`, ignoré par Git), sortie dans `../Release/`.
 
 ## Créer un personnage
 Inventaire des personnages et des skins disponibles : `docs/inventaire_personnages.md` (à mettre à jour à chaque ajout).
@@ -38,6 +56,18 @@ code si besoin, captures, équilibrage (critères chiffrés), commit.
 - `scripts/view/` : affichage ; réagit aux signaux de `CombatState`.
 - `data/` : classes, sorts, sprites en `.tres` (modifiables dans l'inspecteur).
 - `maps/` : cartes (calques Sol, Decor, Placement), listées automatiquement dans le menu.
+- Déroulement : `title.tscn` → `menu.tscn` → `main.tscn`. L'autoload `GameConfig` transmet carte, classes, noms et IA.
+- `scripts/main.gd` assemble `core/` et `view/`. Pendant le vol d'un projectile, il met les effets en attente
+  (`_defer` / `_flush_deferred`) : la logique est déjà résolue, l'affichage la rejoue à l'impact.
+- `main.gd` sert aussi de démo à l'écran titre (`demo`, `demo_setup`) : IA contre IA, sans HUD ni entrées.
+- `BattleMap` (`scripts/map/battle_map.gd`) convertit une scène en `BattleGrid` selon les données des tuiles
+  (`obstacle`, `water`, `placement_team`, `destructible_hp`).
+- Un sort est une liste d'`EffectData`. Un nouveau type d'effet touche `effect_data.gd` (dont `describe`),
+  `combat_state.gd` (application et aperçu), `ai_brain.gd` (score) et les tests.
+- L'IA passe par les règles de `CombatState`. Le hasard du combat vient d'un générateur à graine.
+- Les scripts lancés avec `-s` utilisent les listes de `Roster`, sans passer par un autoload.
+- Mobile (`Settings.mobile`) : jeu au tap en deux temps, `TouchCamera`, `UiFit`. Vérifier PC et mobile
+  après un changement d'interface.
 
 ## Fonctionnalités en place (repères pour ne pas les redécouvrir)
 - **Fond et ambiance** : `scripts/view/background_view.gd` (halo, vignette, socle, particules). Par carte : `background_color`

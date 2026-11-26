@@ -1,10 +1,10 @@
-# Tactique Iso
+# Dingus
 
 Prototype de jeu tactique 1v1 au tour par tour, en vue isométrique (style Dofus), avec Godot 4.
 
 ## Lancer le projet
 
-1. Installer Godot 4.5 ou plus récent (version standard, pas .NET).
+1. Installer Godot 4.7 ou plus récent (version standard, pas .NET).
 2. Dans Godot : **Importer** → sélectionner `project.godot`.
 3. Appuyer sur **F5**.
 
@@ -216,7 +216,8 @@ Les images sont versionnées normalement dans Git (pas de LFS nécessaire).
   Menu principal, Quitter le jeu. Le combat est gelé tant qu'il est ouvert (l'IA attend aussi).
   Rejouer, Menu principal et Quitter demandent confirmation. Code : `scripts/view/pause_menu.gd`.
 - **Paramètres** (aussi depuis l'icône ⚙ du menu principal, à côté de l'icône Quitter) : volume général,
-  volume des voix, son coupé, plein écran. Code : `scripts/view/settings_panel.gd`.
+  volume des voix, de la musique, des bruitages et de l'ambiance, son coupé, plein écran, particules d'ambiance,
+  animations du décor. Code : `scripts/view/settings_panel.gd`.
 - Les réglages sont gérés par l'autoload `Settings` (`scripts/settings.gd`) et mémorisés dans
   `user://settings.cfg` (sous Windows : `%APPDATA%\Godot\app_userdata\Dingus`).
 
@@ -241,7 +242,7 @@ tirées au hasard, bus « Effets », 8 sons simultanés au plus ; fichier absent
 destructibles : `hit_<matière>` à chaque coup, `destroy_<matière>` à l'effondrement, pour la pierre, le bois et la paille
 (`DestructionAnims.MATERIALS` associe chaque planche à sa matière). Ces sons sont **synthétisés** (bruit filtré, enveloppes) :
 `python tools/synth_sfx.py <dossier>` écrit les `.wav`, à convertir en `.ogg`. Ce sont des sons provisoires, à remplacer
-par de vrais enregistrements en gardant les mêmes noms de fichiers. Pas encore de réglage de volume dédié aux effets.
+par de vrais enregistrements en gardant les mêmes noms de fichiers. Leur volume se règle avec « Bruitages et ambiance » dans les paramètres.
 
 
 ## Police
