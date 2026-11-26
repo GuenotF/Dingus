@@ -21,17 +21,15 @@ Jeu tactique 1v1 au tour par tour en vue isométrique (style Dofus), Godot 4.7, 
 - **Claude commite** (message clair en français), **l'utilisateur pousse** (`git push origin main`).
   Quand le PC de l'utilisateur est éteint, Claude travaille dans un clone de son espace cloud et pousse une branche
   que l'utilisateur fusionne (`git merge --ff-only`).
-- Ne jamais faire `git add -A` : les fichiers audio et la police apparaissent comme modifiés. `.gitattributes` les
-  destine à Git LFS, mais le diff montre des fichiers complets que Git remplacerait par des pointeurs LFS : les commiter
-  les convertirait.
-  Ajouter les fichiers un par un. Les fichiers `.uid` de Godot sont versionnés (les ajouter avec leur script).
+- Ajouter les fichiers un par un plutôt qu'avec `git add -A`. Les fichiers `.uid` de Godot sont versionnés
+  (les ajouter avec leur script), ainsi que les `.import` des sons.
 - Sans Godot sur la machine de travail : la VM du PC (outil device_bash) peut télécharger Godot 4.7.2 Linux depuis GitHub et
   lancer les tests sur une **copie** du projet hors du dossier (pour ne pas toucher au cache `.godot` de l'éditeur) ;
   captures possibles avec `xvfb-run` et `--rendering-driver opengl3`. Rapatrier ensuite les fichiers générés (.import, .uid, scènes).
 - Sous Windows, Godot s'appelle par son chemin complet (exécutable `_console.exe` pour voir la sortie des tests).
 - Ne pas commiter les dossiers de packs bruts (`2D HD Character Knight`, `isometric tileset`) :
   le jeu utilise ses propres copies dans `assets/`.
-- Images en Git classique (pas de Git LFS).
+- Pas de Git LFS : images, sons et polices en Git classique (`.gitattributes` les marque seulement `binary`).
 
 ## Commandes
 Godot (PowerShell, depuis la racine du projet) :
