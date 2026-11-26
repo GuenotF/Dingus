@@ -10,6 +10,9 @@ Prototype de jeu tactique 1v1 au tour par tour, en vue isométrique (style Dofus
 
 ## Contrôles
 
+L'écran titre propose la **Campagne solo** (un seul combat pour l'instant), le **Combat 1 contre 1**, les paramètres
+et Quitter.
+
 | Action | Effet |
 |---|---|
 | Survol d'une case | Aperçu du chemin |
@@ -24,6 +27,10 @@ Prototype de jeu tactique 1v1 au tour par tour, en vue isométrique (style Dofus
 Le jeu s'ouvre en fenêtre maximisée et tout s'agrandit avec la fenêtre. Sous chaque personnage,
 un cercle à la couleur de son équipe (rouge : joueur 1, bleu : joueur 2) ; un cercle jaune en plus
 indique le personnage qui joue.
+
+**Mode mobile** (Android, iOS, Web sur téléphone) : un premier toucher sur une case montre l'aperçu, un second sur la même
+case valide (le placement est direct) ; glisser déplace la carte, pincer zoome ; le bouton Retour agit comme Échap ;
+un appui long sur un sort affiche son infobulle. Pour l'essayer sur PC : argument de lancement `--mobile`.
 
 **Interface de combat** : en bas, l'orbe de PV, les PA (étoile bleue) et PM (pas verts) du personnage
 qui joue, ses sorts et « Fin du tour ». Chaque case de sort montre son coût (pastille bleue, rouge si
@@ -65,13 +72,17 @@ non parcourue. Les bonus et malus s'affichent au-dessus du pion avec leur durée
 scripts/
   core/   Logique pure (grille, combattants, tours). Aucun nœud graphique.
   view/   Affichage : conversion iso, plateau, pions, obstacles, interface.
+  map/    Cartes : lecture des tuiles, vent, ondulations de l'eau.
+  audio/  Sons et voix.
   main.gd Assemble core + view et gère les entrées.
 scenes/   Scènes Godot.
-tests/    Tests de la logique.
+tests/    Tests de la logique et scripts d'équilibrage.
+tools/    Générateurs de cartes et de sons.
+docs/     Création et fiches des personnages.
 data/classes/ Classes (.tres) : stats et liste de sorts.
 data/spells/  Sorts (.tres) : portée, zone et liste d'effets, modifiables dans l'inspecteur.
 maps/     Cartes de combat (scènes à 3 calques : Sol, Decor, Placement).
-assets/   Graphismes : tileset (assets/tiles/) et personnages (assets/characters/).
+assets/   Tuiles, personnages, effets, interface, sons, police, shaders.
 ```
 
 **Règle d'or :** `core/` ne connaît pas `view/`. La vue appelle les méthodes de `CombatState`
@@ -126,18 +137,8 @@ Simule 80 combats IA contre IA pour **chaque paire de personnages** sur **chaque
 victoires, durée moyenne et avantage du premier joueur. Options pour cibler un cas :
 `-- personnage=Archer adversaire=Mage carte=Prairie parties=20 graine=1`.
 
-Résultats actuels (victoires du premier nommé) :
-
-| Duel | Prairie | Le lac | Place du village |
-|---|---|---|---|
-| Guerrier / Mage de feu | 67 / 32 % | 45 / 55 % | 61 / 38 % |
-| Archer / Guerrier | 46 / 53 % | 85 / 15 % | 49 / 50 % |
-| Archer / Mage de feu | 41 / 58 % | 50 / 50 % | 53 / 46 % |
-| Chevalier maudit / Guerrier | 63 / 36 % | 45 / 54 % | 52 / 47 % |
-| Chevalier maudit / Mage de feu | 49 / 50 % | 0 / 100 % | 47 / 52 % |
-| Chevalier maudit / Archer | 73 / 26 % | 26 / 73 % | 75 / 24 % |
-
-Détail et historique des réglages : `docs/personnages/`.
+Les résultats ne sont pas recopiés ici, ils seraient vite périmés : lancer le script pour avoir les chiffres actuels.
+Historique des réglages : `docs/personnages/`.
 
 ## Dessiner une carte
 
@@ -156,6 +157,12 @@ Cartes actuelles :
 - **Clairière des gobelins** (`foret.tscn`) : clairière bordée de sapins, bosquets de feuillus et troncs couchés
   destructibles, rochers solides, carte symétrique. Tuiles du pack *Fantasy tileset - 2D Isometric*
   (`assets/tiles/foret/`), générées par `tools/build_forest_map.gd`. Sert aussi au premier combat de la campagne.
+
+- **Le barrage** (`barricade.tscn`) : prototype autour des destructibles, une barricade coupe le terrain. Générée par
+  `tools/build_barricade_map.gd`.
+- **Banc d'essai : destructibles** (`test_destructibles.tscn`) : carte de test des destructibles et des animations du décor.
+
+Relancer un générateur de `tools/` écrase la scène : les retouches faites dans l'éditeur sont perdues.
 
 1. **Ouvrir** une carte de `maps/`, ou la **dupliquer** (clic droit → Dupliquer) pour en créer une nouvelle.
    Sur le nœud racine, renseigner `map_name` et `description` (affichés dans le menu).
@@ -178,7 +185,8 @@ Règles lues sur la carte :
 - une case sans tuile de `Sol` est un trou infranchissable ;
 - la carte doit commencer à la case (0, 0) (coin du haut).
 
-Pour changer quelles tuiles sont des obstacles ou de l'eau : ouvrir `assets/tiles/terrain_tileset.tres`,
+Pour changer quelles tuiles sont des obstacles ou de l'eau : ouvrir le TileSet de la carte (pour la Prairie et le lac,
+`assets/tiles/terrain_tileset.tres`),
 onglet **TileSet** en bas → **Paint** → propriété `obstacle` ou `water`, puis cliquer sur les tuiles.
 La rangée d'eau la plus claire (glace) se traverse.
 
@@ -202,7 +210,8 @@ comme l'ennemi **Gobelin chapardeur** (`assets/characters/pnj_gobelin/`, skin Go
 2. Duplique `data/sprites/knight.tres` et règle-le dans l'inspecteur :
    - `frame_size`, `frames_per_row` ;
    - la **ligne** de la planche pour chacune des 4 directions de la grille ;
-   - `feet_position` (position des pieds dans une image) et `height` (pour placer le nom) ;
+   - `feet_position` (position des pieds dans une image), si besoin les pieds par direction (`feet_down_right`...),
+     et `height` (pour placer le nom) ;
    - la liste `animations` : `idle`, `walk`, `hit`, `die`, plus les noms utilisés par les sorts.
 3. Dans la classe (`data/classes/*.tres`), mets ce fichier dans `sprites`.
 4. Dans chaque sort, le champ `animation` choisit l'animation du lanceur
@@ -215,9 +224,9 @@ Les images sont versionnées normalement dans Git (pas de LFS nécessaire).
 - **Menu pause** (Échap ou bouton ⚙ en haut à gauche du combat) : Reprendre, Rejouer, Paramètres,
   Menu principal, Quitter le jeu. Le combat est gelé tant qu'il est ouvert (l'IA attend aussi).
   Rejouer, Menu principal et Quitter demandent confirmation. Code : `scripts/view/pause_menu.gd`.
-- **Paramètres** (aussi depuis l'icône ⚙ du menu principal, à côté de l'icône Quitter) : volume général,
+- **Paramètres** (aussi depuis l'écran titre et l'icône ⚙ de l'écran de préparation) : volume général,
   volume des voix, de la musique, des bruitages et de l'ambiance, son coupé, plein écran, particules d'ambiance,
-  animations du décor. Code : `scripts/view/settings_panel.gd`.
+  animations du décor (et taille de l'interface en mode mobile). Code : `scripts/view/settings_panel.gd`.
 - Les réglages sont gérés par l'autoload `Settings` (`scripts/settings.gd`) et mémorisés dans
   `user://settings.cfg` (sous Windows : `%APPDATA%\Godot\app_userdata\Dingus`).
 
@@ -227,7 +236,8 @@ Les voix passent par l'autoload `Sound` (`scripts/audio/sound.gd`, bus audio « 
 Un personnage parle si sa classe a une **voix** (champ `voice`, une ressource `CharacterVoice`
 dans `data/voices/`) : plusieurs variantes par moment (attaque, attaque lourde, cri, dégâts,
 gros dégâts, mort, victoire, premier tour, choix dans le menu), tirées au hasard. Le moment d'un sort
-dépend de son animation (`melee` → attaque, `jump` / `kick` → attaque lourde, sinon cri).
+dépend de son animation (`melee` / `attack1` → attaque ; `jump` / `kick` / `attack2` / `attack3` → attaque lourde ;
+sinon cri).
 
 Pour donner une voix à un personnage : convertir les sons en `.ogg` dans `assets/audio/voices/<perso>/`,
 créer une ressource `CharacterVoice` (clic droit dans FileSystem → Nouvelle ressource), y glisser les sons,
@@ -238,12 +248,14 @@ Actuellement : le **Guerrier** parle (*Warrior Voice Pack* de John Carroll,
 L'Archer, le Mage de feu, le Chevalier maudit et le Gobelin n'ont pas encore de voix.
 
 **Bruitages** : `Sound.play_sfx("nom")` joue un son de `assets/audio/sfx/` (variantes `nom_1.ogg`, `nom_2.ogg`...
-tirées au hasard, bus « Effets », 8 sons simultanés au plus ; fichier absent = silence). Actuellement les obstacles
-destructibles : `hit_<matière>` à chaque coup, `destroy_<matière>` à l'effondrement, pour la pierre, le bois et la paille
-(`DestructionAnims.MATERIALS` associe chaque planche à sa matière). Ces sons sont **synthétisés** (bruit filtré, enveloppes) :
-`python tools/synth_sfx.py <dossier>` écrit les `.wav`, à convertir en `.ogg`. Ce sont des sons provisoires, à remplacer
-par de vrais enregistrements en gardant les mêmes noms de fichiers. Leur volume se règle avec « Bruitages et ambiance » dans les paramètres.
+tirées au hasard, bus « Effets », 10 sons simultanés au plus ; fichier absent = silence). Ils couvrent notamment les sorts
+(`cast_sound` et `impact_sound` de chaque sort), les pas (selon la carte), l'interface et les obstacles destructibles :
+`hit_<matière>` à chaque coup, `destroy_<matière>` à l'effondrement, pour la pierre, le bois et la paille
+(`DestructionAnims.MATERIALS` associe chaque planche à sa matière). `tools/synth_sfx.py` synthétise ces sons de
+destruction (`python tools/synth_sfx.py <dossier>` écrit les `.wav`, à convertir en `.ogg`).
 
+**Musique et ambiance** : les musiques sont dans `assets/audio/music/` (bus « Musique »), les boucles d'ambiance des cartes
+dans `assets/audio/ambience/` (bus « Effets »). Les paramètres règlent séparément la musique et « Bruitages et ambiance ».
 
 ## Police
 

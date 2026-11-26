@@ -1,6 +1,6 @@
 # PNJ — Gobelin chapardeur (ennemi de campagne)
 
-**Non jouable** : listé dans `GameConfig.ENEMY_PATHS`, pas dans `CLASS_PATHS` (absent du menu 1v1, de la démo de l'écran titre
+**Non jouable** : listé dans `Roster.ENEMY_PATHS` (`scripts/core/roster.gd`), pas dans `CLASS_PATHS` (absent du menu 1v1, de la démo de l'écran titre
 et de la matrice d'équilibrage). Joué uniquement par l'IA, en campagne.
 
 **Identité** : petit gobelin de base, premier adversaire de la campagne (combat d'introduction, volontairement facile).

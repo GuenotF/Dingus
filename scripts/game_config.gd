@@ -6,7 +6,7 @@ const CLASS_PATHS := Roster.CLASS_PATHS
 const ENEMY_PATHS := Roster.ENEMY_PATHS
 const CAMPAIGN_FIGHTS := Roster.CAMPAIGN_FIGHTS
 
-## Police de l'interface (assets/fonts/). Absente (non versionnée, voir .gitignore) : police par défaut de Godot.
+## Police de l'interface (assets/fonts/). Si le fichier est absent : police par défaut de Godot.
 const FONT_PATH := "res://assets/fonts/vinque_antique_bd.otf"
 ## Police d'origine de Godot, gardée pour les textes qui doivent rester lisibles (description des sorts).
 var body_font: Font

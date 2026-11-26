@@ -81,7 +81,7 @@ code si besoin, captures, équilibrage (critères chiffrés), commit.
   animations d'effondrement du pack dans `assets/destruction/` associées aux tuiles par `scripts/view/destruction_anims.gd`
   (sans association : ancien effondrement dessiné par le code).
 - **Cartes** : prairie, lac, village, désert (destructibles : rochers, colonnes), « Le barrage » (proto autour des destructibles),
-  forêt « Clairière des gobelins » (destructibles : feuillus, troncs ; animation `arbre_vert`).
+  forêt « Clairière des gobelins » (destructibles : feuillus, troncs ; animation `arbre_vert`), et un banc d'essai des destructibles (`test_destructibles.tscn`, listé dans le menu).
   Les cartes désert, barrage et forêt sont générées par `tools/build_desert_map.gd`, `tools/build_barricade_map.gd` et `tools/build_forest_map.gd` ;
   **relancer un générateur écrase la scène** (réglages faits à la main dans l'éditeur perdus).
 - **Fumée** (Fumigène du Gobelin) : `CombatState.smokes` (nuages, durée 1 tour, expiration au début du tour du lanceur), `has_view` / `smoke_blocks_view`

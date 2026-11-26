@@ -4,21 +4,24 @@
 l'approche, se dégage d'une roulade. **Skin** : Archer (pack *2D HD Character pack 1*, dossier `2Archer`).
 **Distance préférée (IA)** : 5.
 
-**Stats** : PV 125 / PA 6 / PM 3
+**Stats** : PV 130 / PA 6 / PM 3
 
 **Animations de base** : idle = Idle, walk = Walk, hit = TakeDamage, die = Die
 
 | # | Sort | PA | Portée | Effets | Limites | Animation | Projectile / impact |
 |---|------|----|--------|--------|---------|-----------|---------------------|
-| 1 | Flèche | 3 | 2–8, ligne de vue | 13–15 dégâts | 2/tour | Attack1 | flèche / — |
-| 2 | Flèche entravante | 3 | 2–4, ligne de vue | 6–8 dégâts, −2 PM (1 tour) | 1/tour, recharge 2 | Attack2 | flèche / éclat de glace au sol |
+| 1 | Flèche | 3 | 2–8, ligne de vue | 14–16 dégâts | 2/tour | Attack1 | flèche / — |
+| 2 | Flèche entravante | 3 | 2–4, ligne de vue | 6–8 dégâts, −2 PM (1 tour) | 1/tour, recharge 1 (chaque tour) | Attack2 | flèche / éclat de glace au sol |
 | 3 | Flèche de recul | 3 | 1–3, en ligne, sur un ennemi | 5–7 dégâts, repousse de 2 | 1/tour | Attack3 | flèche / — |
 | 4 | Roulade | 2 | 2–3, en ligne, case libre | bond sur la case | recharge 2 | Rolling | — |
 
-**Intentions** : 2 Flèches (6 PA) ≈ 28 dégâts/tour de loin. Contre un corps à corps qui approche :
-Entravante (un tour sur deux) pour le tenir à distance, Recul s'il arrive au contact, Roulade pour s'échapper.
+**Intentions** : 2 Flèches (6 PA) ≈ 30 dégâts/tour de loin. Contre un corps à corps qui approche :
+Entravante (chaque tour) pour le tenir à distance, Recul s'il arrive au contact, Roulade pour s'échapper.
 
 ## Équilibrage
+
+Historique : chaque mesure vaut pour les réglages de son époque. Les valeurs actuelles sont dans le tableau ci-dessus
+(en cas de doute, `data/` fait foi).
 
 Premier jet : PV 130, Flèche 10–12, Entravante portée 2–6 −2 PM sans recharge.
 Archer 97 % contre le Guerrier (bloqué en permanence), 0 % contre le Mage de feu (course aux dégâts perdue).
@@ -52,7 +55,7 @@ veut des cartes neutres (moins d'eau, ou des obstacles qui coupent la ligne de v
 Les écarts sont très sensibles aux seuils de mise à mort (±1 dégât ou ±5 PV peut faire basculer
 de 20 à 80 %), d'où des réglages fins.
 
-**Mise à jour** (IA de corps à corps révisée avec le Chevalier maudit) : Archer / Guerrier = 46 / 53 ur la Prairie, 85 / 15 ur le lac, 49 / 50 ur la Place du village.
+**Mise à jour** (IA de corps à corps révisée avec le Chevalier maudit) : Archer / Guerrier = 46 / 53 sur la Prairie, 85 / 15 sur le lac, 49 / 50 sur la Place du village.
 
 ### Équilibrage (23/11, 20 000 combats, matrice complète)
 

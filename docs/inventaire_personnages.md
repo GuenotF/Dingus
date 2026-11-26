@@ -1,7 +1,7 @@
 # Inventaire des personnages
 
 À tenir à jour quand on ajoute un personnage ou un nouveau pack (voir aussi `docs/creation_personnage.md`).
-Dernière mise à jour : 2026-11-23.
+Dernière mise à jour : 2026-11-26.
 
 ## Personnages jouables (5)
 
@@ -9,13 +9,13 @@ Liste dans `scripts/core/roster.gd` (`CLASS_PATHS`). PA 6 pour tous sauf mention
 
 | Personnage | Skin (pack, dossier) | Rôle | PV | PM | Distance IA | Sorts | Voix | Fiche |
 |---|---|---|---|---|---|---|---|---|
-| Guerrier | *2D HD Character Knight* (`assets/characters/knight/`) | corps à corps, repousse | 155 | 3 | – | Coup d'épée, Charge, Repousser, Cri | oui (*Warrior Voice Pack*) | pas de fiche détaillée |
+| Guerrier | *2D HD Character Knight* (`assets/characters/knight/`) | corps à corps, repousse | 155 | 3 | 1 | Coup d'épée, Charge, Repousser, Cri | oui (*Warrior Voice Pack*) | pas de fiche détaillée |
 | Mage de feu | *2D HD Character pack 1* : `3Wizard` | distance, gros dégâts, fragile | 135 | 4 | 4 | Flammèche, Boule de feu, Pluie de feu, Nova de flammes | non | `docs/personnages/mage_de_feu.md` |
-| Archer | *2D HD Character pack 1* : `2Archer` | distance, ralentit et repousse | 125 | 3 | 5 | Flèche, Flèche entravante, Flèche de recul, Roulade | non | `docs/personnages/archer.md` |
+| Archer | *2D HD Character pack 1* : `2Archer` | distance, ralentit et repousse | 130 | 3 | 5 | Flèche, Flèche entravante, Flèche de recul, Roulade | non | `docs/personnages/archer.md` |
 | Chevalier maudit | *2D HD Character pack 1* : `7DeathKnight` | corps à corps, attire, vole la vie | 120 | 3 | 1 | Lame sombre, Chaîne infernale, Malédiction, Pacte de sang | non | `docs/personnages/chevalier_maudit.md` |
-| Gobelin | *2D Orcs and Goblins - TopDown - V1.0* : `Goblin 01` (`assets/characters/gobelin/`) | pillard : vole des PA, enfume, repousse | 120 | 4 | 1 | Vol à la tire, Coup bas, Pétard, Fumigène | non | `docs/personnages/gobelin.md` |
+| Gobelin | *2D Orcs and Goblins - TopDown - V1.0* : `Goblin 01` (`assets/characters/gobelin/`) | pillard : vole des PA, enfume, repousse | 135 | 4 | 1 | Vol à la tire, Coup bas, Pétard, Fumigène | non | `docs/personnages/gobelin.md` |
 
-Équilibrage actuel (rapport du 23/11, 20 parties par côté et par carte) : le Chevalier maudit domine (≈ 62 % de victoires
+Dernier rapport global noté ici (23/11, 20 parties par côté et par carte ; des réglages ont suivi, à remesurer) : le Chevalier maudit domine (≈ 62 % de victoires
 contre les autres), Archer 48 %, Mage de feu 47 %, Guerrier 44 %. Détails : `tests/balance_matrix.gd`.
 
 ## Ennemis de campagne (non jouables)
@@ -61,7 +61,7 @@ Contenu : 17 gobelins (`Goblin 01` à `17`), 12 orcs (`Orc 01` à `12`), 2 anima
 | `Goblin 11` | gobelin monté sur un loup : 3 attaques, Attack Run 1-2, Eating (jeu d'animations des animaux) |
 | autres gobelins, orcs, animaux | non inspectés |
 
-Projectiles : aucun dans ce pack ; la hache du Gobelin (`assets/effects/axes/hache.png`) est dessinée par script (`tools/` : voir historique du commit).
+Projectiles : aucun dans ce pack ; la hache du Gobelin (`assets/effects/axes/hache.png`) a été dessinée par un script qui n'est pas conservé dans `tools/`.
 
 ## Pour ajouter un personnage
 Suivre `docs/creation_personnage.md`, puis ajouter une ligne dans le tableau ci-dessus (et retirer le skin de la liste des non utilisés).

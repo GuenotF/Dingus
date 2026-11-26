@@ -1,6 +1,6 @@
 extends Node
-## Sons du jeu (autoload « Sound »). Quatre bus sous « Master » : « Voix », « Effets » (bruitages, ambiance),
-## « Musique » et « Interface ». M coupe / remet le son partout.
+## Sons du jeu (autoload « Sound »). Trois bus sous « Master » : « Voix », « Effets » (bruitages, ambiance,
+## interface) et « Musique ». M coupe / remet le son partout.
 ## Fichiers : assets/audio/sfx/<nom>_1.ogg, _2... (variantes), music/<nom>.ogg, ambience/<nom>.ogg.
 
 const VOICE_BUS := "Voix"
@@ -55,7 +55,7 @@ func _ready() -> void:
 		_sfx_players.append(p)
 	_music = _loop_player(MUSIC_BUS)
 	_ambience = _loop_player(SFX_BUS)
-	# Clic et survol sur tous les boutons du jeu, sans avoir à les brancher un par un.
+	# Son de survol sur tous les boutons du jeu, sans avoir à les brancher un par un.
 	get_tree().node_added.connect(_on_node_added)
 
 

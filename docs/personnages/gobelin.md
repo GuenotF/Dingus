@@ -2,14 +2,14 @@
 
 **Identité** : pillard fourbe et fragile. Il n'écrase pas l'adversaire, il l'épuise : lui vole des PA, le ralentit, l'aveugle dans la fumée,
 le repousse à coups de pétard. Servira plus tard d'ennemi de campagne / PVE (et se marie bien avec les coffres à bonus).
-**Skin** : Goblin 01 (pack *2D Orcs and Goblins - TopDown - V1.0*). **Distance préférée (IA)** : 1 (à réviser à l'équilibrage).
-**Stats** (provisoires) : PV 120 / PA 6 / PM 4
+**Skin** : Goblin 01 (pack *2D Orcs and Goblins - TopDown - V1.0*). **Distance préférée (IA)** : 1.
+**Stats** : PV 135 / PA 6 / PM 4
 
 **Animations de base** : idle = Idle, walk = Walk, hit = TakeDamage 1, die = Die 1
 
 | # | Sort | PA | Portée | Effets | Limites | Animation | Projectile / impact |
 |---|------|----|--------|--------|---------|-----------|---------------------|
-| 1 | Vol à la tire | 3 | 1 | 8–10 dégâts ; la cible perd 1 PA (1 tour) **et le gobelin gagne 1 PA tout de suite** | 1/tour, recharge 1 (chaque tour) | Attack 4 (bond d'attaque) | — |
+| 1 | Vol à la tire | 3 | 1 | 8–10 dégâts ; la cible perd 1 PA (1 tour) **et le gobelin gagne 1 PA tout de suite** | 1/tour, recharge 2 (un tour sur deux) | Attack 4 (bond d'attaque) | — |
 | 2 | Coup bas | 3 | 1 | 10–12 dégâts, −2 PM (1 tour) | 1/tour | Attack 3 (à confirmer en jeu) | — |
 | 3 | Pétard | 2 | 1–4, ligne de vue | 6–8 dégâts, repousse de 2 (collision = dégâts de poussée habituels) | 2/tour | Attack 1 (lancer) | pétard qui tourne (dessiné) / petite explosion (feu du pack, réduite) |
 | 4 | Fumigène | 3 | 2–5, sans ligne de vue | nuage 3×3 centré sur la case visée, 1 tour (règles ci-dessous) | 1/tour, recharge 3 | Attack 1 (lancer) | bouffées grises dessinées par le code (`SmokeView`) |
@@ -40,18 +40,21 @@ sortir. Leviers si c'est trop fort : ralentissement, recharge, ou permettre de f
 - Affichage : `scripts/view/smoke_view.gd` (sprites générés par le code), branché dans `main.gd`.
 - Tests : `_test_steal_pa`, `_test_square_area`, `_test_smoke`, `_test_goblin_ai_finishes` dans `tests/test_core.gd`.
 
-**Intentions** : Vol à la tire (3 PA, +1 PA rendu) puis Coup bas (3 PA) puis un Pétard (2 PA) au contact, ou un Fumigène sur l'ennemi puis des
-Pétards pour le garder à distance pendant qu'il est aveugle et ralenti.
+**Intentions** : au contact, Vol à la tire (3 PA, +1 PA gagné, soit 7 PA sur le tour) puis Coup bas (3 PA), ou Vol à la tire puis deux
+Pétards (2 PA chacun) ; ou un Fumigène sur l'ennemi puis un Pétard pour le garder à distance pendant qu'il est aveugle et ralenti.
 
 ## Mise en place (23/11)
 
 Créé : assets (`assets/characters/gobelin/`, `assets/effects/axes/`, icônes, portrait), données (`data/classes/gobelin.tres`,
 `data/sprites/gobelin.tres`, 4 sorts, `data/effects/hache.tres`), ajouté à `CLASS_PATHS`. Échelle d'affichage 1,4 (le Goblin 01 mesure
 ≈ 34 px contre ≈ 57 px pour l'Archer). Pieds mesurés sur les planches sans ombre (Idle 70 % / Walk 30 %).
-**Non vérifié** (pas de Godot sur la machine de travail) : tests `test_core.gd`, rendu en jeu (pieds, échelle, lignes de direction),
+**Non vérifié à cette date** (pas de Godot sur la machine de travail) : tests `test_core.gd`, rendu en jeu (pieds, échelle, lignes de direction),
 équilibrage.
 
 ## Équilibrage
+
+Historique : chaque mesure vaut pour les réglages de son époque. Les valeurs actuelles sont dans le tableau ci-dessus
+(en cas de doute, `data/` fait foi).
 
 **Premier jet (23/11, 1600 combats)** : le Gobelin perd 100 % de ses duels (0 % contre le Guerrier, l'Archer, le Mage de feu et
 le Chevalier maudit), combats de 4,6 à 6,5 tours. Un 0 % partout vient du rôle, pas des chiffres.

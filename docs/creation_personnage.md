@@ -15,7 +15,7 @@ du code seulement si un sort a besoin d'un nouvel effet.
 - [ ] **Voix** (optionnel) : ressource `CharacterVoice` dans `data/voices/`, champ `voice` de la classe (voir README, Sons).
 - [ ] **Description** : une phrase de présentation (champ `description` de la classe, affichée dans le menu).
 - [ ] **Tests** : `tests/test_core.gd` vérifie automatiquement la checklist (4 sorts, stats, skin, animations, effets).
-- [ ] **Équilibrage** : `tests/simulate_balance.gd` contre chaque autre personnage, sur chaque carte.
+- [ ] **Équilibrage** : `tests/balance_matrix.gd` contre chaque autre personnage, sur chaque carte.
 
 ## Critères d'équilibrage
 
@@ -36,12 +36,13 @@ du code seulement si un sort a besoin d'un nouvel effet.
    - `data/effects/*.tres` (EffectAnimation : origine, échelle, vitesse, au sol ou non) ;
    - `data/spells/<nom>_*.tres` (SpellData) ;
    - `data/classes/<nom>.tres` (ClassData) — le menu et le simulateur le trouvent automatiquement
-     une fois ajouté à `CLASS_PATHS` (`scripts/game_config.gd`).
+     une fois ajouté à `CLASS_PATHS` (`scripts/core/roster.gd`) ; un ennemi non jouable va dans `ENEMY_PATHS`.
 4. **Code** (seulement si nécessaire) : nouvel effet dans `core/`, son évaluation par l'IA (`ai_brain.gd`), ses tests.
 5. **Vérification visuelle** : une partie jouée, une capture de chaque sort (lancement, vol, impact).
-6. **Équilibrage** : simuler, comparer aux critères, ajuster les **chiffres** (pas le design) et noter
+6. **Équilibrage** : simuler (`balance_matrix.gd -- personnage=<nom>`, détail par duel avec `simulate_balance.gd`), comparer aux critères, ajuster les **chiffres** (pas le design) et noter
    les écarts à la fiche. Si l'IA joue mal le personnage, corriger l'IA avant les chiffres.
-7. **Commit**, puis l'utilisateur teste en jouant.
+7. **Inventaire** : mettre à jour `docs/inventaire_personnages.md`.
+8. **Commit**, puis l'utilisateur teste en jouant.
 
 ## Modèle de fiche
 

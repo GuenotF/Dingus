@@ -3,9 +3,9 @@ extends Resource
 ## Voix d'un personnage (data/voices/*.tres), branchée dans le champ `voice` de sa classe.
 ## Chaque moment a plusieurs variantes : une est tirée au hasard (jamais deux fois de suite la même).
 
-## Attaque légère (sorts dont l'animation est « melee »).
+## Attaque légère (sorts dont l'animation est « melee » ou « attack1 »).
 @export var attack: Array[AudioStream] = []
-## Attaque lourde, bond, coup de pied (« jump », « kick »).
+## Attaque lourde, bond, coup de pied (« jump », « kick », « attack2 », « attack3 »).
 @export var heavy_attack: Array[AudioStream] = []
 ## Cri, sort lancé (« cast » et toute autre animation).
 @export var shout: Array[AudioStream] = []

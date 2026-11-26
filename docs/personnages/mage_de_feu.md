@@ -19,6 +19,8 @@ obstacles ; Nova pour repousser le Guerrier au contact.
 
 ## Équilibrage
 
+Historique : mesures faites avec des réglages anciens (depuis, le Guerrier est passé à 155 PV, entre autres).
+
 Écarts par rapport au premier jet (90 PV / 3 PM, Flammèche 6–8, Boule 15–19, Nova 5 PA repousse 1) :
 le Guerrier gagnait 100 % des combats. Corrections :
 1. **IA** : un personnage à distance évite de finir son tour à portée de déplacement d'un ennemi.

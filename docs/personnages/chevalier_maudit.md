@@ -34,6 +34,8 @@ puis 2 Lames sombres par tour (≈ 31 dégâts, ≈ 15 PV rendus). Le Pacte s'ou
 
 ## Équilibrage
 
+Historique : mesures faites avant des réglages ultérieurs de ses adversaires (Guerrier et Archer notamment).
+
 Le gros levier est la **mobilité** : à 4 PM le Chevalier rattrape tout le monde (98 % contre le Mage, qui ne
 peut plus garder ses distances), à 3 PM il ne rattrape plus rien (88 % de défaites contre le Mage, 100 % contre
 l'Archer) ; les PV et les dégâts bougent peu ces écarts. La solution retenue : 3 PM et une **Chaîne** (attire de 5,
